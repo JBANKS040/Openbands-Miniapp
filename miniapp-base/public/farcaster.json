@@ -1,0 +1,9 @@
+{
+  "name": "OpenBands Mini App",
+  "description": "Company forum for verified employees",
+  "homepage_url": "https://openbands-miniapp.vercel.app",
+  "icon": "https://openbands-miniapp.vercel.app/icon.png",
+  "splash_image": "https://openbands-miniapp.vercel.app/splash.png",
+  "categories": ["social", "productivity"],
+  "requested_capabilities": []
+}
