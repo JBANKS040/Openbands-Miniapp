@@ -3,6 +3,7 @@ import { useState, useMemo } from 'react';
 import { useAppStore } from '@/lib/store';
 import type { Post } from '@/lib/types';
 import { CommentsModal } from './CommentsModal';
+import Link from 'next/link';
 import { useOpenUrl } from '@coinbase/onchainkit/minikit';
 
 interface PostCardProps {
@@ -51,9 +52,12 @@ export function PostCard({ post }: PostCardProps) {
                 {post.authorAnonymousId}
               </div>
               <div className="flex items-center space-x-1 text-xs text-gray-500">
-                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700">
+                <Link
+                  href={`/company/${post.companyDomain}`}
+                  className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800"
+                >
                   {post.companyDomain}
-                </span>
+                </Link>
                 <span>•</span>
                 <span>{timeAgo(post.createdAt)}</span>
               </div>
@@ -93,7 +97,7 @@ export function PostCard({ post }: PostCardProps) {
               <span>{post.commentCount}</span>
             </button>
             <button
-              onClick={() => void openUrl(`https://warpcast.com/~/compose?text=${encodeURIComponent(`Anonymous @ ${post.companyDomain}: ${post.content.substring(0, 180)}…`)}&embeds[]=${encodeURIComponent(process.env.NEXT_PUBLIC_URL || '')}`)}
+              onClick={() => void openUrl(`https://warpcast.com/~/compose?text=${encodeURIComponent(`Someone @ ${post.companyDomain} posted: ${post.content.substring(0, 180)}…`)}&embeds[]=${encodeURIComponent(process.env.NEXT_PUBLIC_URL || '')}`)}
               className="flex items-center space-x-1 text-sm text-gray-500 hover:text-purple-600"
               title="Share on Farcaster"
             >

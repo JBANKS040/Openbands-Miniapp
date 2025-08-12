@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
-import { useMiniKit, useAddFrame } from '@coinbase/onchainkit/minikit';
+import { useMiniKit } from '@coinbase/onchainkit/minikit';
 import { useAppStore } from '@/lib/store';
 import { SignInPanel } from '@/components/SignInPanel';
 import { PostComposer } from '@/components/PostComposer';
@@ -22,7 +22,6 @@ export default function Home() {
 
   // MiniKit frame lifecycle: signal ready once mounted
   const { setFrameReady, isFrameReady } = useMiniKit();
-  const addFrame = useAddFrame();
 
   useEffect(() => {
     const allPosts = getAllPosts(sort);
@@ -48,7 +47,7 @@ export default function Home() {
                 </svg>
               </div>
               <div>
-                <h1 className="text-sm font-bold text-gray-900">OpenBands</h1>
+                <h1 className="text-sm font-bold text-gray-900">Feed</h1>
                 <p className="text-xs text-gray-500">All Companies</p>
               </div>
             </div>
@@ -87,12 +86,6 @@ export default function Home() {
                 <span className="text-xs text-gray-600">{user.anonymousId}</span>
               </div>
               <div className="flex items-center gap-3">
-                <button
-                  onClick={() => void addFrame()}
-                  className="text-xs text-purple-600 hover:text-purple-800 font-medium"
-                >
-                  + Add to Apps
-                </button>
                 <Link 
                   href={`/company/${user.companyDomain}`}
                   className="text-xs text-blue-600 hover:text-blue-800 font-medium"

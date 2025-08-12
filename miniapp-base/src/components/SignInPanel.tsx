@@ -33,7 +33,7 @@ export function SignInPanel() {
           </div>
           <h1 className="text-xl font-bold text-gray-900 mb-2">Welcome to OpenBands</h1>
           <p className="text-gray-600 text-sm">
-            Connect with your company community
+            The anonymous social network for verified employees
           </p>
         </div>
 

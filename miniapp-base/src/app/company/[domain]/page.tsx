@@ -45,8 +45,8 @@ export default function CompanyPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-white border-b shadow-sm">
-        <div className="container py-4">
+      <header className="sticky top-0 z-10 bg-white border-b">
+        <div className="max-w-md mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div>
               <Link href="/" className="text-sm text-blue-600 hover:text-blue-800 mb-1 block">
@@ -58,22 +58,24 @@ export default function CompanyPage() {
             
             <div className="flex items-center space-x-4">
               <SortToggle />
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-600">{user.email}</span>
+              {isAuthenticated && (
                 <button
                   onClick={signOut}
-                  className="text-sm text-gray-500 hover:text-gray-700"
+                  className="p-1 hover:bg-gray-100 rounded"
+                  aria-label="Sign out"
                 >
-                  Sign out
+                  <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
                 </button>
-              </div>
+              )}
             </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="container py-6 space-y-6">
+      <main className="max-w-md mx-auto px-4 py-4 space-y-6">
         {canPost ? (
           <PostComposer />
         ) : (

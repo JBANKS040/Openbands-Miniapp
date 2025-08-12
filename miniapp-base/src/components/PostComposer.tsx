@@ -38,7 +38,7 @@ export function PostComposer() {
             {user.anonymousId}
           </div>
           <div className="text-xs text-gray-500">
-            Posting to {user.companyDomain}
+            Posting as {user.companyDomain}
           </div>
         </div>
       </div>
