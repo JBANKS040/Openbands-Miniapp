@@ -22,8 +22,8 @@ export function SignInPanel() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
+    <div className="bg-gray-50 p-3">
+      <div className="w-full max-w-sm mx-auto">
         {/* Logo/Brand */}
         <div className="text-center mb-8">
           <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4">
@@ -38,7 +38,7 @@ export function SignInPanel() {
         </div>
 
         {/* Sign-in Card */}
-        <div className="bg-white rounded-lg shadow-sm border p-6">
+        <div className="bg-white rounded-xl shadow-sm border p-5">
           <div className="text-center mb-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-2">Get Started</h2>
             <p className="text-sm text-gray-600">
