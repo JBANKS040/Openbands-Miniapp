@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
+import type { Post } from '@/lib/types';
 import { PostComposer } from '@/components/PostComposer';
 import { PostCard } from '@/components/PostCard';
 import { SortToggle } from '@/components/SortToggle';
@@ -18,7 +19,7 @@ export default function CompanyPage() {
   const signOut = useAppStore(s => s.signOut);
   const version = useAppStore(s => s.version);
   
-  const [posts, setPosts] = useState<any[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
 
   const canPost = user?.companyDomain === domain;
 

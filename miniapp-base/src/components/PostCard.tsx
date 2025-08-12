@@ -3,6 +3,7 @@ import { useState, useMemo } from 'react';
 import { useAppStore } from '@/lib/store';
 import type { Post } from '@/lib/types';
 import { CommentsModal } from './CommentsModal';
+import { useOpenUrl } from '@coinbase/onchainkit/minikit';
 
 interface PostCardProps {
   post: Post;
@@ -13,6 +14,7 @@ export function PostCard({ post }: PostCardProps) {
   const likePost = useAppStore(s => s.likePost);
   const getCommentsByPost = useAppStore(s => s.getCommentsByPost);
   const version = useAppStore(s => s.version);
+  const openUrl = useOpenUrl();
   
   const comments = useMemo(() => getCommentsByPost(post.id), [getCommentsByPost, post.id, version]);
 
@@ -89,6 +91,16 @@ export function PostCard({ post }: PostCardProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
               <span>{post.commentCount}</span>
+            </button>
+            <button
+              onClick={() => void openUrl(`https://warpcast.com/~/compose?text=${encodeURIComponent(`Anonymous @ ${post.companyDomain}: ${post.content.substring(0, 180)}…`)}&embeds[]=${encodeURIComponent(process.env.NEXT_PUBLIC_URL || '')}`)}
+              className="flex items-center space-x-1 text-sm text-gray-500 hover:text-purple-600"
+              title="Share on Farcaster"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+              <span>Share</span>
             </button>
           </div>
 

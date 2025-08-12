@@ -1,9 +1,14 @@
 {
-  "name": "OpenBands Mini App",
-  "description": "Company forum for verified employees",
-  "homepage_url": "https://openbands-miniapp.vercel.app",
-  "icon": "https://openbands-miniapp.vercel.app/icon.png",
-  "splash_image": "https://openbands-miniapp.vercel.app/splash.png",
-  "categories": ["social", "productivity"],
-  "requested_capabilities": []
+  "name": "Openbands",
+  "description": "Private. Anonymous. Verified. The social network where employees can finally connect authentically without corporate oversight.",
+  "homepage_url": "https://miniapp.openbands.xyz",
+  "icon": "https://miniapp.openbands.xyz/Openbands.png",
+  "splash_image": "https://miniapp.openbands.xyz/splash.jpeg",
+  "categories": ["social"],
+  "requested_capabilities": [],
+  "accountAssociation": {
+    "header": "eyJmaWQiOjExODIzNDAsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHhkQTliZDAzRTgxMEVlYjUxNzkxQ0ViQTJCNDYyM0Q2MTIwRTBkMGRGIn0",
+    "payload": "eyJkb21haW4iOiJtaW5pYXBwLm9wZW5iYW5kcy54eXoifQ",
+    "signature": "MHg0ZjJlNjAzMjU5NzUyNzZjYmQ0NmU4YzNhNTU1MzlhNjdiY2I1OTQ0NzIxOWRmZGJjMjU2MTM4MjVhZTczMDgxMDY4ZTNiODZlYjU0MjM3ZjI5ODdhNWY2MjhlZWM3OGFmZGVjMjcyM2FkNzAxZjhmY2RmMzNhYTgyMjM2OWQxZTFj"
+  }
 }

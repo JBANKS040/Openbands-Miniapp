@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
+import { useMiniKit, useAddFrame } from '@coinbase/onchainkit/minikit';
 import { useAppStore } from '@/lib/store';
 import { SignInPanel } from '@/components/SignInPanel';
 import { PostComposer } from '@/components/PostComposer';
@@ -19,10 +20,20 @@ export default function Home() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [showSignIn, setShowSignIn] = useState(false);
 
+  // MiniKit frame lifecycle: signal ready once mounted
+  const { setFrameReady, isFrameReady } = useMiniKit();
+  const addFrame = useAddFrame();
+
   useEffect(() => {
     const allPosts = getAllPosts(sort);
     setPosts(allPosts);
   }, [getAllPosts, sort, version]);
+
+  useEffect(() => {
+    if (!isFrameReady) {
+      setFrameReady();
+    }
+  }, [isFrameReady, setFrameReady]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -75,12 +86,20 @@ export default function Home() {
                 <span className="text-xs text-gray-500">•</span>
                 <span className="text-xs text-gray-600">{user.anonymousId}</span>
               </div>
-              <Link 
-                href={`/company/${user.companyDomain}`}
-                className="text-xs text-blue-600 hover:text-blue-800 font-medium"
-              >
-                My Company →
-              </Link>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => void addFrame()}
+                  className="text-xs text-purple-600 hover:text-purple-800 font-medium"
+                >
+                  + Add to Apps
+                </button>
+                <Link 
+                  href={`/company/${user.companyDomain}`}
+                  className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  My Company →
+                </Link>
+              </div>
             </div>
           )}
         </div>

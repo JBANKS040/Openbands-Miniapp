@@ -1,19 +1,32 @@
 "use client";
 import React, { type PropsWithChildren } from "react";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { MiniKitProvider } from "@coinbase/onchainkit/minikit";
+import { base } from 'wagmi/chains';
 
 export default function ClientProviders({ children }: PropsWithChildren) {
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
-  
-  // For now, only use Google OAuth provider
-  // OnchainKit will be added later when deploying on Base
-  if (clientId) {
+  const apiKey =
+    process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY ||
+    process.env.NEXT_PUBLIC_CDP_CLIENT_API_KEY ||
+    "";
+
+  if (apiKey) {
     return (
-      <GoogleOAuthProvider clientId={clientId}>
-        {children}
-      </GoogleOAuthProvider>
+      <MiniKitProvider apiKey={apiKey} chain={base}>
+        {clientId ? (
+          <GoogleOAuthProvider clientId={clientId}>{children}</GoogleOAuthProvider>
+        ) : (
+          <>{children}</>
+        )}
+      </MiniKitProvider>
     );
   }
-  
-  return <>{children}</>;
+
+  // Fallback to just children if environment variables aren't set
+  return clientId ? (
+    <GoogleOAuthProvider clientId={clientId}>{children}</GoogleOAuthProvider>
+  ) : (
+    <>{children}</>
+  );
 }

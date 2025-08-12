@@ -64,18 +64,11 @@ export function SignInPanel() {
               <div>
                 <p className="text-xs font-medium text-blue-900">How it works</p>
                 <p className="text-xs text-blue-700 mt-1">
-                  Your company domain is detected from your email to connect you with the right community.
+                  You create a cryptographic proof of your company email. <br/><br/>All personal information is kept private.<br/><br/> Only your company domain is visible. E.g. &quot;openbands.xyz&quot;
                 </p>
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Footer */}
-        <div className="text-center mt-6">
-          <p className="text-xs text-gray-500">
-            By signing in, you agree to our terms of service
-          </p>
         </div>
       </div>
     </div>
