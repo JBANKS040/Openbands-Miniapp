@@ -1,11 +1,11 @@
 "use client";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
-import { useAppStore } from "@/lib/store";
+import { useApp } from "@/context/AppContext";
 import type { GoogleJwtPayload } from "@/lib/types";
 
 export function SignInPanel() {
-  const signIn = useAppStore((s) => s.signIn);
+  const { signIn } = useApp();
 
   const onSuccess = (resp: CredentialResponse) => {
     if (!resp.credential) return;
@@ -15,7 +15,8 @@ export function SignInPanel() {
       const email = decoded.email;
       if (!email) return;
       
-      signIn(email, resp.credential);
+      // We'll discard the email/token for privacy and just sign in anonymously
+      signIn();
     } catch (err) {
       console.error('Error decoding token:', err);
     }

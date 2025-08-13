@@ -1,6 +1,7 @@
 "use client";
-import { useState, useMemo } from 'react';
-import { useAppStore } from '@/lib/store';
+import { useState } from 'react';
+import { useApp } from '@/context/AppContext';
+import { useComments, likePost as likePostSupabase } from '@/lib/supabase';
 import type { Post } from '@/lib/types';
 import { CommentsModal } from './CommentsModal';
 import Link from 'next/link';
@@ -12,15 +13,19 @@ interface PostCardProps {
 
 export function PostCard({ post }: PostCardProps) {
   const [showComments, setShowComments] = useState(false);
-  const likePost = useAppStore(s => s.likePost);
-  const getCommentsByPost = useAppStore(s => s.getCommentsByPost);
-  const version = useAppStore(s => s.version);
+  const { isAuthenticated, anonymousId, companyDomain } = useApp();
+  const { comments } = useComments(post.id);
   const openUrl = useOpenUrl();
-  
-  const comments = useMemo(() => getCommentsByPost(post.id), [getCommentsByPost, post.id, version]);
 
-  const handleLike = () => {
-    likePost(post.id);
+  const handleLike = async () => {
+    if (!isAuthenticated || !anonymousId) return;
+    
+    try {
+      await likePostSupabase(post.id, anonymousId, companyDomain);
+      // TODO: Trigger a refetch of the post or optimistically update
+    } catch (error) {
+      console.error('Error liking post:', error);
+    }
   };
 
   const timeAgo = (timestamp: number) => {
