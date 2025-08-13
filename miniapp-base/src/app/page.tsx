@@ -21,18 +21,18 @@ export default function Home() {
   const [showSignIn, setShowSignIn] = useState(false);
 
   // MiniKit frame lifecycle: signal ready once mounted
-  const { setFrameReady, isFrameReady } = useMiniKit();
+  //const { setFrameReady, isFrameReady } = useMiniKit();
 
   useEffect(() => {
     const allPosts = getAllPosts(sort);
     setPosts(allPosts);
   }, [getAllPosts, sort, version]);
 
-  useEffect(() => {
-    if (!isFrameReady) {
-      setFrameReady();
-    }
-  }, [isFrameReady, setFrameReady]);
+  // useEffect(() => {
+  //   if (!isFrameReady) {
+  //     setFrameReady();
+  //   }
+  // }, [isFrameReady, setFrameReady]);
 
   return (
     <div className="min-h-screen bg-gray-50">
