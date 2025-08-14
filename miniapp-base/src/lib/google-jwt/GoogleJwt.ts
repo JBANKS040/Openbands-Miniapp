@@ -1,6 +1,6 @@
 import type { JWK } from "@/lib/types";
 
-export function getJwtHeader(idToken: string): jwtHeader: any {
+export function getJwtHeader(idToken: string): any {
   const [headerB64] = idToken.split('.');
   const jwtHeader = JSON.parse(atob(headerB64));
   return jwtHeader;
