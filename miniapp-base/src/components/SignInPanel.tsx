@@ -30,7 +30,7 @@ export function SignInPanel() {
       console.log(`User email: ${email}`);
 
       // @dev - [Generate a zkJWT proof
-      const { proof, publicInputs } = await generateZkJwtProof(decoded.email, userInfo.idToken);
+      const { proof, publicInputs } = await generateZkJwtProof(decoded.email, resp.credential);
       console.log(`Generated zkJWT proof: ${proof}`);
       console.log(`Generated zkJWT public inputs: ${JSON.stringify(publicInputs, null, 2)}`);
 
