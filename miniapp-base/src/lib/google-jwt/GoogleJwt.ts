@@ -1,6 +1,11 @@
 import type { JWK } from "@/lib/types";
 
-async function getGooglePublicKey(kid: string): Promise<JsonWebKey> {
+export function extractDomain(email: string): string {
+  const domain = email.split('@')[1];
+  return domain;
+}
+
+export async function getGooglePublicKey(kid: string): Promise<JsonWebKey> {
   const response = await fetch('https://www.googleapis.com/oauth2/v3/certs');
   const jwks = await response.json();
   

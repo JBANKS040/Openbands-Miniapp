@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import { useApp } from "@/context/AppContext";
+import { generateZkJwtProof } from "@/lib/circuits/ZkJwtProofGeneration";
 import type { UserInfo, GoogleJwtPayload, JWK } from "@/lib/types";
 
 export function SignInPanel() {
@@ -27,6 +28,11 @@ export function SignInPanel() {
       // @dev - Log (NOTE: This should be removed later)
       console.log(`decoded: ${JSON.stringify(decoded, null, 2)}`);
       console.log(`User email: ${email}`);
+
+      // @dev - [TODO]: Generate a zkJWT proof
+      const { proof, publicInputs } = await generateZkJwtProof(decoded.email, resp.credential);
+      console.log(`Generated zkJWT proof: ${proof}`);
+      console.log(`Generated zkJWT public inputs: ${JSON.stringify(publicInputs, null, 2)}`);
 
       // We'll discard the email/token for privacy and just sign in anonymously
       signIn();
