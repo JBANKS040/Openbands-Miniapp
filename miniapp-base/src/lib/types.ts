@@ -39,6 +39,6 @@ export interface JWK {
 }
 
 export interface UserInfo {
-  email: string | null;
-  idToken: string | null;
+  email: string;
+  idToken: string;
 }

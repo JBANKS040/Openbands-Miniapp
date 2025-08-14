@@ -9,10 +9,10 @@ import type { UserInfo, GoogleJwtPayload, JWK } from "@/lib/types";
 export function SignInPanel() {
   const { signIn } = useApp();
 
-  const [userInfo, setUserInfo] = useState<UserInfo>({ email: null, idToken: null });
+  const [userInfo, setUserInfo] = useState<UserInfo>({ email: "", idToken: "" });
   const [error, setError] = useState<string | null>(null);
   
-  const onSuccess = (resp: CredentialResponse) => {
+  const onSuccess = async(resp: CredentialResponse) => {
     if (!resp.credential) return;
     
     try {
@@ -30,7 +30,7 @@ export function SignInPanel() {
       console.log(`User email: ${email}`);
 
       // @dev - [TODO]: Generate a zkJWT proof
-      const { proof, publicInputs } = await generateZkJwtProof(decoded.email, resp.credential);
+      const { proof, publicInputs } = await generateZkJwtProof(decoded.email, userInfo.idToken);
       console.log(`Generated zkJWT proof: ${proof}`);
       console.log(`Generated zkJWT public inputs: ${JSON.stringify(publicInputs, null, 2)}`);
 

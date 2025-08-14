@@ -1,5 +1,11 @@
 import type { JWK } from "@/lib/types";
 
+export function getJwtHeader(idToken: string): jwtHeader: any {
+  const [headerB64] = idToken.split('.');
+  const jwtHeader = JSON.parse(atob(headerB64));
+  return jwtHeader;
+}
+
 export function extractDomain(email: string): string {
   const domain = email.split('@')[1];
   return domain;
