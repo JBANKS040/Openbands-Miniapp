@@ -3,6 +3,7 @@ import React, { type PropsWithChildren } from "react";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { MiniKitProvider } from "@coinbase/onchainkit/minikit";
 import { base } from 'wagmi/chains';
+import { AppProvider } from '@/context/AppContext';
 
 export default function ClientProviders({ children }: PropsWithChildren) {
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
@@ -13,20 +14,26 @@ export default function ClientProviders({ children }: PropsWithChildren) {
 
   if (apiKey) {
     return (
-      <MiniKitProvider apiKey={apiKey} chain={base}>
-        {clientId ? (
-          <GoogleOAuthProvider clientId={clientId}>{children}</GoogleOAuthProvider>
-        ) : (
-          <>{children}</>
-        )}
-      </MiniKitProvider>
+      <AppProvider>
+        <MiniKitProvider apiKey={apiKey} chain={base}>
+          {clientId ? (
+            <GoogleOAuthProvider clientId={clientId}>{children}</GoogleOAuthProvider>
+          ) : (
+            <>{children}</>
+          )}
+        </MiniKitProvider>
+      </AppProvider>
     );
   }
 
   // Fallback to just children if environment variables aren't set
-  return clientId ? (
-    <GoogleOAuthProvider clientId={clientId}>{children}</GoogleOAuthProvider>
-  ) : (
-    <>{children}</>
+  return (
+    <AppProvider>
+      {clientId ? (
+        <GoogleOAuthProvider clientId={clientId}>{children}</GoogleOAuthProvider>
+      ) : (
+        <>{children}</>
+      )}
+    </AppProvider>
   );
 }

@@ -1,17 +1,10 @@
 export type CompanyDomain = string; // e.g., "acme.com"
 
-export interface User {
-  id: string;
-  displayName: string;
-  anonymousId: string; // Random 6-char alphanumeric ID for anonymous posting
-  email: string;
-  companyDomain: CompanyDomain | null;
-}
-
+// Simplified for privacy - no email/PII stored
 export interface Post {
   id: string;
   authorId: string;
-  authorEmail: string;
+  authorEmail: string; // Keep for compatibility but will be empty
   authorAnonymousId: string; // Anonymous display name
   companyDomain: CompanyDomain;
   content: string;
@@ -24,7 +17,7 @@ export interface Comment {
   id: string;
   postId: string;
   authorId: string;
-  authorEmail: string;
+  authorEmail: string; // Keep for compatibility but will be empty
   authorAnonymousId: string; // Anonymous display name
   content: string;
   likeCount: number;

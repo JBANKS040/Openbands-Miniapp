@@ -1,7 +1,8 @@
 "use client";
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useParams } from 'next/navigation';
-import { useAppStore } from '@/lib/store';
+import { useApp } from '@/context/AppContext';
+import { useCompanyPosts } from '@/lib/supabase';
 import type { Post } from '@/lib/types';
 import { PostComposer } from '@/components/PostComposer';
 import { PostCard } from '@/components/PostCard';
@@ -12,29 +13,21 @@ export default function CompanyPage() {
   const params = useParams<{ domain: string }>();
   const domain = params?.domain || '';
   
-  const user = useAppStore(s => s.user);
-  const isAuthenticated = useAppStore(s => s.isAuthenticated);
-  const sort = useAppStore(s => s.sort);
-  const getPostsByDomain = useAppStore(s => s.getPostsByDomain);
-  const signOut = useAppStore(s => s.signOut);
-  const version = useAppStore(s => s.version);
+  const { isAuthenticated, anonymousId, companyDomain, signOut } = useApp();
+  const [sort, setSort] = useState<'new' | 'hot'>('new');
   
-  const [posts, setPosts] = useState<Post[]>([]);
+  // Fetch posts for this specific company
+  const { posts, loading, error } = useCompanyPosts(domain, sort);
 
-  const canPost = user?.companyDomain === domain;
+  const canPost = companyDomain === domain;
 
-  useEffect(() => {
-    const companyPosts = getPostsByDomain(domain, sort);
-    setPosts(companyPosts);
-  }, [getPostsByDomain, domain, sort, version]);
-
-  if (!isAuthenticated || !user) {
+  if (!isAuthenticated || !anonymousId) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="card text-center">
+        <div className="bg-white rounded-lg shadow-sm border p-6 text-center">
           <h2 className="text-xl font-semibold mb-4">Sign in required</h2>
           <p className="text-gray-600 mb-4">You need to sign in to view company pages.</p>
-          <Link href="/" className="btn-primary">
+          <Link href="/" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
             Go to sign in
           </Link>
         </div>
@@ -57,7 +50,7 @@ export default function CompanyPage() {
             </div>
             
             <div className="flex items-center space-x-4">
-              <SortToggle />
+              <SortToggle sort={sort} onSortChange={setSort} />
               {isAuthenticated && (
                 <button
                   onClick={signOut}
@@ -79,27 +72,46 @@ export default function CompanyPage() {
         {canPost ? (
           <PostComposer />
         ) : (
-          <div className="card">
+          <div className="bg-white rounded-lg shadow-sm border p-6">
             <div className="text-center py-6">
               <p className="text-gray-600 mb-2">
                 You can only post to your own company page.
               </p>
               <p className="text-sm text-gray-500">
-                Your company: <span className="font-medium">{user.companyDomain}</span>
+                Your company: <span className="font-medium">{companyDomain || 'Unknown'}</span>
               </p>
-              <Link 
-                href={`/company/${user.companyDomain}`}
-                className="btn-primary mt-4"
-              >
-                Go to your company page
-              </Link>
+              {companyDomain && (
+                <Link 
+                  href={`/company/${companyDomain}`}
+                  className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 mt-4"
+                >
+                  Go to your company page
+                </Link>
+              )}
             </div>
           </div>
         )}
         
         <div className="space-y-4">
-          {posts.length === 0 ? (
-            <div className="card text-center py-12">
+          {loading ? (
+            <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
+              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+              </div>
+              <p className="text-sm text-gray-600">Loading posts...</p>
+            </div>
+          ) : error ? (
+            <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="text-base font-semibold text-gray-900 mb-2">Error loading posts</h3>
+              <p className="text-sm text-gray-600">{error}</p>
+            </div>
+          ) : posts.length === 0 ? (
+            <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
               <p className="text-gray-500 mb-2">No posts yet for {domain}</p>
               <p className="text-sm text-gray-400">
                 {canPost 

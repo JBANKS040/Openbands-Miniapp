@@ -1,6 +1,7 @@
 "use client";
-import { useState, useEffect, useMemo } from 'react';
-import { useAppStore } from '@/lib/store';
+import { useState, useEffect } from 'react';
+import { useApp } from '@/context/AppContext';
+import { useComments, createComment, likeComment as likeCommentSupabase } from '@/lib/supabase';
 import type { Post } from '@/lib/types';
 
 interface CommentsModalProps {
@@ -13,13 +14,8 @@ export function CommentsModal({ post, isOpen, onClose }: CommentsModalProps) {
   const [newComment, setNewComment] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  const user = useAppStore(s => s.user);
-  const createComment = useAppStore(s => s.createComment);
-  const likeComment = useAppStore(s => s.likeComment);
-  const getCommentsByPost = useAppStore(s => s.getCommentsByPost);
-  const version = useAppStore(s => s.version);
-  
-  const comments = useMemo(() => getCommentsByPost(post.id), [getCommentsByPost, post.id, version]);
+  const { isAuthenticated, anonymousId, companyDomain } = useApp();
+  const { comments, loading, error, refetch } = useComments(post.id);
 
   useEffect(() => {
     if (isOpen) {
@@ -35,16 +31,28 @@ export function CommentsModal({ post, isOpen, onClose }: CommentsModalProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newComment.trim() || isLoading || !user) return;
+    if (!newComment.trim() || isLoading || !isAuthenticated || !anonymousId) return;
 
     setIsLoading(true);
     try {
-      await createComment(post.id, newComment.trim());
+      await createComment(post.id, newComment.trim(), anonymousId, companyDomain);
       setNewComment('');
+      refetch(); // Refresh comments after creating
     } catch (error) {
       console.error('Error creating comment:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleLikeComment = async (commentId: string) => {
+    if (!isAuthenticated || !anonymousId) return;
+    
+    try {
+      await likeCommentSupabase(commentId, anonymousId, companyDomain);
+      refetch(); // Refresh comments after liking
+    } catch (error) {
+      console.error('Error liking comment:', error);
     }
   };
 
@@ -82,7 +90,24 @@ export function CommentsModal({ post, isOpen, onClose }: CommentsModalProps) {
 
         {/* Comments List */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
-          {comments.length === 0 ? (
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+              </div>
+              <p className="text-gray-500 text-sm">Loading comments...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-8">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <p className="text-red-600 text-sm">Error loading comments</p>
+              <p className="text-xs text-gray-400">{error}</p>
+            </div>
+          ) : comments.length === 0 ? (
             <div className="text-center py-8">
               <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
                 <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -119,7 +144,7 @@ export function CommentsModal({ post, isOpen, onClose }: CommentsModalProps) {
                 
                 <div className="pl-8">
                   <button
-                    onClick={() => likeComment(comment.id)}
+                    onClick={() => handleLikeComment(comment.id)}
                     className={`flex items-center space-x-1 text-xs ${
                       comment.likeCount > 0 
                         ? 'text-blue-600' 
@@ -138,13 +163,13 @@ export function CommentsModal({ post, isOpen, onClose }: CommentsModalProps) {
         </div>
 
         {/* Comment Input */}
-        {user && (
+        {isAuthenticated && anonymousId && (
           <div className="border-t p-4">
             <form onSubmit={handleSubmit} className="space-y-3">
               <div className="flex items-start space-x-2">
                 <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                   <span className="text-white font-medium text-xs">
-                    {user.anonymousId.charAt(0)}
+                    {anonymousId.charAt(0)}
                   </span>
                 </div>
                 <div className="flex-1">

@@ -11,13 +11,12 @@
   "dependencies": {
     "@coinbase/onchainkit": "^0.38.19",
     "@react-oauth/google": "^0.12.2",
+    "@supabase/supabase-js": "^2.55.0",
     "clsx": "^2.1.1",
     "jwt-decode": "^4.0.0",
     "next": "15.4.6",
     "react": "19.1.0",
-    "react-dom": "19.1.0",
-    "ulid": "^3.0.1",
-    "zustand": "^5.0.7"
+    "react-dom": "19.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

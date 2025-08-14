@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { useMiniKit } from '@coinbase/onchainkit/minikit';
-import { useAppStore } from '@/lib/store';
+import { useApp } from '@/context/AppContext';
+import { usePosts } from '@/lib/supabase';
 import { SignInPanel } from '@/components/SignInPanel';
 import { PostComposer } from '@/components/PostComposer';
 import { PostCard } from '@/components/PostCard';
@@ -10,15 +11,12 @@ import type { Post } from '@/lib/types';
 import Link from 'next/link';
 
 export default function Home() {
-  const user = useAppStore(s => s.user);
-  const isAuthenticated = useAppStore(s => s.isAuthenticated);
-  const sort = useAppStore(s => s.sort);
-  const getAllPosts = useAppStore(s => s.getAllPosts);
-  const signOut = useAppStore(s => s.signOut);
-  const version = useAppStore(s => s.version);
-  
-  const [posts, setPosts] = useState<Post[]>([]);
+  const { isAuthenticated, anonymousId, companyDomain, signOut } = useApp();
+  const [sort, setSort] = useState<'new' | 'hot'>('new');
   const [showSignIn, setShowSignIn] = useState(false);
+  
+  // Fetch posts from Supabase
+  const { posts, loading, error } = usePosts(sort);
 
   // MiniKit frame lifecycle: signal ready once mounted
   //const { setFrameReady, isFrameReady } = useMiniKit();
@@ -33,6 +31,15 @@ export default function Home() {
   //     setFrameReady();
   //   }
   // }, [isFrameReady, setFrameReady]);
+
+  
+  // =======
+  // useEffect(() => {
+  //     if (!isFrameReady) {
+  //       setFrameReady();
+  //     }
+  //   }, [isFrameReady, setFrameReady]);
+  // >>>>>>> main
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -53,7 +60,7 @@ export default function Home() {
             </div>
             
             <div className="flex items-center space-x-3">
-              <SortToggle />
+              <SortToggle sort={sort} onSortChange={setSort} />
               {isAuthenticated ? (
                 <button
                   onClick={signOut}
@@ -76,18 +83,18 @@ export default function Home() {
           </div>
           
           {/* User Info Bar - only show when authenticated */}
-          {isAuthenticated && user && (
+          {isAuthenticated && anonymousId && companyDomain && (
             <div className="mt-2 flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700">
-                  {user.companyDomain}
+                  {companyDomain}
                 </span>
                 <span className="text-xs text-gray-500">•</span>
-                <span className="text-xs text-gray-600">{user.anonymousId}</span>
+                <span className="text-xs text-gray-600">{anonymousId}</span>
               </div>
               <div className="flex items-center gap-3">
                 <Link 
-                  href={`/company/${user.companyDomain}`}
+                  href={`/company/${companyDomain}`}
                   className="text-xs text-blue-600 hover:text-blue-800 font-medium"
                 >
                   My Company →
@@ -101,7 +108,7 @@ export default function Home() {
       {/* Main Content */}
       <main className="max-w-md mx-auto px-4 py-4 space-y-4">
         {/* Post Composer - only show when authenticated */}
-        {isAuthenticated && user ? (
+        {isAuthenticated && anonymousId && companyDomain ? (
           <PostComposer />
         ) : (
           <div className="bg-white rounded-lg shadow-sm border p-4">
@@ -119,7 +126,24 @@ export default function Home() {
         )}
         
         <div className="space-y-3">
-          {posts.length === 0 ? (
+          {loading ? (
+            <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
+              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+              </div>
+              <p className="text-sm text-gray-600">Loading posts...</p>
+            </div>
+          ) : error ? (
+            <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="text-base font-semibold text-gray-900 mb-2">Error loading posts</h3>
+              <p className="text-sm text-gray-600">{error}</p>
+            </div>
+          ) : posts.length === 0 ? (
             <div className="bg-white rounded-lg shadow-sm border p-8 text-center">
               <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

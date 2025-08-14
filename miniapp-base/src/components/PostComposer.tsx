@@ -1,21 +1,22 @@
 "use client";
 import { useState } from 'react';
-import { useAppStore } from '@/lib/store';
+import { useApp } from '@/context/AppContext';
+import { createPost } from '@/lib/supabase';
 
 export function PostComposer() {
   const [content, setContent] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const createPost = useAppStore(s => s.createPost);
-  const user = useAppStore(s => s.user);
+  const { isAuthenticated, anonymousId, companyDomain } = useApp();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!content.trim() || isLoading) return;
+    if (!content.trim() || isLoading || !isAuthenticated || !anonymousId) return;
 
     setIsLoading(true);
     try {
-      await createPost(content.trim());
+      await createPost(content.trim(), anonymousId, companyDomain);
       setContent('');
+      // TODO: Trigger a refetch of posts
     } catch (error) {
       console.error('Error creating post:', error);
     } finally {
@@ -23,22 +24,22 @@ export function PostComposer() {
     }
   };
 
-  if (!user) return null;
+  if (!isAuthenticated || !anonymousId) return null;
 
   return (
     <div className="bg-white rounded-lg shadow-sm border p-4">
       <div className="flex items-center space-x-3 mb-4">
         <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
           <span className="text-white font-medium text-sm">
-            {user.anonymousId.charAt(0)}
+            {anonymousId.charAt(0)}
           </span>
         </div>
         <div>
           <div className="text-sm font-medium text-gray-900">
-            {user.anonymousId}
+            {anonymousId}
           </div>
           <div className="text-xs text-gray-500">
-            Posting as {user.companyDomain}
+            Posting as {companyDomain || 'Anonymous'}
           </div>
         </div>
       </div>
