@@ -1,1 +1,4 @@
 Openbands-Miniapp/
+
+# Environment Variables
+.env
