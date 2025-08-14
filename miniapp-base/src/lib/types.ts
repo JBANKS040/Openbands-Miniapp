@@ -28,3 +28,8 @@ export interface GoogleJwtPayload {
   email: string;
   kid: string;
 }
+
+export interface UserInfo {
+  email: string | null;
+  idToken: string | null;
+}

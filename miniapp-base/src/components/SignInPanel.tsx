@@ -1,12 +1,16 @@
 "use client";
+import React, { useState } from "react";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import { useApp } from "@/context/AppContext";
-import type { GoogleJwtPayload } from "@/lib/types";
+import type { UserInfo, GoogleJwtPayload } from "@/lib/types";
 
 export function SignInPanel() {
   const { signIn } = useApp();
 
+  const [userInfo, setUserInfo] = useState<UserInfo>({ email: null, idToken: null });
+  const [error, setError] = useState<string | null>(null);
+  
   const onSuccess = (resp: CredentialResponse) => {
     if (!resp.credential) return;
     
@@ -15,6 +19,12 @@ export function SignInPanel() {
       const email = decoded.email;
       if (!email) return;
 
+      setUserInfo({
+        email: decoded.email,
+        idToken: resp.credential
+      });
+
+      // @dev - Log (NOTE: This should be removed later)
       console.log(`decoded: ${JSON.stringify(decoded, null, 2)}`);
       console.log(`User email: ${email}`);
 
@@ -22,6 +32,7 @@ export function SignInPanel() {
       signIn();
     } catch (err) {
       console.error('Error decoding token:', err);
+      setError('Failed to authenticate with Google');
     }
   };
 
