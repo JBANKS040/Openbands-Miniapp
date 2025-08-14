@@ -14,7 +14,10 @@ export function SignInPanel() {
       const decoded = jwtDecode<GoogleJwtPayload>(resp.credential);
       const email = decoded.email;
       if (!email) return;
-      
+
+      console.log(`decoded: ${JSON.stringify(decoded, null, 2)}`);
+      console.log(`User email: ${email}`);
+
       // We'll discard the email/token for privacy and just sign in anonymously
       signIn();
     } catch (err) {
