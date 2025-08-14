@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import { useApp } from "@/context/AppContext";
-import type { UserInfo, GoogleJwtPayload } from "@/lib/types";
+import type { UserInfo, GoogleJwtPayload, JWK } from "@/lib/types";
 
 export function SignInPanel() {
   const { signIn } = useApp();
@@ -35,6 +35,18 @@ export function SignInPanel() {
       setError('Failed to authenticate with Google');
     }
   };
+
+  async function getGooglePublicKey(kid: string): Promise<JsonWebKey> {
+    const response = await fetch('https://www.googleapis.com/oauth2/v3/certs');
+    const jwks = await response.json();
+    
+    const key = jwks.keys.find((k: JWK) => k.kid === kid);
+    if (!key) {
+      throw new Error('Unable to find matching public key');
+    }
+    
+    return key;
+  }
 
   return (
     <div className="bg-gray-50 p-3">
