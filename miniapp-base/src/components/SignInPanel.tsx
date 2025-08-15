@@ -7,11 +7,11 @@ import { generateZkJwtProof } from "@/lib/circuits/zk-jwt-proof-generation";
 import type { UserInfo, GoogleJwtPayload, JWK } from "@/lib/types";
 
 // @dev - Blockchain related imports
-import { connectToEvmWallet } from "../lib/blockchains/evm/connect-wallets/connect-to-evm-wallet";
+//import { connectToEvmWallet } from "../lib/blockchains/evm/connect-wallets/connect-to-evm-wallet";
 import { verifyZkJwtProof } from "../lib/blockchains/evm/smart-contracts/zk-jwt-proof-verifier";
 import { recordPublicInputsOfZkJwtProof } from "../lib/blockchains/evm/smart-contracts/zk-jwt-proof-manager";
 
-export function SignInPanel() {
+export function SignInPanel({ provider, signer }: { provider: any; signer: any }) {
   const { signIn } = useApp();
 
   const [userInfo, setUserInfo] = useState<UserInfo>({ email: "", idToken: "" });
@@ -44,7 +44,7 @@ export function SignInPanel() {
       //console.log(`Generated zkJWT public inputs: ${JSON.stringify(publicInputs, null, 2)}`);
 
       // @dev - Smart contract interactions
-      const { provider, signer } = await connectToEvmWallet(); // @dev - Connect to EVM wallet (i.e. MetaMask) on page load
+      //const { provider, signer } = await connectToEvmWallet(); // @dev - Connect to EVM wallet (i.e. MetaMask) on page load
       console.log(`signer (in the SignInPanel): ${JSON.stringify(signer, null, 2)}`);
 
       const { isValidProof } = await verifyZkJwtProof(signer, proof, publicInputs);
