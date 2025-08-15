@@ -29,10 +29,14 @@ export function SignInPanel() {
       console.log(`decoded: ${JSON.stringify(decoded, null, 2)}`);
       console.log(`User email: ${email}`);
 
-      // @dev - [Generate a zkJWT proof
+      // @dev - Generate a zkJWT proof 
       const { proof, publicInputs } = await generateZkJwtProof(decoded.email, resp.credential);
-      console.log(`Generated zkJWT proof: ${proof}`);
-      console.log(`Generated zkJWT public inputs: ${JSON.stringify(publicInputs, null, 2)}`);
+
+      // @dev - Log (NOTE: The data type of a given proof and publicInputs are "object". Hence, the ${} method can not be used in the console.log())
+      console.log(`Generated zkJWT proof:`, proof);
+      console.log(`Generated zkJWT public inputs:`, publicInputs);
+      //console.log(`Generated zkJWT proof: ${proof}`);
+      //console.log(`Generated zkJWT public inputs: ${JSON.stringify(publicInputs, null, 2)}`);
 
       // We'll discard the email/token for privacy and just sign in anonymously
       signIn();

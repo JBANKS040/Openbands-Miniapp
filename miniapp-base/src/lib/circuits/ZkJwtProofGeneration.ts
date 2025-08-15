@@ -20,12 +20,9 @@ export async function generateZkJwtProof(email: string, idToken: string): Promis
   const jwtHeader = getJwtHeader(idToken);
   const jwtPubkey = await getGooglePublicKey(jwtHeader.kid);
 
-  const generatedProof = await _generateZkJwtProof(idToken, jwtPubkey, domain);
+  const { proof, publicInputs } = await _generateZkJwtProof(idToken, jwtPubkey, domain);
 
-  let proof: any;
-  let publicInputs: any;
-
-  return { proof, publicInputs }; // Placeholder for actual proof generation logic
+  return { proof, publicInputs };
 }
 
 
@@ -84,7 +81,7 @@ async function _generateZkJwtProof(
   const { witness } = await noir.execute(inputs as InputMap);
   const generatedProof = await backend.generateProof(witness, { keccak: true }); // @dev - This is used when storing the proof/publicInputs into the EVM Blockchain via the Solidity Smart Contract.
   //const proof = await backend.generateProof(witness);                 // @dev - This is used when storing the proof/publicInputs into the Web2 Database via Supabase.
-  console.log(`proof (in openbands.ts): ${JSON.stringify(generatedProof, null, 2)}`);
+  console.log(`generatedProof: ${JSON.stringify(generatedProof, null, 2)}`);
 
   const provingTime = performance.now() - startTime;
 
@@ -94,13 +91,15 @@ async function _generateZkJwtProof(
   const proof = generatedProof.proof;
   const publicInputs = generatedProof.publicInputs;
   console.log(`proof: ${ JSON.stringify(generatedProof.proof, null, 2) }`);
-  //console.log(`type of generatedProof.proof: ${ typeof generatedProof.proof }`); // @dev - [Return]: "object" 
-  console.log(`publicInputs: ${ JSON.stringify(generatedProof.proof, null, 2) }`);
+  console.log(`publicInputs: ${ JSON.stringify(generatedProof.publicInputs, null, 2) }`);
+
+  //console.log(`type of proof: ${ typeof proof }`);               // @dev - [Return]: "object" 
+  //console.log(`type of publicInputs: ${ typeof publicInputs }`); // @dev - [Return]: "object" 
 
   // @dev - TEST proof verification with NoirJS
   //const isValidProof = await backend.verifyProof(proof, { keccak: true });
   //console.log(`isValidProof: ${ isValidProof }`); // @dev - [Result]: True
 
-  // Implement the actual proof generation logic here
+  // @dev - Return
   return { proof, publicInputs };
 }
