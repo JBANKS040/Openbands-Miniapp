@@ -49,12 +49,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <div className="flex justify-center items-center h-screen">
-        <ConnectWalletButton />
-      </div>
-
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ClientProviders>{children}</ClientProviders>
+
+        <div className="flex justify-center items-center h-screen">
+          <ConnectWalletButton />
+        </div>
       </body>
     </html>
   );
