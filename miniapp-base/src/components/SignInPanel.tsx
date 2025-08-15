@@ -6,6 +6,11 @@ import { useApp } from "@/context/AppContext";
 import { generateZkJwtProof } from "@/lib/circuits/zk-jwt-proof-generation";
 import type { UserInfo, GoogleJwtPayload, JWK } from "@/lib/types";
 
+// @dev - Blockchain related imports
+import { connectToEvmWallet } from "../lib/blockchains/evm/connect-wallets/connect-to-evm-wallet";
+import { verifyZkJwtProof } from "../lib/blockchains/evm/smart-contracts/zk-jwt-proof-verifier";
+import { recordPublicInputsOfZkJwtProof } from "../lib/blockchains/evm/smart-contracts/zk-jwt-proof-manager";
+
 export function SignInPanel() {
   const { signIn } = useApp();
 
@@ -37,6 +42,16 @@ export function SignInPanel() {
       console.log(`Generated zkJWT public inputs:`, publicInputs);
       //console.log(`Generated zkJWT proof: ${proof}`);
       //console.log(`Generated zkJWT public inputs: ${JSON.stringify(publicInputs, null, 2)}`);
+
+      // @dev - Smart contract interactions
+      const { provider, signer } = await connectToEvmWallet(); // @dev - Connect to EVM wallet (i.e. MetaMask) on page load
+      console.log(`signer (in the SignInPanel): ${JSON.stringify(signer, null, 2)}`);
+
+      const { isValidProof } = await verifyZkJwtProof(signer, proof, publicInputs);
+      console.log(`Is a proof valid?: ${isValidProof}`);
+
+      const { txReceipt } = await recordPublicInputsOfZkJwtProof(signer, proof, publicInputs);
+      console.log(`txReceipt: ${JSON.stringify(txReceipt, null, 2)}`);
 
       // We'll discard the email/token for privacy and just sign in anonymously
       signIn();
