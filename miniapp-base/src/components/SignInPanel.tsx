@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import { useApp } from "@/context/AppContext";
-import { generateZkJwtProof } from "@/lib/circuits/ZkJwtProofGeneration";
+import { generateZkJwtProof } from "@/lib/circuits/zk-jwt-proof-generation";
 import type { UserInfo, GoogleJwtPayload, JWK } from "@/lib/types";
 
 export function SignInPanel() {

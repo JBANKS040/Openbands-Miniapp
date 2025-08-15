@@ -1,5 +1,5 @@
 //import type { JWK } from "@/lib/types";
-import { getJwtHeader, extractDomain, getGooglePublicKey } from "@/lib/google-jwt/GoogleJwt";
+import { getJwtHeader, extractDomain, getGooglePublicKey } from "@/lib/google-jwt/google-jwt";
 
 // @dev - Noir
 import { generateInputs } from "noir-jwt";
@@ -27,7 +27,7 @@ export async function generateZkJwtProof(email: string, idToken: string): Promis
 
 
 /**
- * @notice - Run the zkJWT circuit with NoirJS
+ * @notice - Run the zkJWT circuit with NoirJS/bb.js
  * @param idToken 
  * @param jwtPubkey 
  * @param domain 
