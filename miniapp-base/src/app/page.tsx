@@ -19,13 +19,13 @@ export default function Home() {
   const { posts, loading, error } = usePosts(sort);
 
   // MiniKit frame lifecycle: signal ready once mounted
-  const { setFrameReady, isFrameReady } = useMiniKit();
+  //const { setFrameReady, isFrameReady } = useMiniKit();
 
-  useEffect(() => {
-    if (!isFrameReady) {
-      setFrameReady();
-    }
-  }, [isFrameReady, setFrameReady]);
+  // useEffect(() => {
+  //     if (!isFrameReady) {
+  //       setFrameReady();
+  //     }
+  //   }, [isFrameReady, setFrameReady]);
 
   return (
     <div className="min-h-screen bg-gray-50">

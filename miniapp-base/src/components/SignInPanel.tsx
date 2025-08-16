@@ -1,24 +1,48 @@
 "use client";
+import React, { useState } from "react";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import { useApp } from "@/context/AppContext";
-import type { GoogleJwtPayload } from "@/lib/types";
+import { generateZkJwtProof } from "@/lib/circuits/zk-jwt-proof-generation";
+import type { UserInfo, GoogleJwtPayload, JWK } from "@/lib/types";
 
 export function SignInPanel() {
   const { signIn } = useApp();
 
-  const onSuccess = (resp: CredentialResponse) => {
+  const [userInfo, setUserInfo] = useState<UserInfo>({ email: "", idToken: "" });
+  const [error, setError] = useState<string | null>(null);
+  
+  const onSuccess = async(resp: CredentialResponse) => {
     if (!resp.credential) return;
     
     try {
       const decoded = jwtDecode<GoogleJwtPayload>(resp.credential);
       const email = decoded.email;
       if (!email) return;
-      
+
+      setUserInfo({
+        email: decoded.email,
+        idToken: resp.credential
+      });
+
+      // @dev - Log (NOTE: This should be removed later)
+      console.log(`decoded: ${JSON.stringify(decoded, null, 2)}`);
+      console.log(`User email: ${email}`);
+
+      // @dev - Generate a zkJWT proof 
+      const { proof, publicInputs } = await generateZkJwtProof(decoded.email, resp.credential);
+
+      // @dev - Log (NOTE: The data type of a given proof and publicInputs are "object". Hence, the ${} method can not be used in the console.log())
+      console.log(`Generated zkJWT proof:`, proof);
+      console.log(`Generated zkJWT public inputs:`, publicInputs);
+      //console.log(`Generated zkJWT proof: ${proof}`);
+      //console.log(`Generated zkJWT public inputs: ${JSON.stringify(publicInputs, null, 2)}`);
+
       // We'll discard the email/token for privacy and just sign in anonymously
       signIn();
     } catch (err) {
       console.error('Error decoding token:', err);
+      setError('Failed to authenticate with Google');
     }
   };
 
