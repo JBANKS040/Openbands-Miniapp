@@ -97,8 +97,8 @@ async function _generateZkJwtProof(
   //console.log(`type of publicInputs: ${ typeof publicInputs }`); // @dev - [Return]: "object" 
 
   // @dev - TEST proof verification with NoirJS
-  //const isValidProof = await backend.verifyProof(proof, { keccak: true });
-  //console.log(`isValidProof: ${ isValidProof }`); // @dev - [Result]: True
+  const isValidProof = await backend.verifyProof(generatedProof, { keccak: true });
+  console.log(`isValidProof (via NoirJS): ${ isValidProof }`); // @dev - [Result]: True
 
   // @dev - Return
   return { proof, publicInputs };
