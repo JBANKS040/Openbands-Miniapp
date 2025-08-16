@@ -44,6 +44,10 @@ export function SignInPanel({ provider, signer }: { provider: any; signer: any }
       //console.log(`Generated zkJWT proof: ${proof}`);
       //console.log(`Generated zkJWT public inputs: ${JSON.stringify(publicInputs, null, 2)}`);
 
+      // @dev - Convert public inputs to string
+      const publicInputsString = new TextDecoder().decode(new Uint8Array(publicInputs)).replace(/\0.*$/g, "");
+      console.log(`Generated zkJWT public inputs (string): ${publicInputsString}`); // @dev - i.e. "example-company.com"
+
       // @dev - Smart contract interactions
       console.log(`signer (in the SignInPanel):`, signer); // @dev - The data type of "signer" is an "object" type.
 
