@@ -8,6 +8,7 @@ import type { UserInfo, GoogleJwtPayload, JWK } from "@/lib/types";
 
 // @dev - Blockchain related imports
 //import { connectToEvmWallet } from "../lib/blockchains/evm/connect-wallets/connect-to-evm-wallet";
+import { verifyViaHonkVerifier } from "../lib/blockchains/evm/smart-contracts/honk-verifier";
 import { verifyZkJwtProof } from "../lib/blockchains/evm/smart-contracts/zk-jwt-proof-verifier";
 import { recordPublicInputsOfZkJwtProof } from "../lib/blockchains/evm/smart-contracts/zk-jwt-proof-manager";
 
@@ -44,11 +45,13 @@ export function SignInPanel({ provider, signer }: { provider: any; signer: any }
       //console.log(`Generated zkJWT public inputs: ${JSON.stringify(publicInputs, null, 2)}`);
 
       // @dev - Smart contract interactions
-      //const { provider, signer } = await connectToEvmWallet(); // @dev - Connect to EVM wallet (i.e. MetaMask) on page load
-      console.log(`signer (in the SignInPanel): ${JSON.stringify(signer, null, 2)}`);
+      console.log(`signer (in the SignInPanel):`, signer); // @dev - The data type of "signer" is an "object" type.
+
+      const { isValidProofViaHonkVerifier } = await verifyViaHonkVerifier(signer, proof, publicInputs);
+      console.log(`Is a proof valid via the HonkVerifier?: ${isValidProofViaHonkVerifier}`);  // @dev - [Error]: PublicInputsLengthWrong()
 
       const { isValidProof } = await verifyZkJwtProof(signer, proof, publicInputs);
-      console.log(`Is a proof valid?: ${isValidProof}`);
+      console.log(`Is a proof valid via the ZkJwtProofVerifier?: ${isValidProof}`);
 
       // @dev - Prepare separated public inputs for the smart contract
       // The nullifierHash should be the first public input (based on circuit output)
