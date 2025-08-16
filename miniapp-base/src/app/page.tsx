@@ -10,11 +10,18 @@ import { SortToggle } from '@/components/SortToggle';
 import type { Post } from '@/lib/types';
 import Link from 'next/link';
 
+// @dev - Blockchain related imports
+import { connectToEvmWallet } from '../lib/blockchains/evm/connect-wallets/connect-to-evm-wallet';
+
 export default function Home() {
   const { isAuthenticated, anonymousId, companyDomain, signOut } = useApp();
   const [sort, setSort] = useState<'new' | 'hot'>('new');
   const [showSignIn, setShowSignIn] = useState(false);
-  
+
+  // @dev - Fetch from an EVM wallet
+  const [provider, setProvider] = useState(null);
+  const [signer, setSigner] = useState(null);
+
   // Fetch posts from Supabase
   const { posts, loading, error } = usePosts(sort);
 
@@ -26,6 +33,16 @@ export default function Home() {
   //       setFrameReady();
   //     }
   //   }, [isFrameReady, setFrameReady]);
+
+  useEffect(() => {
+    // fetchSubmissions();
+    async function init() {
+      const { provider, signer } = await connectToEvmWallet(); // @dev - Connect to EVM wallet (i.e. MetaMask) on page load
+      setProvider(provider);
+      setSigner(signer);
+    }
+    init();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
