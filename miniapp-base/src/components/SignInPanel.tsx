@@ -50,7 +50,15 @@ export function SignInPanel({ provider, signer }: { provider: any; signer: any }
       const { isValidProof } = await verifyZkJwtProof(signer, proof, publicInputs);
       console.log(`Is a proof valid?: ${isValidProof}`);
 
-      const { txReceipt } = await recordPublicInputsOfZkJwtProof(signer, proof, publicInputs);
+      // @dev - Prepare separated public inputs for the smart contract
+      // The nullifierHash should be the first public input (based on circuit output)
+      const separatedPublicInputs = {
+        domain: decoded.email.split('@')[1], // Extract domain from email
+        nullifierHash: publicInputs.length > 0 ? publicInputs[0] : "0x0000000000000000000000000000000000000000000000000000000000000000", // First public input should be nullifier
+        createdAt: new Date().toISOString() // Current timestamp
+      };
+
+      const { txReceipt } = await recordPublicInputsOfZkJwtProof(signer, proof, publicInputs, separatedPublicInputs);
       console.log(`txReceipt: ${JSON.stringify(txReceipt, null, 2)}`);
 
       // We'll discard the email/token for privacy and just sign in anonymously

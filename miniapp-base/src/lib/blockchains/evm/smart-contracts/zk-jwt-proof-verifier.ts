@@ -19,8 +19,8 @@ export async function verifyZkJwtProof(signer: any, proof: any, publicInputs: an
   //const proofHex = uint8ArrayToHex(proof);
   console.log(`proofHex: ${proofHex}`);
 
-  // @dev - Call the verify() in the ZkJwtProofVerifier.sol
-  const isValidProof = await zkJwtProofVerifier.verify(proofHex, publicInputs);
+  // @dev - Call the verifyZkJwtProof() in the ZkJwtProofVerifier.sol
+  const isValidProof = await zkJwtProofVerifier.verifyZkJwtProof(proofHex, publicInputs);
   console.log(`Is a proof valid?: ${isValidProof}`);
 
   return { isValidProof };

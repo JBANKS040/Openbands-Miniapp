@@ -12,7 +12,12 @@ import artifactOfZkJwtProofManager from './artifacts/ZkJwtProofManager.sol/ZkJwt
 export async function recordPublicInputsOfZkJwtProof(
   signer: any,
   proof: Uint8Array<any>,
-  publicInputs: Array<any>
+  publicInputs: Array<any>,
+  separatedPublicInputs: {
+    domain: string;
+    nullifierHash: string;
+    createdAt: string;
+  }
 ): Promise<{ txReceipt: any }> {
   // @dev - Create the ZkJwtProofManager contract instance
   const abi: Array<any> = artifactOfZkJwtProofManager.abi;
@@ -30,7 +35,8 @@ export async function recordPublicInputsOfZkJwtProof(
   try {
     tx = await zkJwtProofManager.recordPublicInputsOfZkJwtProof(
       proofHex, 
-      publicInputs
+      publicInputs,
+      separatedPublicInputs
       //{ value: parseEther("0.001") }  // @dev - Send a TX with 0.01 ETH -> This is not a gas fee. Hence, this is commented out.
     );
     
