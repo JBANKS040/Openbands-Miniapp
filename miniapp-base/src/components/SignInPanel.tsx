@@ -10,7 +10,7 @@ import type { UserInfo, GoogleJwtPayload, JWK } from "@/lib/types";
 //import { connectToEvmWallet } from "../lib/blockchains/evm/connect-wallets/connect-to-evm-wallet";
 import { verifyViaHonkVerifier } from "../lib/blockchains/evm/smart-contracts/honk-verifier";
 import { verifyZkJwtProof } from "../lib/blockchains/evm/smart-contracts/zk-jwt-proof-verifier";
-import { recordPublicInputsOfZkJwtProof } from "../lib/blockchains/evm/smart-contracts/zk-jwt-proof-manager";
+import { recordPublicInputsOfZkJwtProof, getNullifierByWalletAddress } from "../lib/blockchains/evm/smart-contracts/zk-jwt-proof-manager";
 
 export function SignInPanel({ provider, signer }: { provider: any; signer: any }) {
   const { signIn } = useApp();
@@ -70,6 +70,9 @@ export function SignInPanel({ provider, signer }: { provider: any; signer: any }
 
       const { txReceipt } = await recordPublicInputsOfZkJwtProof(signer, proof, publicInputs, separatedPublicInputs);
       console.log(`txReceipt: ${JSON.stringify(txReceipt, null, 2)}`);
+
+      const { nullifierHash } = await getNullifierByWalletAddress(signer);
+      console.log(`nullifierHash: ${nullifierHash}`);
 
       // We'll discard the email/token for privacy and just sign in anonymously
       signIn();
