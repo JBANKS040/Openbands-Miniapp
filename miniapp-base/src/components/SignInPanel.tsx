@@ -45,8 +45,8 @@ export function SignInPanel({ provider, signer }: { provider: any; signer: any }
       //console.log(`Generated zkJWT public inputs: ${JSON.stringify(publicInputs, null, 2)}`);
 
       // @dev - Convert public inputs to String type
-      const publicInputsString = new TextDecoder().decode(new Uint8Array(publicInputs)).replace(/\0.*$/g, "");
-      console.log(`Generated zkJWT public inputs (string): ${publicInputsString}`); // @dev - i.e. "example-company.com"
+      const domainFromPublicInputs = new TextDecoder().decode(new Uint8Array(publicInputs)).replace(/\0.*$/g, "");
+      console.log(`domain (from public inputs): ${domainFromPublicInputs}`); // @dev - i.e. "example-company.com"
 
       // @dev - Smart contract interactions
       console.log(`signer (in the SignInPanel):`, signer); // @dev - The data type of "signer" is an "object" type.
@@ -58,10 +58,13 @@ export function SignInPanel({ provider, signer }: { provider: any; signer: any }
       console.log(`Is a proof valid via the ZkJwtProofVerifier?: ${isValidProof}`);
 
       // @dev - Prepare separated public inputs for the smart contract
-      // The nullifierHash should be the first public input (based on circuit output)
+      const nullifier = JSON.stringify(publicInputs[publicInputs.length - 1]);
+      console.log(`nullifier: ${nullifier}`);
+
       const separatedPublicInputs = {
-        domain: decoded.email.split('@')[1], // Extract domain from email
-        nullifierHash: publicInputs.length > 0 ? publicInputs[0] : "0x0000000000000000000000000000000000000000000000000000000000000000", // First public input should be nullifier
+        domain: domainFromPublicInputs,
+        //domain: decoded.email.split('@')[1], // Extract domain from email
+        nullifierHash: nullifier,
         createdAt: new Date().toISOString() // Current timestamp
       };
 
