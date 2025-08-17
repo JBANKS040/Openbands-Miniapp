@@ -18,7 +18,7 @@ export async function recordPublicInputsOfZkJwtProof(
   }
 ): Promise<{ txReceipt: any }> {
   // @dev - Create the ZkJwtProofManager contract instance
-  const zkJwtProofManagerContractAddress: string = process.env.NEXT_PUBLIC_ZK_JWT_PROOF_MANAGER_CONTRACT_ADDRESS || "";  
+  const zkJwtProofManagerContractAddress: string = process.env.NEXT_PUBLIC_ZK_JWT_PROOF_MANAGER_ON_BASE_TESTNET || "";  
   const zkJwtProofManagerAbi: Array<any> = artifactOfZkJwtProofManager.abi;
   const zkJwtProofManager = new Contract(zkJwtProofManagerContractAddress, zkJwtProofManagerAbi, signer);
   console.log(`zkJwtProofManagerContractAddress: ${zkJwtProofManagerContractAddress}`);
