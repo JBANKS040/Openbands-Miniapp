@@ -35,7 +35,7 @@ export interface DbLike {
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey); // @dev - [NOTE]: Temporarily, removing the comment out for local development
 
 // Convert database types to app types
 function dbPostToPost(dbPost: DbPost, commentCount: number = 0): import('@/lib/types').Post {
