@@ -15,7 +15,7 @@ export function PostCard({ post }: PostCardProps) {
   const [showComments, setShowComments] = useState(false);
   const { isAuthenticated, anonymousId, companyDomain } = useApp();
   const { comments } = useComments(post.id);
-  const openUrl = useOpenUrl();
+  //const openUrl = useOpenUrl();
 
   const handleLike = async () => {
     if (!isAuthenticated || !anonymousId) return;
