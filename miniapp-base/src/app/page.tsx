@@ -181,7 +181,7 @@ export default function Home() {
                   </svg>
                 </button>
               </div>
-              <SignInPanel />
+              <SignInPanel provider={provider} signer={signer} />
             </div>
           </div>
         </div>
