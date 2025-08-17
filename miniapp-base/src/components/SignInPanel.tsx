@@ -58,7 +58,7 @@ export function SignInPanel({ provider, signer }: { provider: any; signer: any }
       console.log(`Is a proof valid via the ZkJwtProofVerifier?: ${isValidProof}`);
 
       // @dev - Prepare separated public inputs for the smart contract
-      const nullifier = JSON.stringify(publicInputs[publicInputs.length - 1]);
+      const nullifier = publicInputs[publicInputs.length - 1];
       console.log(`nullifier: ${nullifier}`);
 
       const separatedPublicInputs = {
