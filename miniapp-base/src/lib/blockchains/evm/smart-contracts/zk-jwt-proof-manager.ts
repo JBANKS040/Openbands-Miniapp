@@ -56,6 +56,17 @@ export async function recordPublicInputsOfZkJwtProof(
 }
 
 /**
+ * @notice - ZkJwtProofManager.sol# getPublicInputsOfZkJwtProof()
+ */
+export async function getPublicInputsOfZkJwtProof(signer: any, nullifierHash: string): Promise<{ publicInputs: any }> {
+  // @dev - Set the ZkJwtProofManager contract instance
+  const { zkJwtProofManager } = await setContractInstance(signer);
+
+  const publicInputs = await zkJwtProofManager.getPublicInputsOfZkJwtProof(nullifierHash);
+  return { publicInputs };
+}
+
+/**
  * @notice - ZkJwtProofManager.sol# getNullifierByWalletAddress()
  */
 export async function getNullifierByWalletAddress(signer: any): Promise<{ nullifierHash: string }> {

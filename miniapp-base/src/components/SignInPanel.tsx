@@ -10,7 +10,11 @@ import type { UserInfo, GoogleJwtPayload, JWK } from "@/lib/types";
 //import { connectToEvmWallet } from "../lib/blockchains/evm/connect-wallets/connect-to-evm-wallet";
 import { verifyViaHonkVerifier } from "../lib/blockchains/evm/smart-contracts/honk-verifier";
 import { verifyZkJwtProof } from "../lib/blockchains/evm/smart-contracts/zk-jwt-proof-verifier";
-import { recordPublicInputsOfZkJwtProof, getNullifierByWalletAddress } from "../lib/blockchains/evm/smart-contracts/zk-jwt-proof-manager";
+import { 
+  recordPublicInputsOfZkJwtProof,
+  getPublicInputsOfZkJwtProof, 
+  getNullifierByWalletAddress 
+} from "../lib/blockchains/evm/smart-contracts/zk-jwt-proof-manager";
 
 export function SignInPanel({ provider, signer }: { provider: any; signer: any }) {
   const { signIn } = useApp();
@@ -80,9 +84,16 @@ export function SignInPanel({ provider, signer }: { provider: any; signer: any }
         } catch (error) {
           console.error('Error to record public inputs on-chain (BASE):', error);
         }
+
+        const publicInputsFromOnChain = await getPublicInputsOfZkJwtProof(signer, nullifierHash);
+        console.log(`publicInputs (from on-chain): ${JSON.stringify(publicInputsFromOnChain, null, 2)}`);
+
         // We'll discard the email/token for privacy and just sign in anonymously
-        signIn();
+        signIn();        
       } else {
+        const publicInputsFromOnChain = await getPublicInputsOfZkJwtProof(signer, nullifierHash);
+        console.log(`publicInputs (from on-chain): ${JSON.stringify(publicInputsFromOnChain, null, 2)}`);
+
         // @dev - If there is already nullifierHash, which is stored on-chain and is associated with a given wallet address, the user can straightly sign-in without generating new zkJWT proof and store its public inputs on-chain. 
         // We'll discard the email/token for privacy and just sign in anonymously
         signIn();
