@@ -69,10 +69,10 @@ export async function getPublicInputsOfZkJwtProof(signer: any, nullifierHash: st
 /**
  * @notice - ZkJwtProofManager.sol# getNullifierByWalletAddress()
  */
-export async function getNullifierByWalletAddress(signer: any): Promise<{ nullifierFromOnChain: string }> {
+export async function getNullifierByWalletAddress(signer: any): Promise<{ nullifierFromOnChainByWalletAddress: string }> {
   // @dev - Set the ZkJwtProofManager contract instance
   const { zkJwtProofManager } = await setContractInstance(signer);
 
-  const nullifierFromOnChain = await zkJwtProofManager.getNullifierByWalletAddress();
-  return { nullifierFromOnChain };
+  const nullifierFromOnChainByWalletAddress = await zkJwtProofManager.getNullifierByWalletAddress();
+  return { nullifierFromOnChainByWalletAddress };
 }
