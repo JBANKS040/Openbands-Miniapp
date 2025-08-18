@@ -5,12 +5,17 @@ import { jwtDecode } from "jwt-decode";
 import { useApp } from "@/context/AppContext";
 import { generateZkJwtProof } from "@/lib/circuits/zk-jwt-proof-generation";
 import type { UserInfo, GoogleJwtPayload, JWK } from "@/lib/types";
+import { extractDomain } from "@/lib/google-jwt/google-jwt";
 
 // @dev - Blockchain related imports
 //import { connectToEvmWallet } from "../lib/blockchains/evm/connect-wallets/connect-to-evm-wallet";
 import { verifyViaHonkVerifier } from "../lib/blockchains/evm/smart-contracts/honk-verifier";
 import { verifyZkJwtProof } from "../lib/blockchains/evm/smart-contracts/zk-jwt-proof-verifier";
-import { recordPublicInputsOfZkJwtProof } from "../lib/blockchains/evm/smart-contracts/zk-jwt-proof-manager";
+import { 
+  recordPublicInputsOfZkJwtProof,
+  getPublicInputsOfZkJwtProof, 
+  getNullifierByWalletAddress 
+} from "../lib/blockchains/evm/smart-contracts/zk-jwt-proof-manager";
 
 export function SignInPanel({ provider, signer }: { provider: any; signer: any }) {
   const { signIn } = useApp();
@@ -35,44 +40,85 @@ export function SignInPanel({ provider, signer }: { provider: any; signer: any }
       console.log(`decoded: ${JSON.stringify(decoded, null, 2)}`);
       console.log(`User email: ${email}`);
 
-      // @dev - Generate a zkJWT proof 
-      const { proof, publicInputs } = await generateZkJwtProof(decoded.email, resp.credential);
+      // @dev - Retrieve a nullifierHash, which is stored on-chain and is associated with a given wallet address
+      const { nullifierFromOnChainByWalletAddress } = await getNullifierByWalletAddress(signer);
+      console.log(`nullifier (from on-chain) by a wallet address: ${nullifierFromOnChainByWalletAddress}`);
 
-      // @dev - Log (NOTE: The data type of a given proof and publicInputs are "object". Hence, the ${} method can not be used in the console.log())
-      console.log(`Generated zkJWT proof:`, proof);
-      console.log(`Generated zkJWT public inputs:`, publicInputs);
-      //console.log(`Generated zkJWT proof: ${proof}`);
-      //console.log(`Generated zkJWT public inputs: ${JSON.stringify(publicInputs, null, 2)}`);
+      // @dev - If there is no nullifierFromOnChain, which is stored on-chain and is associated with a given wallet address, it will be recorded on-chain (BASE).
+      if (nullifierFromOnChainByWalletAddress === "0x0000000000000000000000000000000000000000000000000000000000000000") {
+        // @dev - Generate a zkJWT proof
+        const { proof, publicInputs } = await generateZkJwtProof(decoded.email, resp.credential);
 
-      // @dev - Convert public inputs to String type
-      const domainFromPublicInputs = new TextDecoder().decode(new Uint8Array(publicInputs)).replace(/\0.*$/g, "");
-      console.log(`domain (from public inputs): ${domainFromPublicInputs}`); // @dev - i.e. "example-company.com"
+        // @dev - Log (NOTE: The data type of a given proof and publicInputs are "object". Hence, the ${} method can not be used in the console.log())
+        console.log(`Generated zkJWT proof:`, proof);
+        console.log(`Generated zkJWT public inputs:`, publicInputs);
+        //console.log(`Generated zkJWT proof: ${proof}`);
+        //console.log(`Generated zkJWT public inputs: ${JSON.stringify(publicInputs, null, 2)}`);
 
-      // @dev - Smart contract interactions
-      console.log(`signer (in the SignInPanel):`, signer); // @dev - The data type of "signer" is an "object" type.
+        // @dev - Convert public inputs to String type
+        const domainFromZkJwtCircuit = new TextDecoder().decode(new Uint8Array(publicInputs)).replace(/\0.*$/g, "");
+        console.log(`domain (from public inputs-emitted via the zkJWT circuit): ${domainFromZkJwtCircuit}`); // @dev - i.e. "example-company.com"
 
-      const { isValidProofViaHonkVerifier } = await verifyViaHonkVerifier(signer, proof, publicInputs);
-      console.log(`Is a proof valid via the HonkVerifier?: ${isValidProofViaHonkVerifier}`);  // @dev - [Error]: PublicInputsLengthWrong()
+        // @dev - Smart contract interactions
+        console.log(`signer (in the SignInPanel):`, signer); // @dev - The data type of "signer" is an "object" type.
 
-      const { isValidProof } = await verifyZkJwtProof(signer, proof, publicInputs);
-      console.log(`Is a proof valid via the ZkJwtProofVerifier?: ${isValidProof}`);
+        const { isValidProofViaHonkVerifier } = await verifyViaHonkVerifier(signer, proof, publicInputs);
+        console.log(`Is a proof valid via the HonkVerifier?: ${isValidProofViaHonkVerifier}`);  // @dev - [Error]: PublicInputsLengthWrong()
 
-      // @dev - Prepare separated public inputs for the smart contract
-      const nullifier = publicInputs[publicInputs.length - 1]; // @dev - The nullifier is the last of the public inputs
-      console.log(`nullifier: ${nullifier}`);
+        const { isValidProof } = await verifyZkJwtProof(signer, proof, publicInputs);
+        console.log(`Is a proof valid via the ZkJwtProofVerifier?: ${isValidProof}`);
 
-      const separatedPublicInputs = {
-        domain: domainFromPublicInputs,
-        //domain: decoded.email.split('@')[1], // Extract domain from email
-        nullifierHash: nullifier,
-        createdAt: new Date().toISOString() // Current timestamp
-      };
+        // @dev - Prepare separated public inputs for the smart contract
+        const nullifierFromZkJwtCircuit = publicInputs[publicInputs.length - 1]; // @dev - The nullifier is the last of the public inputs
+        console.log(`nullifier (from zkJWT circuit): ${nullifierFromZkJwtCircuit}`);
 
-      const { txReceipt } = await recordPublicInputsOfZkJwtProof(signer, proof, publicInputs, separatedPublicInputs);
-      console.log(`txReceipt: ${JSON.stringify(txReceipt, null, 2)}`);
+        const walletAddressFromConnectedWallet = signer.address;
+        console.log(`signer.getAddress(): ${walletAddressFromConnectedWallet}`);
 
-      // We'll discard the email/token for privacy and just sign in anonymously
-      signIn();
+        const separatedPublicInputs = {
+          domain: domainFromZkJwtCircuit,
+          //domain: decoded.email.split('@')[1], // Extract domain from email
+          nullifierHash: nullifierFromZkJwtCircuit,
+          walletAddress: walletAddressFromConnectedWallet,
+          createdAt: new Date().toISOString() // Current timestamp
+        };
+
+        try {
+          const { txReceipt } = await recordPublicInputsOfZkJwtProof(signer, proof, publicInputs, separatedPublicInputs);
+          console.log(`txReceipt: ${JSON.stringify(txReceipt, null, 2)}`);
+        } catch (error) {
+          console.error('Error to record public inputs on-chain (BASE):', error);
+        }
+
+        // We'll discard the email/token for privacy and just sign in anonymously
+        signIn();
+      } else if (nullifierFromOnChainByWalletAddress !== "0x0000000000000000000000000000000000000000000000000000000000000000") {
+        // @dev - Get a domain from JWT and wallet address from a connected wallet
+        const domainFromGoogleJwt = extractDomain(decoded.email);
+        const walletAddressFromConnectedWallet = signer.address;
+        console.log(`walletAddressFromConnectedWallet: ${walletAddressFromConnectedWallet}`);
+
+        // @dev - Get public inputs from on-chain
+        const publicInputsFromOnChain = await getPublicInputsOfZkJwtProof(signer, nullifierFromOnChainByWalletAddress);
+        console.log(`publicInputs (from on-chain): ${JSON.stringify(publicInputsFromOnChain, null, 2)}`);
+        const _domainFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[0];
+        const _nullifierFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[1];
+        const _walletAddress = publicInputsFromOnChain.publicInputsFromOnChain[2];
+
+        if (
+          domainFromGoogleJwt === _domainFromOnChain && 
+          nullifierFromOnChainByWalletAddress === _nullifierFromOnChain && 
+          walletAddressFromConnectedWallet === _walletAddress
+        ) {
+          // We'll discard the email/token for privacy and just sign in anonymously
+          signIn();
+        }
+      } else {
+        return;
+      }
+
+      // // We'll discard the email/token for privacy and just sign in anonymously
+      // signIn();
     } catch (err) {
       console.error('Error decoding token:', err);
       setError('Failed to authenticate with Google');

@@ -3,6 +3,17 @@ import { ethers, Contract } from "ethers";
 // @dev - Blockchain related imports
 import artifactOfZkJwtProofManager from './artifacts/ZkJwtProofManager.sol/ZkJwtProofManager.json';
 
+/**
+ * @notice - Set the ZkJwtProofManager contract instance
+ */
+export async function setContractInstance(signer: any): Promise<{ zkJwtProofManager: Contract }> {
+  // @dev - Create the ZkJwtProofManager contract instance
+  const zkJwtProofManagerContractAddress: string = process.env.NEXT_PUBLIC_ZK_JWT_PROOF_MANAGER_ON_BASE_TESTNET || "";  
+  const zkJwtProofManagerAbi: Array<any> = artifactOfZkJwtProofManager.abi;
+  const zkJwtProofManager = new Contract(zkJwtProofManagerContractAddress, zkJwtProofManagerAbi, signer);
+  console.log(`zkJwtProofManagerContractAddress: ${zkJwtProofManagerContractAddress}`);
+  return { zkJwtProofManager };
+}
 
 /**
  * @notice - ZkJwtProofManager.sol# recordPublicInputsOfZkJwtProof()
@@ -17,11 +28,8 @@ export async function recordPublicInputsOfZkJwtProof(
     createdAt: string;
   }
 ): Promise<{ txReceipt: any }> {
-  // @dev - Create the ZkJwtProofManager contract instance
-  const zkJwtProofManagerContractAddress: string = process.env.NEXT_PUBLIC_ZK_JWT_PROOF_MANAGER_ON_BASE_TESTNET || "";  
-  const zkJwtProofManagerAbi: Array<any> = artifactOfZkJwtProofManager.abi;
-  const zkJwtProofManager = new Contract(zkJwtProofManagerContractAddress, zkJwtProofManagerAbi, signer);
-  console.log(`zkJwtProofManagerContractAddress: ${zkJwtProofManagerContractAddress}`);
+  // @dev - Set the ZkJwtProofManager contract instance
+  const { zkJwtProofManager } = await setContractInstance(signer);
 
   // @dev - Convert Uint8Array proof to hex string proofHex
   const proofHex = "0x" + Buffer.from(proof).toString("hex");
@@ -47,5 +55,24 @@ export async function recordPublicInputsOfZkJwtProof(
   return { txReceipt };
 }
 
+/**
+ * @notice - ZkJwtProofManager.sol# getPublicInputsOfZkJwtProof()
+ */
+export async function getPublicInputsOfZkJwtProof(signer: any, nullifierHash: string): Promise<{ publicInputsFromOnChain: any }> {
+  // @dev - Set the ZkJwtProofManager contract instance
+  const { zkJwtProofManager } = await setContractInstance(signer);
 
+  const publicInputsFromOnChain = await zkJwtProofManager.getPublicInputsOfZkJwtProof(nullifierHash);
+  return { publicInputsFromOnChain };
+}
 
+/**
+ * @notice - ZkJwtProofManager.sol# getNullifierByWalletAddress()
+ */
+export async function getNullifierByWalletAddress(signer: any): Promise<{ nullifierFromOnChainByWalletAddress: string }> {
+  // @dev - Set the ZkJwtProofManager contract instance
+  const { zkJwtProofManager } = await setContractInstance(signer);
+
+  const nullifierFromOnChainByWalletAddress = await zkJwtProofManager.getNullifierByWalletAddress();
+  return { nullifierFromOnChainByWalletAddress };
+}
