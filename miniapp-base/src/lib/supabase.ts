@@ -71,9 +71,10 @@ export function usePosts(sort: 'new' | 'hot' = 'new') {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchPosts = useCallback(async () => {
+  const fetchPosts = useCallback(async (opts?: { silent?: boolean }) => {
     try {
-      setLoading(true);
+      const silent = Boolean(opts?.silent);
+      if (!silent) setLoading(true);
       setError(null);
 
       // Fetch posts with comment counts
@@ -100,9 +101,25 @@ export function usePosts(sort: 'new' | 'hot' = 'new') {
         return acc;
       }, {} as Record<string, number>);
 
-      const processedPosts = (postsData || []).map(post => 
-        dbPostToPost(post, commentCountMap[post.id] || 0)
-      );
+      // Get like counts for each post (derive from likes table so we don't depend on RPC)
+      const { data: likeRows, error: likesError } = await supabase
+        .from('likes')
+        .select('target_id')
+        .eq('target_type', 'post')
+        .in('target_id', postIds);
+
+      if (likesError) throw likesError;
+
+      const likeCountMap = (likeRows || []).reduce((acc, row) => {
+        acc[row.target_id] = (acc[row.target_id] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      const processedPosts = (postsData || []).map(post => {
+        const mapped = dbPostToPost(post, commentCountMap[post.id] || 0);
+        mapped.likeCount = likeCountMap[post.id] || 0;
+        return mapped;
+      });
 
       setPosts(processedPosts);
     } catch (err) {
@@ -124,9 +141,10 @@ export function useCompanyPosts(companyDomain: string, sort: 'new' | 'hot' = 'ne
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchPosts = useCallback(async () => {
+  const fetchPosts = useCallback(async (opts?: { silent?: boolean }) => {
     try {
-      setLoading(true);
+      const silent = Boolean(opts?.silent);
+      if (!silent) setLoading(true);
       setError(null);
 
       // Fetch posts for specific company with comment counts
@@ -154,9 +172,25 @@ export function useCompanyPosts(companyDomain: string, sort: 'new' | 'hot' = 'ne
         return acc;
       }, {} as Record<string, number>);
 
-      const processedPosts = (postsData || []).map(post => 
-        dbPostToPost(post, commentCountMap[post.id] || 0)
-      );
+      // Derive like counts from likes table
+      const { data: likeRows, error: likesError } = await supabase
+        .from('likes')
+        .select('target_id')
+        .eq('target_type', 'post')
+        .in('target_id', postIds);
+
+      if (likesError) throw likesError;
+
+      const likeCountMap = (likeRows || []).reduce((acc, row) => {
+        acc[row.target_id] = (acc[row.target_id] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      const processedPosts = (postsData || []).map(post => {
+        const mapped = dbPostToPost(post, commentCountMap[post.id] || 0);
+        mapped.likeCount = likeCountMap[post.id] || 0;
+        return mapped;
+      });
 
       setPosts(processedPosts);
     } catch (err) {
@@ -178,9 +212,10 @@ export function useComments(postId: string) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchComments = useCallback(async () => {
+  const fetchComments = useCallback(async (opts?: { silent?: boolean }) => {
     try {
-      setLoading(true);
+      const silent = Boolean(opts?.silent);
+      if (!silent) setLoading(true);
       setError(null);
 
       const { data, error: commentsError } = await supabase
@@ -191,7 +226,26 @@ export function useComments(postId: string) {
 
       if (commentsError) throw commentsError;
 
-      const processedComments = (data || []).map(dbCommentToComment);
+      // Derive like counts for comments
+      const commentIds = (data || []).map(c => c.id);
+      let likeCountMap: Record<string, number> = {};
+      if (commentIds.length > 0) {
+        const { data: likeRows, error: likesError } = await supabase
+          .from('likes')
+          .select('target_id')
+          .eq('target_type', 'comment')
+          .in('target_id', commentIds);
+        if (likesError) throw likesError;
+        likeCountMap = (likeRows || []).reduce((acc, row) => {
+          acc[row.target_id] = (acc[row.target_id] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+      }
+
+      const processedComments = (data || []).map(dbCommentToComment).map(c => ({
+        ...c,
+        likeCount: likeCountMap[c.id] || 0,
+      }));
       setComments(processedComments);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch comments');
@@ -253,21 +307,14 @@ export async function likePost(postId: string, anonymousId: string, companyDomai
     .eq('target_type', 'post')
     .eq('target_id', postId)
     .eq('anonymous_id', anonymousId)
-    .single();
+    .maybeSingle();
 
   if (existingLike) {
-    // Unlike: remove like and decrement count
     await supabase
       .from('likes')
       .delete()
       .eq('id', existingLike.id);
-
-    await supabase.rpc('decrement_like_count', {
-      table_name: 'posts',
-      row_id: postId
-    });
   } else {
-    // Like: add like and increment count
     await supabase
       .from('likes')
       .insert([
@@ -278,11 +325,6 @@ export async function likePost(postId: string, anonymousId: string, companyDomai
           company_domain: companyDomain,
         }
       ]);
-
-    await supabase.rpc('increment_like_count', {
-      table_name: 'posts',
-      row_id: postId
-    });
   }
 }
 
@@ -294,21 +336,14 @@ export async function likeComment(commentId: string, anonymousId: string, compan
     .eq('target_type', 'comment')
     .eq('target_id', commentId)
     .eq('anonymous_id', anonymousId)
-    .single();
+    .maybeSingle();
 
   if (existingLike) {
-    // Unlike: remove like and decrement count
     await supabase
       .from('likes')
       .delete()
       .eq('id', existingLike.id);
-
-    await supabase.rpc('decrement_like_count', {
-      table_name: 'comments',
-      row_id: commentId
-    });
   } else {
-    // Like: add like and increment count
     await supabase
       .from('likes')
       .insert([
@@ -319,10 +354,5 @@ export async function likeComment(commentId: string, anonymousId: string, compan
           company_domain: companyDomain,
         }
       ]);
-
-    await supabase.rpc('increment_like_count', {
-      table_name: 'comments',
-      row_id: commentId
-    });
   }
 }

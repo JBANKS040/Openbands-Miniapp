@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { useCompanyPosts } from '@/lib/supabase';
-import type { Post } from '@/lib/types';
 import { PostComposer } from '@/components/PostComposer';
 import { PostCard } from '@/components/PostCard';
 import { SortToggle } from '@/components/SortToggle';
@@ -17,7 +16,7 @@ export default function CompanyPage() {
   const [sort, setSort] = useState<'new' | 'hot'>('new');
   
   // Fetch posts for this specific company
-  const { posts, loading, error } = useCompanyPosts(domain, sort);
+  const { posts, loading, error, refetch } = useCompanyPosts(domain, sort);
 
   const canPost = companyDomain === domain;
 
@@ -70,7 +69,7 @@ export default function CompanyPage() {
       {/* Main Content */}
       <main className="max-w-md mx-auto px-4 py-4 space-y-6">
         {canPost ? (
-          <PostComposer />
+          <PostComposer onPosted={() => refetch({ silent: true })} />
         ) : (
           <div className="bg-white rounded-lg shadow-sm border p-6">
             <div className="text-center py-6">
@@ -122,7 +121,7 @@ export default function CompanyPage() {
             </div>
           ) : (
             posts.map((post) => (
-              <PostCard key={post.id} post={post} />
+              <PostCard key={post.id} post={post} onLiked={() => refetch({ silent: true })} />
             ))
           )}
         </div>

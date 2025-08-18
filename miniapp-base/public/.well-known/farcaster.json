@@ -1,14 +1,18 @@
 {
-  "name": "Openbands",
-  "description": "Private. Anonymous. Verified. The social network where employees can finally connect authentically without corporate oversight.",
-  "homepage_url": "https://miniapp.openbands.xyz",
-  "icon": "https://miniapp.openbands.xyz/Openbands.png",
-  "splash_image": "https://miniapp.openbands.xyz/splash.jpeg",
-  "categories": ["social"],
-  "requested_capabilities": [],
   "accountAssociation": {
     "header": "eyJmaWQiOjExODIzNDAsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHhkQTliZDAzRTgxMEVlYjUxNzkxQ0ViQTJCNDYyM0Q2MTIwRTBkMGRGIn0",
     "payload": "eyJkb21haW4iOiJtaW5pYXBwLm9wZW5iYW5kcy54eXoifQ",
     "signature": "MHg0ZjJlNjAzMjU5NzUyNzZjYmQ0NmU4YzNhNTU1MzlhNjdiY2I1OTQ0NzIxOWRmZGJjMjU2MTM4MjVhZTczMDgxMDY4ZTNiODZlYjU0MjM3ZjI5ODdhNWY2MjhlZWM3OGFmZGVjMjcyM2FkNzAxZjhmY2RmMzNhYTgyMjM2OWQxZTFj"
+  },
+  "frame": {
+    "version": "1",
+    "name": "Openbands",
+    "iconUrl": "https://miniapp.openbands.xyz/Openbands.png",
+    "splashImageUrl": "https://miniapp.openbands.xyz/splash.jpeg",
+    "homeUrl": "https://miniapp.openbands.xyz",
+    "primaryCategory": "social",
+    "noindex": true
   }
 }
+
+
