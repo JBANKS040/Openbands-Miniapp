@@ -39,42 +39,47 @@ export function SignInPanel({ provider, signer }: { provider: any; signer: any }
       console.log(`decoded: ${JSON.stringify(decoded, null, 2)}`);
       console.log(`User email: ${email}`);
 
+      // @dev - Generate a zkJWT proof
+      const { proof, publicInputs } = await generateZkJwtProof(decoded.email, resp.credential);
+
+      // @dev - Log (NOTE: The data type of a given proof and publicInputs are "object". Hence, the ${} method can not be used in the console.log())
+      console.log(`Generated zkJWT proof:`, proof);
+      console.log(`Generated zkJWT public inputs:`, publicInputs);
+      //console.log(`Generated zkJWT proof: ${proof}`);
+      //console.log(`Generated zkJWT public inputs: ${JSON.stringify(publicInputs, null, 2)}`);
+
+      // @dev - Convert public inputs to String type
+      const domainFromZkJwtCircuit = new TextDecoder().decode(new Uint8Array(publicInputs)).replace(/\0.*$/g, "");
+      console.log(`domain (from public inputs-emitted via the zkJWT circuit): ${domainFromZkJwtCircuit}`); // @dev - i.e. "example-company.com"
+
+      // @dev - Smart contract interactions
+      console.log(`signer (in the SignInPanel):`, signer); // @dev - The data type of "signer" is an "object" type.
+
+      const { isValidProofViaHonkVerifier } = await verifyViaHonkVerifier(signer, proof, publicInputs);
+      console.log(`Is a proof valid via the HonkVerifier?: ${isValidProofViaHonkVerifier}`);  // @dev - [Error]: PublicInputsLengthWrong()
+
+      const { isValidProof } = await verifyZkJwtProof(signer, proof, publicInputs);
+      console.log(`Is a proof valid via the ZkJwtProofVerifier?: ${isValidProof}`);
+
+      // @dev - Prepare separated public inputs for the smart contract
+      const nullifierFromZkJwtCircuit = publicInputs[publicInputs.length - 1]; // @dev - The nullifier is the last of the public inputs
+      console.log(`nullifier (from zkJWT circuit): ${nullifierFromZkJwtCircuit}`);
+
       // @dev - Retrieve a nullifierHash, which is stored on-chain and is associated with a given wallet address
-      const { nullifierHash } = await getNullifierByWalletAddress(signer);
-      console.log(`nullifierHash: ${nullifierHash}`);
+      const { nullifierFromOnChain } = await getNullifierByWalletAddress(signer);
+      console.log(`nullifier (from on-chain): ${nullifierFromOnChain}`);
 
-      // @dev - If there is no nullifierHash, which is stored on-chain and is associated with a given wallet address, it will be recorded on-chain (BASE).
-      if (nullifierHash === "") {
-        // @dev - Generate a zkJWT proof
-        const { proof, publicInputs } = await generateZkJwtProof(decoded.email, resp.credential);
+      const publicInputsFromOnChain = await getPublicInputsOfZkJwtProof(signer, nullifierFromZkJwtCircuit);
+      console.log(`publicInputs (from on-chain): ${JSON.stringify(publicInputsFromOnChain, null, 2)}`);
+      const _domainFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[0];
+      const _nullifierFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[1];
 
-        // @dev - Log (NOTE: The data type of a given proof and publicInputs are "object". Hence, the ${} method can not be used in the console.log())
-        console.log(`Generated zkJWT proof:`, proof);
-        console.log(`Generated zkJWT public inputs:`, publicInputs);
-        //console.log(`Generated zkJWT proof: ${proof}`);
-        //console.log(`Generated zkJWT public inputs: ${JSON.stringify(publicInputs, null, 2)}`);
-
-        // @dev - Convert public inputs to String type
-        const domainFromPublicInputs = new TextDecoder().decode(new Uint8Array(publicInputs)).replace(/\0.*$/g, "");
-        console.log(`domain (from public inputs): ${domainFromPublicInputs}`); // @dev - i.e. "example-company.com"
-
-        // @dev - Smart contract interactions
-        console.log(`signer (in the SignInPanel):`, signer); // @dev - The data type of "signer" is an "object" type.
-
-        const { isValidProofViaHonkVerifier } = await verifyViaHonkVerifier(signer, proof, publicInputs);
-        console.log(`Is a proof valid via the HonkVerifier?: ${isValidProofViaHonkVerifier}`);  // @dev - [Error]: PublicInputsLengthWrong()
-
-        const { isValidProof } = await verifyZkJwtProof(signer, proof, publicInputs);
-        console.log(`Is a proof valid via the ZkJwtProofVerifier?: ${isValidProof}`);
-
-        // @dev - Prepare separated public inputs for the smart contract
-        const nullifier = publicInputs[publicInputs.length - 1]; // @dev - The nullifier is the last of the public inputs
-        console.log(`nullifier: ${nullifier}`);
-
+      // @dev - If there is no nullifierFromOnChain, which is stored on-chain and is associated with a given wallet address, it will be recorded on-chain (BASE).
+      if (_nullifierFromOnChain === "") {
         const separatedPublicInputs = {
-          domain: domainFromPublicInputs,
+          domain: domainFromZkJwtCircuit,
           //domain: decoded.email.split('@')[1], // Extract domain from email
-          nullifierHash: nullifier,
+          nullifierHash: nullifierFromZkJwtCircuit,
           createdAt: new Date().toISOString() // Current timestamp
         };
 
@@ -85,18 +90,14 @@ export function SignInPanel({ provider, signer }: { provider: any; signer: any }
           console.error('Error to record public inputs on-chain (BASE):', error);
         }
 
-        const publicInputsFromOnChain = await getPublicInputsOfZkJwtProof(signer, nullifierHash);
-        console.log(`publicInputs (from on-chain): ${JSON.stringify(publicInputsFromOnChain, null, 2)}`);
-
         // We'll discard the email/token for privacy and just sign in anonymously
-        signIn();        
-      } else {
-        const publicInputsFromOnChain = await getPublicInputsOfZkJwtProof(signer, nullifierHash);
-        console.log(`publicInputs (from on-chain): ${JSON.stringify(publicInputsFromOnChain, null, 2)}`);
-
+        signIn();
+      } else if (_nullifierFromOnChain === nullifierFromZkJwtCircuit && _domainFromOnChain === domainFromZkJwtCircuit) {
         // @dev - If there is already nullifierHash, which is stored on-chain and is associated with a given wallet address, the user can straightly sign-in without generating new zkJWT proof and store its public inputs on-chain. 
         // We'll discard the email/token for privacy and just sign in anonymously
         signIn();
+      } else {
+        return;
       }
 
       // // We'll discard the email/token for privacy and just sign in anonymously
