@@ -58,12 +58,12 @@ export async function recordPublicInputsOfZkJwtProof(
 /**
  * @notice - ZkJwtProofManager.sol# getPublicInputsOfZkJwtProof()
  */
-export async function getPublicInputsOfZkJwtProof(signer: any, nullifierHash: string): Promise<{ publicInputs: any }> {
+export async function getPublicInputsOfZkJwtProof(signer: any, nullifierHash: string): Promise<{ publicInputsFromOnChain: any }> {
   // @dev - Set the ZkJwtProofManager contract instance
   const { zkJwtProofManager } = await setContractInstance(signer);
 
-  const publicInputs = await zkJwtProofManager.getPublicInputsOfZkJwtProof(nullifierHash);
-  return { publicInputs };
+  const publicInputsFromOnChain = await zkJwtProofManager.getPublicInputsOfZkJwtProof(nullifierHash);
+  return { publicInputsFromOnChain };
 }
 
 /**
