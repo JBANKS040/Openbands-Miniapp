@@ -6,6 +6,7 @@ import { useApp } from "@/context/AppContext";
 import { generateZkJwtProof } from "@/lib/circuits/zk-jwt-proof-generation";
 import type { UserInfo, GoogleJwtPayload, JWK } from "@/lib/types";
 import { extractDomain } from "@/lib/google-jwt/google-jwt";
+import { hashEmail } from "@/lib/blockchains/evm/utils/convert-string-to-poseidon-hash";
 
 // @dev - Blockchain related imports
 //import { connectToEvmWallet } from "../lib/blockchains/evm/connect-wallets/connect-to-evm-wallet";
@@ -39,6 +40,10 @@ export function SignInPanel({ provider, signer }: { provider: any; signer: any }
       // @dev - Log (NOTE: This should be removed later)
       console.log(`decoded: ${JSON.stringify(decoded, null, 2)}`);
       console.log(`User email: ${email}`);
+
+      // @dev - [TODO]: Hash an email
+      const hashedEmail = hashEmail(email);
+      console.log('a hashed email:', hashedEmail);
 
       // @dev - Retrieve a nullifierHash, which is stored on-chain and is associated with a given wallet address
       const { nullifierFromOnChainByWalletAddress } = await getNullifierByWalletAddress(signer);
