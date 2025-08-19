@@ -26,7 +26,7 @@ export default function Home() {
   const { posts, loading, error, refetch } = usePosts(sort);
 
   // MiniKit frame lifecycle: signal ready once mounted
-  const { setFrameReady, isFrameReady } = useMiniKit();
+  const { setFrameReady, isFrameReady } = useMiniKit(); // @dev - [NOTE]: When the local development, this line, which includes the "setFrameReady", "isFrameReady", "#useMiniKit" should be commented out to avoid an error. (For this line and the lines in the useEffect())
 
   useEffect(() => {
     if (!isFrameReady) {
