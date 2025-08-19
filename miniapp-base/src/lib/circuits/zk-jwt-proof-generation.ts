@@ -4,16 +4,21 @@ import { getJwtHeader, extractDomain, getGooglePublicKey } from "@/lib/google-jw
 // @dev - Noir
 import { generateInputs } from "noir-jwt";
 import { InputMap, type CompiledCircuit } from "@noir-lang/noir_js";
-import { initProver, initVerifier } from "./lazy-modules";
+import { initProver } from "./lazy-modules";
 
 const MAX_DOMAIN_LENGTH = 64;
+
+export interface ZkJwtProofResult {
+  proof: Uint8Array;
+  publicInputs: string[];
+}
 
 /**
  * @notice - Generates a zero-knowledge proof for a JWT
  * @param email 
  * @param idToken 
  */
-export async function generateZkJwtProof(email: string, idToken: string): Promise<{ proof: any, publicInputs: any }> {
+export async function generateZkJwtProof(email: string, idToken: string): Promise<ZkJwtProofResult> {
   const domain = extractDomain(email);
   //const domain = email.split('@')[1];
 
@@ -36,7 +41,7 @@ async function _generateZkJwtProof(
   idToken: string,
   jwtPubkey: JsonWebKey,
   domain: string,
-): Promise<{ proof: any; publicInputs: any }> {
+): Promise<ZkJwtProofResult> {
   if (!idToken || !jwtPubkey) {
     throw new Error(
       "[JWT Circuit] Proof generation failed: idToken and jwtPubkey are required"

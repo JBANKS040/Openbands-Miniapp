@@ -65,9 +65,9 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
         //console.log(`Generated zkJWT proof: ${proof}`);
         //console.log(`Generated zkJWT public inputs: ${JSON.stringify(publicInputs, null, 2)}`);
 
-        // @dev - Convert public inputs to String type
-        const domainFromZkJwtCircuit = new TextDecoder().decode(new Uint8Array(publicInputs)).replace(/\0.*$/g, "");
-        console.log(`domain (from public inputs-emitted via the zkJWT circuit): ${domainFromZkJwtCircuit}`); // @dev - i.e. "example-company.com"
+        // @dev - Extract domain from email (instead of trying to decode from public inputs)
+        const domainFromZkJwtCircuit = decoded.email.split('@')[1];
+        console.log(`domain (from email): ${domainFromZkJwtCircuit}`); // @dev - i.e. "example-company.com"
 
         // @dev - Smart contract interactions
         console.log(`signer (in the SignInPanel):`, signer); // @dev - The data type of "signer" is an "object" type.
