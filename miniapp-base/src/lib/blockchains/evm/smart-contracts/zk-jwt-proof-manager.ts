@@ -1,4 +1,4 @@
-import { ethers, Contract } from "ethers";
+import { Contract, JsonRpcSigner, TransactionResponse, TransactionReceipt } from "ethers";
 
 // @dev - Blockchain related imports
 import artifactOfZkJwtProofManager from './artifacts/ZkJwtProofManager.sol/ZkJwtProofManager.json';
@@ -6,10 +6,10 @@ import artifactOfZkJwtProofManager from './artifacts/ZkJwtProofManager.sol/ZkJwt
 /**
  * @notice - Set the ZkJwtProofManager contract instance
  */
-export async function setContractInstance(signer: any): Promise<{ zkJwtProofManager: Contract }> {
+export async function setContractInstance(signer: JsonRpcSigner): Promise<{ zkJwtProofManager: Contract }> {
   // @dev - Create the ZkJwtProofManager contract instance
   const zkJwtProofManagerContractAddress: string = process.env.NEXT_PUBLIC_ZK_JWT_PROOF_MANAGER_ON_BASE_TESTNET || "";  
-  const zkJwtProofManagerAbi: Array<any> = artifactOfZkJwtProofManager.abi;
+  const zkJwtProofManagerAbi = artifactOfZkJwtProofManager.abi;
   const zkJwtProofManager = new Contract(zkJwtProofManagerContractAddress, zkJwtProofManagerAbi, signer);
   console.log(`zkJwtProofManagerContractAddress: ${zkJwtProofManagerContractAddress}`);
   return { zkJwtProofManager };
@@ -19,16 +19,17 @@ export async function setContractInstance(signer: any): Promise<{ zkJwtProofMana
  * @notice - ZkJwtProofManager.sol# recordPublicInputsOfZkJwtProof()
  */
 export async function recordPublicInputsOfZkJwtProof(
-  signer: any,
-  proof: Uint8Array<any>,
-  publicInputs: Array<any>,
+  signer: JsonRpcSigner,
+  proof: Uint8Array,
+  publicInputs: Array<string | number>,
   separatedPublicInputs: {
     domain: string;
     nullifierHash: string;
     emailHash: string;
+    walletAddress: string;
     createdAt: string;
   }
-): Promise<{ txReceipt: any }> {
+): Promise<{ txReceipt: TransactionReceipt | null }> {
   // @dev - Set the ZkJwtProofManager contract instance
   const { zkJwtProofManager } = await setContractInstance(signer);
 
@@ -37,8 +38,8 @@ export async function recordPublicInputsOfZkJwtProof(
   console.log(`proofHex: ${proofHex}`);
   
   // @dev - Call the recordPublicInputsOfZkJwtProof() function in the ZkJwtProofManager.sol
-  let tx: any;
-  let txReceipt: any;
+  let tx: TransactionResponse;
+  let txReceipt: TransactionReceipt | null = null;
   try {
     tx = await zkJwtProofManager.recordPublicInputsOfZkJwtProof(
       proofHex, 
@@ -59,7 +60,7 @@ export async function recordPublicInputsOfZkJwtProof(
 /**
  * @notice - ZkJwtProofManager.sol# getPublicInputsOfZkJwtProof()
  */
-export async function getPublicInputsOfZkJwtProof(signer: any, nullifierHash: string): Promise<{ publicInputsFromOnChain: any }> {
+export async function getPublicInputsOfZkJwtProof(signer: JsonRpcSigner, nullifierHash: string): Promise<{ publicInputsFromOnChain: string[] }> {
   // @dev - Set the ZkJwtProofManager contract instance
   const { zkJwtProofManager } = await setContractInstance(signer);
 
@@ -70,7 +71,7 @@ export async function getPublicInputsOfZkJwtProof(signer: any, nullifierHash: st
 /**
  * @notice - ZkJwtProofManager.sol# getNullifierByWalletAddress()
  */
-export async function getNullifiersByDomainAndEmailHashAndWalletAddresses(signer: any, domain: string, emailHash: string): Promise<{ nullifierFromOnChainByDomainAndEmailHashAndWalletAddress: string }> {
+export async function getNullifiersByDomainAndEmailHashAndWalletAddresses(signer: JsonRpcSigner, domain: string, emailHash: string): Promise<{ nullifierFromOnChainByDomainAndEmailHashAndWalletAddress: string }> {
   // @dev - Set the ZkJwtProofManager contract instance
   const { zkJwtProofManager } = await setContractInstance(signer);
 
