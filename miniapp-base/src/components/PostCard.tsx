@@ -15,7 +15,7 @@ export function PostCard({ post }: PostCardProps) {
   const [showComments, setShowComments] = useState(false);
   const { isAuthenticated, anonymousId, companyDomain } = useApp();
   const { comments } = useComments(post.id);
-  const openUrl = useOpenUrl();  // @dev - [NOTE]: Temporarily comment out for local development
+  const openUrl = useOpenUrl();  // @dev - [NOTE]: When the local development, this line should be commented out to avoid an error.
 
   const handleLike = async () => {
     if (!isAuthenticated || !anonymousId) return;
