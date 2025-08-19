@@ -25,6 +25,10 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
   const [userInfo, setUserInfo] = useState<UserInfo>({ email: "", idToken: "" });
   const [error, setError] = useState<string | null>(null);
   
+  // Check if we have a real Google Client ID (not the dummy fallback)
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  const hasValidGoogleClientId = googleClientId && googleClientId !== "dummy-client-id-for-build";
+  
   const onSuccess = async(resp: CredentialResponse) => {
     if (!resp.credential) return;
     
@@ -164,13 +168,21 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
           </div>
 
           <div className="flex justify-center">
-            <GoogleLogin
-              onSuccess={onSuccess}
-              onError={() => console.error('Login Failed')}
-              useOneTap
-              theme="outline"
-              size="large"
-            />
+            {hasValidGoogleClientId ? (
+              <GoogleLogin
+                onSuccess={onSuccess}
+                onError={() => console.error('Login Failed')}
+                useOneTap
+                theme="outline"
+                size="large"
+              />
+            ) : (
+              <div className="text-center p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-sm text-yellow-800">
+                  Google OAuth is not configured. Please set NEXT_PUBLIC_GOOGLE_CLIENT_ID environment variable.
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="mt-6 p-3 bg-blue-50 rounded-lg">
