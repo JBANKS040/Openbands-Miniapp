@@ -26,23 +26,20 @@ export default function Home() {
   const { posts, loading, error, refetch } = usePosts(sort);
 
   // MiniKit frame lifecycle: signal ready once mounted
-  //const { setFrameReady, isFrameReady } = useMiniKit();
-
-  // useEffect(() => {
-  //     if (!isFrameReady) {
-  //       setFrameReady();
-  //     }
-  //   }, [isFrameReady, setFrameReady]);
+  const { setFrameReady, isFrameReady } = useMiniKit();
 
   useEffect(() => {
-    // fetchSubmissions();
+    if (!isFrameReady) {
+      setFrameReady();
+    }
+
     async function init() {
       const { provider, signer } = await connectToEvmWallet(); // @dev - Connect to EVM wallet (i.e. MetaMask) on page load
       setProvider(provider);
       setSigner(signer);
     }
     init();
-  }, []);
+  }, [isFrameReady, setFrameReady]);
 
   return (
     <div className="min-h-screen bg-gray-50">
