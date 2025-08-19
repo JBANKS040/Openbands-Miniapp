@@ -101,7 +101,7 @@ export function SignInPanel({ provider, signer }: { provider: any; signer: any }
         }
 
         // We'll discard the email/token for privacy and just sign in anonymously
-        signIn();
+        signIn(domainFromZkJwtCircuit);
       } else if (nullifierFromOnChainByDomainAndEmailHashAndWalletAddress !== "0x0000000000000000000000000000000000000000000000000000000000000000") {
         // @dev - Get a domain from JWT and wallet address from a connected wallet
         //const domainFromGoogleJwt = extractDomain(decoded.email);
@@ -123,7 +123,7 @@ export function SignInPanel({ provider, signer }: { provider: any; signer: any }
           _walletAddressFromOnChain === walletAddressFromConnectedWallet
         ) {
           // We'll discard the email/token for privacy and just sign in anonymously
-          signIn();
+          signIn(domainFromGoogleJwt);
         }
       } else {
         return;
