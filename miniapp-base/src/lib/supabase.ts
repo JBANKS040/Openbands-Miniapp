@@ -32,11 +32,11 @@ export interface DbLike {
 }
 
 // Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-// Create supabase client only if environment variables are available
-export const supabase = supabaseUrl && supabaseAnonKey 
+// Create supabase client only if environment variables are available and valid
+export const supabase = (supabaseUrl && supabaseUrl.trim() && supabaseAnonKey && supabaseAnonKey.trim())
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null;
 
