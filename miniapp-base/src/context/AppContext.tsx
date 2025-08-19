@@ -8,7 +8,7 @@ interface AppState {
 }
 
 interface AppContextValue extends AppState {
-  signIn: () => void;
+  signIn: (domain: string) => void;
   signOut: () => void;
 }
 

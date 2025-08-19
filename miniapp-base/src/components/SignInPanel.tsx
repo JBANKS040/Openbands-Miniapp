@@ -7,6 +7,7 @@ import { generateZkJwtProof } from "@/lib/circuits/zk-jwt-proof-generation";
 import type { UserInfo, GoogleJwtPayload, JWK } from "@/lib/types";
 import { extractDomain } from "@/lib/google-jwt/google-jwt";
 import { hashEmail } from "@/lib/blockchains/evm/utils/convert-string-to-poseidon-hash";
+import { BrowserProvider, JsonRpcSigner } from "ethers";
 
 // @dev - Blockchain related imports
 //import { connectToEvmWallet } from "../lib/blockchains/evm/connect-wallets/connect-to-evm-wallet";
@@ -18,7 +19,7 @@ import {
   getNullifiersByDomainAndEmailHashAndWalletAddresses
 } from "../lib/blockchains/evm/smart-contracts/zk-jwt-proof-manager";
 
-export function SignInPanel({ provider, signer }: { provider: any; signer: any }) {
+export function SignInPanel({ provider, signer }: { provider: BrowserProvider; signer: JsonRpcSigner }) {
   const { signIn } = useApp();
 
   const [userInfo, setUserInfo] = useState<UserInfo>({ email: "", idToken: "" });
