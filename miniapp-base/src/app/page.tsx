@@ -12,6 +12,7 @@ import Link from 'next/link';
 
 // @dev - Blockchain related imports
 import { connectToEvmWallet } from '../lib/blockchains/evm/connect-wallets/connect-to-evm-wallet';
+import { BrowserProvider, JsonRpcSigner } from 'ethers';
 
 export default function Home() {
   const { isAuthenticated, anonymousId, companyDomain, signOut } = useApp();
@@ -19,8 +20,8 @@ export default function Home() {
   const [showSignIn, setShowSignIn] = useState(false);
 
   // @dev - Fetch from an EVM wallet
-  const [provider, setProvider] = useState(null);
-  const [signer, setSigner] = useState(null);
+  const [provider, setProvider] = useState<BrowserProvider | null>(null);
+  const [signer, setSigner] = useState<JsonRpcSigner | null>(null);
 
   // Fetch posts from Supabase
   const { posts, loading, error } = usePosts(sort);
@@ -181,7 +182,13 @@ export default function Home() {
                   </svg>
                 </button>
               </div>
-              <SignInPanel provider={provider} signer={signer} />
+              {provider && signer ? (
+                <SignInPanel provider={provider} signer={signer} />
+              ) : (
+                <div className="flex items-center justify-center p-4">
+                  <div className="text-gray-500">Loading wallet connection...</div>
+                </div>
+              )}
             </div>
           </div>
         </div>
