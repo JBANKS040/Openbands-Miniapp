@@ -25,9 +25,9 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
   const [userInfo, setUserInfo] = useState<UserInfo>({ email: "", idToken: "" });
   const [error, setError] = useState<string | null>(null);
   
-  // Check if we have a real Google Client ID (not the dummy fallback)
+  // Check if we have a real Google Client ID
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-  const hasValidGoogleClientId = googleClientId && googleClientId !== "dummy-client-id-for-build";
+  const hasValidGoogleClientId = googleClientId && googleClientId !== "";
   
   const onSuccess = async(resp: CredentialResponse) => {
     if (!resp.credential) return;
