@@ -28,3 +28,17 @@ export interface GoogleJwtPayload {
   email: string;
   kid: string;
 }
+
+export interface JWK {
+  kty: string;
+  alg: string;
+  kid: string;
+  n: string;
+  e: string;
+  use: string;
+}
+
+export interface UserInfo {
+  email: string;
+  idToken: string;
+}

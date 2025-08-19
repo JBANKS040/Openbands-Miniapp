@@ -8,7 +8,7 @@ interface AppState {
 }
 
 interface AppContextValue extends AppState {
-  signIn: () => void;
+  signIn: (domain: string) => void;
   signOut: () => void;
 }
 
@@ -21,14 +21,14 @@ export function AppProvider({ children }: PropsWithChildren) {
     companyDomain: null,
   });
 
-  const signIn = useCallback(() => {
+  const signIn = useCallback((domain: string) => {
     // Generate a random 6-character anonymous ID
     const anonymousId = Math.random().toString(36).substring(2, 8).toUpperCase();
     
     // For now, we'll use a placeholder company domain
     // Later this will be replaced with ZK proof verification
-    const companyDomain = 'example.com';
-    
+    const companyDomain = domain;
+
     setState({
       isAuthenticated: true,
       anonymousId,

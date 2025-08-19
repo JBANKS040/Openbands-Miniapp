@@ -9,21 +9,36 @@ import { PostCard } from '@/components/PostCard';
 import { SortToggle } from '@/components/SortToggle';
 import Link from 'next/link';
 
+// @dev - Blockchain related imports
+import { connectToEvmWallet } from '../lib/blockchains/evm/connect-wallets/connect-to-evm-wallet';
+import { BrowserProvider, JsonRpcSigner } from 'ethers';
+
 export default function Home() {
   const { isAuthenticated, anonymousId, companyDomain, signOut } = useApp();
   const [sort, setSort] = useState<'new' | 'hot'>('new');
   const [showSignIn, setShowSignIn] = useState(false);
-  
+
+  // @dev - Fetch from an EVM wallet
+  const [provider, setProvider] = useState<BrowserProvider | null>(null);
+  const [signer, setSigner] = useState<JsonRpcSigner | null>(null);
+
   // Fetch posts from Supabase
   const { posts, loading, error, refetch } = usePosts(sort);
 
   // MiniKit frame lifecycle: signal ready once mounted
-  const { setFrameReady, isFrameReady } = useMiniKit();
+  const { setFrameReady, isFrameReady } = useMiniKit(); // @dev - [NOTE]: When the local development, this line, which includes the "setFrameReady", "isFrameReady", "#useMiniKit" should be commented out to avoid an error. (For this line and the lines in the useEffect())
 
   useEffect(() => {
     if (!isFrameReady) {
       setFrameReady();
     }
+
+    async function init() {
+      const { provider, signer } = await connectToEvmWallet(); // @dev - Connect to EVM wallet (i.e. MetaMask) on page load
+      setProvider(provider);
+      setSigner(signer);
+    }
+    init();
   }, [isFrameReady, setFrameReady]);
 
   return (
@@ -163,7 +178,13 @@ export default function Home() {
                   </svg>
                 </button>
               </div>
-              <SignInPanel />
+              {provider && signer ? (
+                <SignInPanel provider={provider} signer={signer} />
+              ) : (
+                <div className="flex items-center justify-center p-4">
+                  <div className="text-gray-500">Loading wallet connection...</div>
+                </div>
+              )}
             </div>
           </div>
         </div>

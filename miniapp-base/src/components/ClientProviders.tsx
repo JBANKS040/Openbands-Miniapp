@@ -6,34 +6,19 @@ import { base } from 'wagmi/chains';
 import { AppProvider } from '@/context/AppContext';
 
 export default function ClientProviders({ children }: PropsWithChildren) {
-  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
+  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "dummy-client-id-for-build";
   const apiKey =
     process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY ||
     process.env.NEXT_PUBLIC_CDP_CLIENT_API_KEY ||
-    "";
+    "dummy-key-for-build";
 
-  if (apiKey) {
-    return (
-      <AppProvider>
-        <MiniKitProvider apiKey={apiKey} chain={base}>
-          {clientId ? (
-            <GoogleOAuthProvider clientId={clientId}>{children}</GoogleOAuthProvider>
-          ) : (
-            <>{children}</>
-          )}
-        </MiniKitProvider>
-      </AppProvider>
-    );
-  }
-
-  // Fallback to just children if environment variables aren't set
   return (
     <AppProvider>
-      {clientId ? (
-        <GoogleOAuthProvider clientId={clientId}>{children}</GoogleOAuthProvider>
-      ) : (
-        <>{children}</>
-      )}
+      <MiniKitProvider apiKey={apiKey} chain={base}>
+        <GoogleOAuthProvider clientId={clientId}>
+          {children}
+        </GoogleOAuthProvider>
+      </MiniKitProvider>
     </AppProvider>
   );
 }

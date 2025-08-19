@@ -2,6 +2,30 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+### 1. Environment Setup (for the Local Development)
+
+Copy the environment variables file and configure your settings:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and fill in the required values:
+
+- `NEXT_PUBLIC_GOOGLE_CLIENT_ID`: Your Google OAuth Client ID
+- `NEXT_PUBLIC_ZK_JWT_PROOF_VERIFIER_ON_BASE_TESTNET`: Address of deployed ZkJwtProofVerifier contract
+- `NEXT_PUBLIC_ZK_JWT_PROOF_MANAGER_ON_BASE_TESTNET`: Address of deployed ZkJwtProofManager contract
+- `NEXT_PUBLIC_HONK_VERIFIER_ON_BASE_TESTNET`: Address of deployed HonkVerifier contract
+
+<br>
+
+**NOTE:**
+- For the production/staging environment, the environment variables above should be added to the environment variables file on a frontend hosting server (i.e. Vercel).
+
+<br>
+
+### 2. Start Development Server
+
 First, run the development server:
 
 ```bash

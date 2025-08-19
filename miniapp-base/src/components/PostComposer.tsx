@@ -23,6 +23,17 @@ export function PostComposer({ onPosted }: PostComposerProps) {
       onPosted?.();
     } catch (error) {
       console.error('Error creating post:', error);
+      
+      // Provide user feedback for common errors
+      if (error instanceof Error) {
+        if (error.message.includes('supabase') || error.message.includes('Supabase')) {
+          alert('Database connection failed. Please check your Supabase configuration.');
+        } else if (error.message.includes('network') || error.message.includes('fetch')) {
+          alert('Network error. Please check your connection and try again.');
+        } else {
+          alert('Failed to create post. Please try again.');
+        }
+      }
     } finally {
       setIsLoading(false);
     }

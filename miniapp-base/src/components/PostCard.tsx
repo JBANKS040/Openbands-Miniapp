@@ -18,22 +18,26 @@ export function PostCard({ post, onLiked }: PostCardProps) {
   const [liked, setLiked] = useState<boolean>(false);
   const { isAuthenticated, anonymousId, companyDomain } = useApp();
   const { comments, refetch } = useComments(post.id);
-  const openUrl = useOpenUrl();
+  const openUrl = useOpenUrl();  // @dev - [NOTE]: When the local development, this line should be commented out to avoid an error.
 
   const canLike = isAuthenticated && Boolean(anonymousId);
 
   // determine if the current user already liked this post (once authenticated)
   useEffect(() => {
     const check = async () => {
-      if (!isAuthenticated || !anonymousId) return;
-      const { data } = await supabase
-        .from('likes')
-        .select('id')
-        .eq('target_type', 'post')
-        .eq('target_id', post.id)
-        .eq('anonymous_id', anonymousId)
-        .maybeSingle();
-      setLiked(Boolean(data));
+      if (!isAuthenticated || !anonymousId || !supabase) return;
+      try {
+        const { data } = await supabase
+          .from('likes')
+          .select('id')
+          .eq('target_type', 'post')
+          .eq('target_id', post.id)
+          .eq('anonymous_id', anonymousId)
+          .maybeSingle();
+        setLiked(Boolean(data));
+      } catch (error) {
+        console.error('Error checking like status:', error);
+      }
     };
     void check();
   }, [isAuthenticated, anonymousId, post.id]);

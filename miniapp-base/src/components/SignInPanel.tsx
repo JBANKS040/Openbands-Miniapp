@@ -1,24 +1,144 @@
 "use client";
+import React, { useState } from "react";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import { useApp } from "@/context/AppContext";
-import type { GoogleJwtPayload } from "@/lib/types";
+import { generateZkJwtProof } from "@/lib/circuits/zk-jwt-proof-generation";
+import type { UserInfo, GoogleJwtPayload, JWK } from "@/lib/types";
+import { extractDomain } from "@/lib/google-jwt/google-jwt";
+import { hashEmail } from "@/lib/blockchains/evm/utils/convert-string-to-poseidon-hash";
+import { BrowserProvider, JsonRpcSigner } from "ethers";
 
-export function SignInPanel() {
+// @dev - Blockchain related imports
+//import { connectToEvmWallet } from "../lib/blockchains/evm/connect-wallets/connect-to-evm-wallet";
+import { verifyViaHonkVerifier } from "../lib/blockchains/evm/smart-contracts/honk-verifier";
+import { verifyZkJwtProof } from "../lib/blockchains/evm/smart-contracts/zk-jwt-proof-verifier";
+import { 
+  recordPublicInputsOfZkJwtProof,
+  getPublicInputsOfZkJwtProof, 
+  getNullifiersByDomainAndEmailHashAndWalletAddresses
+} from "../lib/blockchains/evm/smart-contracts/zk-jwt-proof-manager";
+
+export function SignInPanel({ provider, signer }: { provider: BrowserProvider; signer: JsonRpcSigner }) {
   const { signIn } = useApp();
 
-  const onSuccess = (resp: CredentialResponse) => {
+  const [userInfo, setUserInfo] = useState<UserInfo>({ email: "", idToken: "" });
+  const [error, setError] = useState<string | null>(null);
+  
+  // Check if we have a real Google Client ID (not the dummy fallback)
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  const hasValidGoogleClientId = googleClientId && googleClientId !== "dummy-client-id-for-build";
+  
+  const onSuccess = async(resp: CredentialResponse) => {
     if (!resp.credential) return;
     
     try {
       const decoded = jwtDecode<GoogleJwtPayload>(resp.credential);
       const email = decoded.email;
       if (!email) return;
-      
-      // We'll discard the email/token for privacy and just sign in anonymously
-      signIn();
+
+      setUserInfo({
+        email: decoded.email,
+        idToken: resp.credential
+      });
+
+      // @dev - Log (NOTE: This should be removed later)
+      console.log(`decoded: ${JSON.stringify(decoded, null, 2)}`);
+      console.log(`User email: ${email}`);
+
+      // @dev - Extract a domain from an email
+      const domainFromGoogleJwt = extractDomain(email);
+      console.log(`Extracted domain (from JWT): ${domainFromGoogleJwt}`);
+
+      // @dev - Hash an email
+      const hashedEmailFromGoogleJwt = hashEmail(email);
+      console.log('a hashed email (from JWT):', hashedEmailFromGoogleJwt);
+
+      // @dev - Retrieve a nullifierHash, which is stored on-chain and is associated with a given wallet address
+      const { nullifierFromOnChainByDomainAndEmailHashAndWalletAddress } = await getNullifiersByDomainAndEmailHashAndWalletAddresses(signer, domainFromGoogleJwt, hashedEmailFromGoogleJwt);
+      console.log(`nullifier (from on-chain) by a domain, emailHash, wallet address: ${nullifierFromOnChainByDomainAndEmailHashAndWalletAddress}`);
+
+      // @dev - If there is no nullifierFromOnChain, which is stored on-chain and is associated with a given wallet address, it will be recorded on-chain (BASE).
+      if (nullifierFromOnChainByDomainAndEmailHashAndWalletAddress === "0x0000000000000000000000000000000000000000000000000000000000000000") {
+        // @dev - Generate a zkJWT proof
+        const { proof, publicInputs } = await generateZkJwtProof(decoded.email, resp.credential);
+
+        // @dev - Log (NOTE: The data type of a given proof and publicInputs are "object". Hence, the ${} method can not be used in the console.log())
+        console.log(`Generated zkJWT proof:`, proof);
+        console.log(`Generated zkJWT public inputs:`, publicInputs);
+        //console.log(`Generated zkJWT proof: ${proof}`);
+        //console.log(`Generated zkJWT public inputs: ${JSON.stringify(publicInputs, null, 2)}`);
+
+        // @dev - Extract domain from email (instead of trying to decode from public inputs)
+        const domainFromZkJwtCircuit = decoded.email.split('@')[1];
+        console.log(`domain (from email): ${domainFromZkJwtCircuit}`); // @dev - i.e. "example-company.com"
+
+        // @dev - Smart contract interactions
+        console.log(`signer (in the SignInPanel):`, signer); // @dev - The data type of "signer" is an "object" type.
+
+        const { isValidProofViaHonkVerifier } = await verifyViaHonkVerifier(signer, proof, publicInputs);
+        console.log(`Is a proof valid via the HonkVerifier?: ${isValidProofViaHonkVerifier}`);  // @dev - [Error]: PublicInputsLengthWrong()
+
+        const { isValidProof } = await verifyZkJwtProof(signer, proof, publicInputs);
+        console.log(`Is a proof valid via the ZkJwtProofVerifier?: ${isValidProof}`);
+
+        // @dev - Prepare separated public inputs for the smart contract
+        const nullifierFromZkJwtCircuit = publicInputs[publicInputs.length - 1]; // @dev - The nullifier is the last of the public inputs
+        console.log(`nullifier (from zkJWT circuit): ${nullifierFromZkJwtCircuit}`);
+
+        const walletAddressFromConnectedWallet = signer.address;
+        console.log(`signer.getAddress(): ${walletAddressFromConnectedWallet}`);
+
+        const separatedPublicInputs = {
+          domain: domainFromZkJwtCircuit,
+          //domain: decoded.email.split('@')[1], // Extract domain from email
+          nullifierHash: nullifierFromZkJwtCircuit,
+          emailHash: hashedEmailFromGoogleJwt,
+          walletAddress: walletAddressFromConnectedWallet,
+          createdAt: new Date().toISOString() // Current timestamp
+        };
+
+        try {
+          const { txReceipt } = await recordPublicInputsOfZkJwtProof(signer, proof, publicInputs, separatedPublicInputs);
+          console.log(`txReceipt: ${JSON.stringify(txReceipt, null, 2)}`);
+        } catch (error) {
+          console.error('Error to record public inputs on-chain (BASE):', error);
+        }
+
+        // We'll discard the email/token for privacy and just sign in anonymously
+        signIn(domainFromZkJwtCircuit);
+      } else if (nullifierFromOnChainByDomainAndEmailHashAndWalletAddress !== "0x0000000000000000000000000000000000000000000000000000000000000000") {
+        // @dev - Get a domain from JWT and wallet address from a connected wallet
+        //const domainFromGoogleJwt = extractDomain(decoded.email);
+        const walletAddressFromConnectedWallet = signer.address;
+        console.log(`walletAddressFromConnectedWallet: ${walletAddressFromConnectedWallet}`);
+
+        // @dev - Get public inputs from on-chain
+        const publicInputsFromOnChain = await getPublicInputsOfZkJwtProof(signer, nullifierFromOnChainByDomainAndEmailHashAndWalletAddress);
+        console.log(`publicInputs (from on-chain): ${JSON.stringify(publicInputsFromOnChain, null, 2)}`);
+        const _domainFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[0];
+        const _nullifierFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[1];
+        const _hashedEmailFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[2];
+        const _walletAddressFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[3];
+
+        if (
+          _domainFromOnChain === domainFromGoogleJwt && 
+          _nullifierFromOnChain === nullifierFromOnChainByDomainAndEmailHashAndWalletAddress && 
+          _hashedEmailFromOnChain === hashedEmailFromGoogleJwt &&
+          _walletAddressFromOnChain === walletAddressFromConnectedWallet
+        ) {
+          // We'll discard the email/token for privacy and just sign in anonymously
+          signIn(domainFromGoogleJwt);
+        }
+      } else {
+        return;
+      }
+
+      // // We'll discard the email/token for privacy and just sign in anonymously
+      // signIn();
     } catch (err) {
       console.error('Error decoding token:', err);
+      setError('Failed to authenticate with Google');
     }
   };
 
@@ -48,13 +168,21 @@ export function SignInPanel() {
           </div>
 
           <div className="flex justify-center">
-            <GoogleLogin
-              onSuccess={onSuccess}
-              onError={() => console.error('Login Failed')}
-              useOneTap
-              theme="outline"
-              size="large"
-            />
+            {hasValidGoogleClientId ? (
+              <GoogleLogin
+                onSuccess={onSuccess}
+                onError={() => console.error('Login Failed')}
+                useOneTap
+                theme="outline"
+                size="large"
+              />
+            ) : (
+              <div className="text-center p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-sm text-yellow-800">
+                  Google OAuth is not configured. Please set NEXT_PUBLIC_GOOGLE_CLIENT_ID environment variable.
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="mt-6 p-3 bg-blue-50 rounded-lg">
