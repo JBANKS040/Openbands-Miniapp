@@ -3,7 +3,11 @@ import { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { createPost } from '@/lib/supabase';
 
-export function PostComposer() {
+interface PostComposerProps {
+  onPosted?: () => void;
+}
+
+export function PostComposer({ onPosted }: PostComposerProps) {
   const [content, setContent] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { isAuthenticated, anonymousId, companyDomain } = useApp();
@@ -16,7 +20,7 @@ export function PostComposer() {
     try {
       await createPost(content.trim(), anonymousId, companyDomain);
       setContent('');
-      // TODO: Trigger a refetch of posts
+      onPosted?.();
     } catch (error) {
       console.error('Error creating post:', error);
       

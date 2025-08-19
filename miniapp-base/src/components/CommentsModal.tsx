@@ -37,7 +37,7 @@ export function CommentsModal({ post, isOpen, onClose }: CommentsModalProps) {
     try {
       await createComment(post.id, newComment.trim(), anonymousId, companyDomain);
       setNewComment('');
-      refetch(); // Refresh comments after creating
+      await refetch({ silent: true }); // Refresh comments quietly
     } catch (error) {
       console.error('Error creating comment:', error);
     } finally {
@@ -50,7 +50,7 @@ export function CommentsModal({ post, isOpen, onClose }: CommentsModalProps) {
     
     try {
       await likeCommentSupabase(commentId, anonymousId, companyDomain);
-      refetch(); // Refresh comments after liking
+      await refetch({ silent: true }); // Refresh comments quietly
     } catch (error) {
       console.error('Error liking comment:', error);
     }
@@ -70,10 +70,10 @@ export function CommentsModal({ post, isOpen, onClose }: CommentsModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="fixed inset-0 bg-black bg-opacity-50" onClick={onClose} />
       
-      <div className="relative w-full max-w-md max-h-[90vh] bg-white rounded-t-lg shadow-xl flex flex-col">
+      <div className="relative w-full max-w-md max-h-[85vh] bg-white rounded-lg shadow-xl flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b">
           <h3 className="text-lg font-semibold text-gray-900">Comments</h3>
@@ -129,7 +129,7 @@ export function CommentsModal({ post, isOpen, onClose }: CommentsModalProps) {
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
                       <div className="text-sm font-medium text-gray-900">
-                        {comment.authorAnonymousId}
+                        Someone from {post.companyDomain || 'their company'}
                       </div>
                       <div className="text-xs text-gray-500">
                         {timeAgo(comment.createdAt)}
@@ -164,7 +164,7 @@ export function CommentsModal({ post, isOpen, onClose }: CommentsModalProps) {
 
         {/* Comment Input */}
         {isAuthenticated && anonymousId && (
-          <div className="border-t p-4">
+          <div className="border-t p-4 sticky bottom-0 bg-white">
             <form onSubmit={handleSubmit} className="space-y-3">
               <div className="flex items-start space-x-2">
                 <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
