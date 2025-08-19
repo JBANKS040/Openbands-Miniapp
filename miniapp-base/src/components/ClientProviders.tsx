@@ -10,30 +10,17 @@ export default function ClientProviders({ children }: PropsWithChildren) {
   const apiKey =
     process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY ||
     process.env.NEXT_PUBLIC_CDP_CLIENT_API_KEY ||
-    "";
+    "dummy-key-for-build"; // Always provide a fallback to ensure MiniKitProvider is available
 
-  if (apiKey) {
-    return (
-      <AppProvider>
-        <MiniKitProvider apiKey={apiKey} chain={base}>
-          {clientId ? (
-            <GoogleOAuthProvider clientId={clientId}>{children}</GoogleOAuthProvider>
-          ) : (
-            <>{children}</>
-          )}
-        </MiniKitProvider>
-      </AppProvider>
-    );
-  }
-
-  // Fallback to just children if environment variables aren't set
   return (
     <AppProvider>
-      {clientId ? (
-        <GoogleOAuthProvider clientId={clientId}>{children}</GoogleOAuthProvider>
-      ) : (
-        <>{children}</>
-      )}
+      <MiniKitProvider apiKey={apiKey} chain={base}>
+        {clientId ? (
+          <GoogleOAuthProvider clientId={clientId}>{children}</GoogleOAuthProvider>
+        ) : (
+          <>{children}</>
+        )}
+      </MiniKitProvider>
     </AppProvider>
   );
 }
