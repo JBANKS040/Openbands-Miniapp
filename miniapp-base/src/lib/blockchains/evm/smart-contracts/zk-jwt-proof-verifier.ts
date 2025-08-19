@@ -1,4 +1,4 @@
-import { ethers, Contract } from "ethers";
+import { Contract, JsonRpcSigner, InterfaceAbi } from "ethers";
 
 // @dev - Blockchain related imports
 import artifactOfZkJwtProofVerifier from './artifacts/ZkJwtProofVerifier.sol/ZkJwtProofVerifier.json';
@@ -7,13 +7,13 @@ import artifactOfZkJwtProofVerifier from './artifacts/ZkJwtProofVerifier.sol/ZkJ
  * @notice - ZkJwtProofVerifier.sol#verifyZkJwtProof(), which the HonkVerifier# verify() isinternally called.
  */
 export async function verifyZkJwtProof(
-  signer: any, 
-  proof: Uint8Array<any>, 
-  publicInputs: Array<any>
+  signer: JsonRpcSigner, 
+  proof: Uint8Array, 
+  publicInputs: Array<string | number>
 ): Promise<{ isValidProof: boolean }> {
   // @dev - Create the ZkJwtProofVerifier contract instance
   const zkJwtProofVerifierAddress: string = process.env.NEXT_PUBLIC_ZK_JWT_PROOF_VERIFIER_ON_BASE_TESTNET || "";
-  const zkJwtProofVerifierAbi: Array<any> = artifactOfZkJwtProofVerifier.abi;
+  const zkJwtProofVerifierAbi: InterfaceAbi = artifactOfZkJwtProofVerifier.abi;
   const zkJwtProofVerifier = new Contract(zkJwtProofVerifierAddress, zkJwtProofVerifierAbi, signer);
   console.log(`zkJwtProofVerifierAddress: ${zkJwtProofVerifierAddress}`);
 

@@ -1,4 +1,4 @@
-import { ethers, Contract } from "ethers";
+import { Contract, JsonRpcSigner } from "ethers";
 
 // @dev - Blockchain related imports
 import artifactOfHonkVerifier from './artifacts/honk_vk.sol/HonkVerifier.json';
@@ -7,13 +7,13 @@ import artifactOfHonkVerifier from './artifacts/honk_vk.sol/HonkVerifier.json';
  * @notice - HonkVerifier# verify()
  */
 export async function verifyViaHonkVerifier(
-  signer: any, 
-  proof: Uint8Array<any>, 
-  publicInputs: Array<any>
+  signer: JsonRpcSigner, 
+  proof: Uint8Array, 
+  publicInputs: Array<string | number>
 ): Promise<{ isValidProofViaHonkVerifier: boolean }> {
   // @dev - Create the HonkVerifier contract instance
   const honkVerifierAddress: string = process.env.NEXT_PUBLIC_HONK_VERIFIER_ON_BASE_TESTNET || "";
-  const honkVerifierAbi: Array<any> = artifactOfHonkVerifier.abi;
+  const honkVerifierAbi = artifactOfHonkVerifier.abi;
   const honkVerifier = new Contract(honkVerifierAddress, honkVerifierAbi, signer);
   console.log(`honkVerifierAddress: ${honkVerifierAddress}`);
 

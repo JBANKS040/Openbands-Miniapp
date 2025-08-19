@@ -1,9 +1,8 @@
-import { ethers } from "ethers";
-import { BrowserProvider, parseUnits } from "ethers";
+import { ethers, BrowserProvider, JsonRpcSigner, Network } from "ethers";
+import { parseUnits } from "ethers";
 import { HDNodeWallet } from "ethers/wallet";
 
 import { EthereumProvider } from "./data-types";
-//import { EthereumProvider, Window } from "./dataTypes";
 
 // @dev - The global declaration for the EthereumProvider interface.
 declare global {
@@ -12,30 +11,28 @@ declare global {
   //   // add more methods as needed
   // }
 
-  interface Window {
-    ethereum?: EthereumProvider;
-  }
+  // interface Window {
+  //   ethereum?: EthereumProvider;
+  // }
 }
 
 /**
  * @notice - Connect to Ethereum using ethers.js v6
  * @dev - ref). https://docs.ethers.io/v6/getting-started/#getting-started-connecting
  */
-export async function connectToEvmWallet(): Promise<{ provider: any, signer: any }> {
-  let signer: any = null;
-  let provider: any = null;
-  let network: any = null;
+export async function connectToEvmWallet(): Promise<{ provider: BrowserProvider, signer: JsonRpcSigner }> {
+  let signer: JsonRpcSigner | null = null;
+  let provider: BrowserProvider | null = null;
+  let network: Network | null = null;
 
   //let window: Window = { ethereum: undefined };
   console.log("window.ethereum:", window.ethereum);
 
   if (window.ethereum == null) {
-    // If Web3 EVM Wallet (i.e. MetaMask) is not installed, we use the default provider, which is backed by a variety of third-party services (such as INFURA). 
-    // They do not have private keys installed, so they only have read-only access
-    console.log("Web3 EVM Wallet (i.e. MetaMask) is not installed; using read-only defaults")
-    provider = ethers.getDefaultProvider()
-    window.ethereum = provider;
+    // If Web3 EVM Wallet (i.e. MetaMask) is not installed, throw an error since we need a signer
+    throw new Error("MetaMask or compatible Web3 wallet not found. Please install MetaMask to continue.");
   } else {
+
     // Connect to the MetaMask EIP-1193 object. 
     // This is a standard protocol that allows Ethers access to make all read-only requests through MetaMask.
     provider = new ethers.BrowserProvider(window.ethereum);
