@@ -7,7 +7,6 @@ import { SignInPanel } from '@/components/SignInPanel';
 import { PostComposer } from '@/components/PostComposer';
 import { PostCard } from '@/components/PostCard';
 import { SortToggle } from '@/components/SortToggle';
-import type { Post } from '@/lib/types';
 import Link from 'next/link';
 
 // @dev - Blockchain related imports
@@ -24,7 +23,7 @@ export default function Home() {
   const [signer, setSigner] = useState<JsonRpcSigner | null>(null);
 
   // Fetch posts from Supabase
-  const { posts, loading, error } = usePosts(sort);
+  const { posts, loading, error, refetch } = usePosts(sort);
 
   // MiniKit frame lifecycle: signal ready once mounted
   //const { setFrameReady, isFrameReady } = useMiniKit();
@@ -113,7 +112,7 @@ export default function Home() {
       <main className="max-w-md mx-auto px-4 py-4 space-y-4">
         {/* Post Composer - only show when authenticated */}
         {isAuthenticated && anonymousId && companyDomain ? (
-          <PostComposer />
+          <PostComposer onPosted={() => refetch({ silent: true })} />
         ) : (
           <div className="bg-white rounded-lg shadow-sm border p-4">
             <div className="text-center">
@@ -159,7 +158,7 @@ export default function Home() {
             </div>
           ) : (
             posts.map((post) => (
-              <PostCard key={post.id} post={post} />
+              <PostCard key={post.id} post={post} onLiked={() => refetch({ silent: true })} />
             ))
           )}
         </div>

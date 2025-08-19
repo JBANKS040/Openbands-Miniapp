@@ -1,7 +1,7 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
-import { useComments, likePost as likePostSupabase } from '@/lib/supabase';
+import { useComments, likePost as likePostSupabase, supabase } from '@/lib/supabase';
 import type { Post } from '@/lib/types';
 import { CommentsModal } from './CommentsModal';
 import Link from 'next/link';
@@ -9,20 +9,44 @@ import { useOpenUrl } from '@coinbase/onchainkit/minikit';
 
 interface PostCardProps {
   post: Post;
+  onLiked?: () => void;
 }
 
-export function PostCard({ post }: PostCardProps) {
+export function PostCard({ post, onLiked }: PostCardProps) {
   const [showComments, setShowComments] = useState(false);
+  const [likeCount, setLikeCount] = useState<number>(post.likeCount);
+  const [liked, setLiked] = useState<boolean>(false);
   const { isAuthenticated, anonymousId, companyDomain } = useApp();
-  const { comments } = useComments(post.id);
+  const { comments, refetch } = useComments(post.id);
   const openUrl = useOpenUrl();  // @dev - [NOTE]: When the local development, this line should be commented out to avoid an error.
+
+  const canLike = isAuthenticated && Boolean(anonymousId);
+
+  // determine if the current user already liked this post (once authenticated)
+  useEffect(() => {
+    const check = async () => {
+      if (!isAuthenticated || !anonymousId) return;
+      const { data } = await supabase
+        .from('likes')
+        .select('id')
+        .eq('target_type', 'post')
+        .eq('target_id', post.id)
+        .eq('anonymous_id', anonymousId)
+        .maybeSingle();
+      setLiked(Boolean(data));
+    };
+    void check();
+  }, [isAuthenticated, anonymousId, post.id]);
 
   const handleLike = async () => {
     if (!isAuthenticated || !anonymousId) return;
     
     try {
+      // optimistic toggle
+      setLiked(prev => !prev);
+      setLikeCount(prev => (liked ? Math.max(prev - 1, 0) : prev + 1));
       await likePostSupabase(post.id, anonymousId, companyDomain);
-      // TODO: Trigger a refetch of the post or optimistically update
+      onLiked?.();
     } catch (error) {
       console.error('Error liking post:', error);
     }
@@ -79,17 +103,22 @@ export function PostCard({ post }: PostCardProps) {
         <div className="flex items-center justify-between pt-2 border-t border-gray-100">
           <div className="flex items-center space-x-4">
             <button
-              onClick={handleLike}
+              onClick={canLike ? handleLike : undefined}
+              disabled={!canLike}
+              aria-disabled={!canLike}
+              title={canLike ? 'Like' : 'Sign in to like'}
               className={`flex items-center space-x-1 text-sm ${
-                post.likeCount > 0 
-                  ? 'text-blue-600 hover:text-blue-700' 
-                  : 'text-gray-500 hover:text-blue-600'
+                !canLike
+                  ? 'text-gray-300 cursor-not-allowed'
+                  : liked || likeCount > 0 
+                    ? 'text-blue-600 hover:text-blue-700' 
+                    : 'text-gray-500 hover:text-blue-600'
               }`}
             >
               <svg className="w-4 h-4" fill={post.likeCount > 0 ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
-              <span>{post.likeCount}</span>
+              <span>{likeCount}</span>
             </button>
 
             <button
