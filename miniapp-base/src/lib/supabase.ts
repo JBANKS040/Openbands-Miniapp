@@ -35,7 +35,23 @@ export interface DbLike {
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey); // @dev - [NOTE]: Temporarily, removing the comment out for local development
+// Create supabase client only if environment variables are available
+export const supabase = supabaseUrl && supabaseAnonKey 
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null;
+
+// Helper function to check if supabase is configured
+function isSupabaseConfigured(): boolean {
+  return supabase !== null;
+}
+
+// Helper function to get supabase client with error handling
+function getSupabase() {
+  if (!supabase) {
+    throw new Error('Supabase is not configured. Please check your environment variables.');
+  }
+  return supabase;
+}
 
 // Convert database types to app types
 function dbPostToPost(dbPost: DbPost, commentCount: number = 0): import('@/lib/types').Post {
@@ -77,8 +93,18 @@ export function usePosts(sort: 'new' | 'hot' = 'new') {
       if (!silent) setLoading(true);
       setError(null);
 
+      // Check if Supabase is configured
+      if (!isSupabaseConfigured() || !supabase) {
+        setPosts([]);
+        setError(null);
+        if (!silent) setLoading(false);
+        return;
+      }
+
+      const supabaseClient = getSupabase();
+
       // Fetch posts with comment counts
-      const { data: postsData, error: postsError } = await supabase
+      const { data: postsData, error: postsError } = await supabaseClient
         .from('posts')
         .select('*')
         .order(sort === 'new' ? 'created_at' : 'like_count', { ascending: false })
@@ -88,7 +114,7 @@ export function usePosts(sort: 'new' | 'hot' = 'new') {
 
       // Get comment counts for each post
       const postIds = postsData?.map(p => p.id) || [];
-      const { data: commentCounts, error: countError } = await supabase
+      const { data: commentCounts, error: countError } = await supabaseClient
         .from('comments')
         .select('post_id')
         .in('post_id', postIds);
@@ -102,7 +128,7 @@ export function usePosts(sort: 'new' | 'hot' = 'new') {
       }, {} as Record<string, number>);
 
       // Get like counts for each post (derive from likes table so we don't depend on RPC)
-      const { data: likeRows, error: likesError } = await supabase
+      const { data: likeRows, error: likesError } = await supabaseClient
         .from('likes')
         .select('target_id')
         .eq('target_type', 'post')
@@ -147,8 +173,18 @@ export function useCompanyPosts(companyDomain: string, sort: 'new' | 'hot' = 'ne
       if (!silent) setLoading(true);
       setError(null);
 
+      // Check if Supabase is configured
+      if (!isSupabaseConfigured()) {
+        setPosts([]);
+        setError(null);
+        if (!silent) setLoading(false);
+        return;
+      }
+
+      const supabaseClient = getSupabase();
+
       // Fetch posts for specific company with comment counts
-      const { data: postsData, error: postsError } = await supabase
+      const { data: postsData, error: postsError } = await supabaseClient
         .from('posts')
         .select('*')
         .eq('company_domain', companyDomain)
@@ -159,7 +195,7 @@ export function useCompanyPosts(companyDomain: string, sort: 'new' | 'hot' = 'ne
 
       // Get comment counts for each post
       const postIds = postsData?.map(p => p.id) || [];
-      const { data: commentCounts, error: countError } = await supabase
+      const { data: commentCounts, error: countError } = await supabaseClient
         .from('comments')
         .select('post_id')
         .in('post_id', postIds);
@@ -173,7 +209,7 @@ export function useCompanyPosts(companyDomain: string, sort: 'new' | 'hot' = 'ne
       }, {} as Record<string, number>);
 
       // Derive like counts from likes table
-      const { data: likeRows, error: likesError } = await supabase
+      const { data: likeRows, error: likesError } = await supabaseClient
         .from('likes')
         .select('target_id')
         .eq('target_type', 'post')
@@ -218,7 +254,17 @@ export function useComments(postId: string) {
       if (!silent) setLoading(true);
       setError(null);
 
-      const { data, error: commentsError } = await supabase
+      // Check if Supabase is configured
+      if (!isSupabaseConfigured()) {
+        setComments([]);
+        setError(null);
+        if (!silent) setLoading(false);
+        return;
+      }
+
+      const supabaseClient = getSupabase();
+
+      const { data, error: commentsError } = await supabaseClient
         .from('comments')
         .select('*')
         .eq('post_id', postId)
@@ -230,7 +276,7 @@ export function useComments(postId: string) {
       const commentIds = (data || []).map(c => c.id);
       let likeCountMap: Record<string, number> = {};
       if (commentIds.length > 0) {
-        const { data: likeRows, error: likesError } = await supabase
+        const { data: likeRows, error: likesError } = await supabaseClient
           .from('likes')
           .select('target_id')
           .eq('target_type', 'comment')
@@ -263,7 +309,9 @@ export function useComments(postId: string) {
 
 // Mutation functions
 export async function createPost(content: string, anonymousId: string, companyDomain: string | null) {
-  const { data, error } = await supabase
+  const supabaseClient = getSupabase();
+  
+  const { data, error } = await supabaseClient
     .from('posts')
     .insert([
       {
@@ -281,7 +329,9 @@ export async function createPost(content: string, anonymousId: string, companyDo
 }
 
 export async function createComment(postId: string, content: string, anonymousId: string, companyDomain: string | null) {
-  const { data, error } = await supabase
+  const supabaseClient = getSupabase();
+  
+  const { data, error } = await supabaseClient
     .from('comments')
     .insert([
       {
@@ -300,8 +350,10 @@ export async function createComment(postId: string, content: string, anonymousId
 }
 
 export async function likePost(postId: string, anonymousId: string, companyDomain: string | null) {
+  const supabaseClient = getSupabase();
+  
   // Check if already liked
-  const { data: existingLike } = await supabase
+  const { data: existingLike } = await supabaseClient
     .from('likes')
     .select('id')
     .eq('target_type', 'post')
@@ -310,12 +362,12 @@ export async function likePost(postId: string, anonymousId: string, companyDomai
     .maybeSingle();
 
   if (existingLike) {
-    await supabase
+    await supabaseClient
       .from('likes')
       .delete()
       .eq('id', existingLike.id);
   } else {
-    await supabase
+    await supabaseClient
       .from('likes')
       .insert([
         {
@@ -329,8 +381,10 @@ export async function likePost(postId: string, anonymousId: string, companyDomai
 }
 
 export async function likeComment(commentId: string, anonymousId: string, companyDomain: string | null) {
+  const supabaseClient = getSupabase();
+  
   // Check if already liked
-  const { data: existingLike } = await supabase
+  const { data: existingLike } = await supabaseClient
     .from('likes')
     .select('id')
     .eq('target_type', 'comment')
@@ -339,12 +393,12 @@ export async function likeComment(commentId: string, anonymousId: string, compan
     .maybeSingle();
 
   if (existingLike) {
-    await supabase
+    await supabaseClient
       .from('likes')
       .delete()
       .eq('id', existingLike.id);
   } else {
-    await supabase
+    await supabaseClient
       .from('likes')
       .insert([
         {

@@ -1,0 +1,12 @@
+(node:41151) [DEP0174] DeprecationWarning: Calling promisify on a function that returns a Promise is likely a mistake.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+npm ERR! code ENOENT
+npm ERR! syscall open
+npm ERR! path /Users/unomasanori/Projects/actual-projects/OpenBands/Openbands-Miniapp/Openbands-Miniapp/package.json
+npm ERR! errno -2
+npm ERR! enoent ENOENT: no such file or directory, open '/Users/unomasanori/Projects/actual-projects/OpenBands/Openbands-Miniapp/Openbands-Miniapp/package.json'
+npm ERR! enoent This is related to npm not being able to find a file.
+npm ERR! enoent 
+
+npm ERR! A complete log of this run can be found in:
+npm ERR!     /Users/unomasanori/.npm/_logs/2025-08-19T07_48_20_469Z-debug.log
