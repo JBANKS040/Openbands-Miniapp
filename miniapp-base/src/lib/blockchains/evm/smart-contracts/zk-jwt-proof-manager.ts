@@ -8,7 +8,8 @@ import artifactOfZkJwtProofManager from './artifacts/ZkJwtProofManager.sol/ZkJwt
  */
 export async function setContractInstance(signer: JsonRpcSigner): Promise<{ zkJwtProofManager: Contract }> {
   // @dev - Create the ZkJwtProofManager contract instance
-  const zkJwtProofManagerContractAddress: string = process.env.NEXT_PUBLIC_ZK_JWT_PROOF_MANAGER_ON_BASE_TESTNET || "";  
+  const zkJwtProofManagerContractAddress: string = process.env.NEXT_PUBLIC_ZK_JWT_PROOF_MANAGER_ON_BASE_MAINNET || "";  
+  //const zkJwtProofManagerContractAddress: string = process.env.NEXT_PUBLIC_ZK_JWT_PROOF_MANAGER_ON_BASE_TESTNET || "";  
   const zkJwtProofManagerAbi = artifactOfZkJwtProofManager.abi;
   const zkJwtProofManager = new Contract(zkJwtProofManagerContractAddress, zkJwtProofManagerAbi, signer);
   console.log(`zkJwtProofManagerContractAddress: ${zkJwtProofManagerContractAddress}`);
