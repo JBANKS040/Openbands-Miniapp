@@ -12,7 +12,8 @@ export async function verifyZkJwtProof(
   publicInputs: Array<string | number>
 ): Promise<{ isValidProof: boolean }> {
   // @dev - Create the ZkJwtProofVerifier contract instance
-  const zkJwtProofVerifierAddress: string = process.env.NEXT_PUBLIC_ZK_JWT_PROOF_VERIFIER_ON_BASE_TESTNET || "";
+  const zkJwtProofVerifierAddress: string = process.env.NEXT_PUBLIC_ZK_JWT_PROOF_VERIFIER_ON_BASE_MAINNET || "";
+  //const zkJwtProofVerifierAddress: string = process.env.NEXT_PUBLIC_ZK_JWT_PROOF_VERIFIER_ON_BASE_TESTNET || "";
   const zkJwtProofVerifierAbi: InterfaceAbi = artifactOfZkJwtProofVerifier.abi;
   const zkJwtProofVerifier = new Contract(zkJwtProofVerifierAddress, zkJwtProofVerifierAbi, signer);
   console.log(`zkJwtProofVerifierAddress: ${zkJwtProofVerifierAddress}`);
