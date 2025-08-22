@@ -28,7 +28,7 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
   // Check if we have a real Google Client ID
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
   const hasValidGoogleClientId = googleClientId && googleClientId !== "";
-  
+
   const onSuccess = async(resp: CredentialResponse) => {
     if (!resp.credential) return;
     
@@ -77,10 +77,10 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
         console.log(`signer (in the SignInPanel):`, signer); // @dev - The data type of "signer" is an "object" type.
 
         const { isValidProofViaHonkVerifier: isValidProofViaHonkVerifierWithEthersjs } = await verifyViaHonkVerifierWithEthersjs(signer, proof, publicInputs);
-        console.log(`Is a proof valid via the HonkVerifier?: ${isValidProofViaHonkVerifierWithEthersjs}`);
+        console.log(`Is a proof valid via the HonkVerifier (with Ethers.js)?: ${isValidProofViaHonkVerifierWithEthersjs}`);
 
-        const { isValidProofViaHonkVerifier: isValidProofViaHonkVerifierWithWagmi } = await verifyViaHonkVerifierWithWagmi(proof, publicInputs);
-        console.log(`Is a proof valid via the HonkVerifier?: ${isValidProofViaHonkVerifierWithWagmi}`);
+        const { isValidProofViaHonkVerifier: isValidProofViaHonkVerifierWithWagmi } = await verifyViaHonkVerifierWithWagmi(signer, proof, publicInputs);
+        console.log(`Is a proof valid via the HonkVerifier (alternative ethers.js)?: ${isValidProofViaHonkVerifierWithWagmi}`);
 
         const { isValidProof } = await verifyZkJwtProof(signer, proof, publicInputs);
         console.log(`Is a proof valid via the ZkJwtProofVerifier?: ${isValidProof}`);
@@ -101,12 +101,12 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
           createdAt: new Date().toISOString() // Current timestamp
         };
 
-        try {
-          const { txReceipt } = await recordPublicInputsOfZkJwtProof(signer, proof, publicInputs, separatedPublicInputs);
-          console.log(`txReceipt: ${JSON.stringify(txReceipt, null, 2)}`);
-        } catch (error) {
-          console.error('Error to record public inputs on-chain (BASE):', error);
-        }
+        // try {
+        //   const { txReceipt } = await recordPublicInputsOfZkJwtProof(signer, proof, publicInputs, separatedPublicInputs);
+        //   console.log(`txReceipt: ${JSON.stringify(txReceipt, null, 2)}`);
+        // } catch (error) {
+        //   console.error('Error to record public inputs on-chain (BASE):', error);
+        // }
 
         // We'll discard the email/token for privacy and just sign in anonymously
         signIn(domainFromZkJwtCircuit);
