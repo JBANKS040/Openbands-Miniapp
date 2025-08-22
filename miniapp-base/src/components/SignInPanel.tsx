@@ -11,7 +11,7 @@ import { BrowserProvider, JsonRpcSigner } from "ethers";
 
 // @dev - Blockchain related imports
 //import { connectToEvmWallet } from "../lib/blockchains/evm/connect-wallets/connect-to-evm-wallet";
-import { verifyViaHonkVerifier } from "../lib/blockchains/evm/smart-contracts/honk-verifier";
+import { verifyViaHonkVerifierWithEthersjs, verifyViaHonkVerifierWithWagmi } from "../lib/blockchains/evm/smart-contracts/honk-verifier";
 import { verifyZkJwtProof } from "../lib/blockchains/evm/smart-contracts/zk-jwt-proof-verifier";
 import { 
   recordPublicInputsOfZkJwtProof,
@@ -76,8 +76,11 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
         // @dev - Smart contract interactions
         console.log(`signer (in the SignInPanel):`, signer); // @dev - The data type of "signer" is an "object" type.
 
-        const { isValidProofViaHonkVerifier } = await verifyViaHonkVerifier(signer, proof, publicInputs);
-        console.log(`Is a proof valid via the HonkVerifier?: ${isValidProofViaHonkVerifier}`);  // @dev - [Error]: PublicInputsLengthWrong()
+        const { isValidProofViaHonkVerifier: isValidProofViaHonkVerifierWithEthersjs } = await verifyViaHonkVerifierWithEthersjs(signer, proof, publicInputs);
+        console.log(`Is a proof valid via the HonkVerifier?: ${isValidProofViaHonkVerifierWithEthersjs}`);
+
+        const { isValidProofViaHonkVerifier: isValidProofViaHonkVerifierWithWagmi } = await verifyViaHonkVerifierWithWagmi(proof, publicInputs);
+        console.log(`Is a proof valid via the HonkVerifier?: ${isValidProofViaHonkVerifierWithWagmi}`);
 
         const { isValidProof } = await verifyZkJwtProof(signer, proof, publicInputs);
         console.log(`Is a proof valid via the ZkJwtProofVerifier?: ${isValidProof}`);
