@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import { useApp } from "@/context/AppContext";
@@ -11,7 +11,7 @@ import { BrowserProvider, JsonRpcSigner } from "ethers";
 
 // @dev - Blockchain related imports
 //import { connectToEvmWallet } from "../lib/blockchains/evm/connect-wallets/connect-to-evm-wallet";
-import { verifyViaHonkVerifierWithEthersjs, verifyViaHonkVerifierWithWagmi } from "../lib/blockchains/evm/smart-contracts/honk-verifier";
+import { verifyViaHonkVerifierWithEthersjs, verifyViaHonkVerifierWithWagmi, useHonkVerifier } from "../lib/blockchains/evm/smart-contracts/honk-verifier";
 import { verifyZkJwtProof } from "../lib/blockchains/evm/smart-contracts/zk-jwt-proof-verifier";
 import { 
   recordPublicInputsOfZkJwtProof,
@@ -24,10 +24,32 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
 
   const [userInfo, setUserInfo] = useState<UserInfo>({ email: "", idToken: "" });
   const [error, setError] = useState<string | null>(null);
+  const [currentProof, setCurrentProof] = useState<Uint8Array | null>(null);
+  const [currentPublicInputs, setCurrentPublicInputs] = useState<Array<string | number> | null>(null);
+  const [enableHonkVerifier, setEnableHonkVerifier] = useState(false);
   
   // Check if we have a real Google Client ID
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
   const hasValidGoogleClientId = googleClientId && googleClientId !== "";
+  
+  // Use the Wagmi hook at component level (this is the proper way!)
+  const { 
+    isValidProofViaHonkVerifier: wagmiVerificationResult, 
+    isLoading: isWagmiLoading, 
+    error: wagmiError,
+    proofHex
+  } = useHonkVerifier(currentProof, currentPublicInputs, enableHonkVerifier);
+  
+  // Effect to log Wagmi results when they change
+  useEffect(() => {
+    if (enableHonkVerifier && !isWagmiLoading) {
+      console.log('🎯 Wagmi Hook Results:');
+      console.log(`  - isLoading: ${isWagmiLoading}`);
+      console.log(`  - error:`, wagmiError);
+      console.log(`  - verification result: ${wagmiVerificationResult}`);
+      console.log(`  - proofHex: ${proofHex}`);
+    }
+  }, [wagmiVerificationResult, isWagmiLoading, wagmiError, proofHex, enableHonkVerifier]);
 
   const onSuccess = async(resp: CredentialResponse) => {
     if (!resp.credential) return;
@@ -76,11 +98,20 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
         // @dev - Smart contract interactions
         console.log(`signer (in the SignInPanel):`, signer); // @dev - The data type of "signer" is an "object" type.
 
+        // Set state to trigger Wagmi hook verification
+        setCurrentProof(proof);
+        setCurrentPublicInputs(publicInputs);
+        setEnableHonkVerifier(true);
+
         const { isValidProofViaHonkVerifier: isValidProofViaHonkVerifierWithEthersjs } = await verifyViaHonkVerifierWithEthersjs(signer, proof, publicInputs);
         console.log(`Is a proof valid via the HonkVerifier (with Ethers.js)?: ${isValidProofViaHonkVerifierWithEthersjs}`);
 
         const { isValidProofViaHonkVerifier: isValidProofViaHonkVerifierWithWagmi } = await verifyViaHonkVerifierWithWagmi(signer, proof, publicInputs);
         console.log(`Is a proof valid via the HonkVerifier (alternative ethers.js)?: ${isValidProofViaHonkVerifierWithWagmi}`);
+
+        // Log Wagmi hook results (these will update asynchronously)
+        console.log(`Wagmi hook - isLoading: ${isWagmiLoading}, error:`, wagmiError);
+        console.log(`Wagmi hook - verification result: ${wagmiVerificationResult}`);
 
         const { isValidProof } = await verifyZkJwtProof(signer, proof, publicInputs);
         console.log(`Is a proof valid via the ZkJwtProofVerifier?: ${isValidProof}`);
