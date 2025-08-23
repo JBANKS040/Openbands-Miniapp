@@ -16,7 +16,9 @@ import {
 } from '@coinbase/onchainkit/transaction';
 import { Wallet, ConnectWallet } from '@coinbase/onchainkit/wallet';
 import { useAccount } from 'wagmi';
+
 import { calls } from '@/lib/blockchains/evm/coinbase-onchainkit/calls';
+import { honkVerifierCalls } from '@/lib/blockchains/evm/coinbase-onchainkit/honk-verifier-calls';
 
 const BASE_MAINNET_CHAIN_ID = 8453;
 const BASE_SEPOLIA_TESTNET_CHAIN_ID = 84532;
@@ -35,7 +37,8 @@ export default function TransactionComponents() {
   return address ? (
     <Transaction
       chainId={BASE_MAINNET_CHAIN_ID}
-      calls={calls}
+      //calls={calls}
+      calls={honkVerifierCalls}
       isSponsored={true}
       onStatus={handleOnStatus}
     >
