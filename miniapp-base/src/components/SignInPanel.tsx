@@ -9,7 +9,7 @@ import { extractDomain } from "@/lib/google-jwt/google-jwt";
 import { hashEmail } from "@/lib/blockchains/evm/utils/convert-string-to-poseidon-hash";
 import { BrowserProvider, JsonRpcSigner } from "ethers";
 
-// @dev - OnChainKit Transaction
+// @dev - Transaction component using the OnChainKit
 import { TransactionComponents } from "@/lib/blockchains/evm/coinbase-onchainkit/TransactionComponents";
 
 // @dev - Blockchain related imports
@@ -36,23 +36,23 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
   const hasValidGoogleClientId = googleClientId && googleClientId !== "";
   
   // Use the Wagmi hook at component level (this is the proper way!)
-  const { 
-    isValidProofViaHonkVerifier: wagmiVerificationResult, 
-    isLoading: isWagmiLoading, 
-    error: wagmiError,
-    proofHex
-  } = useHonkVerifier(currentProof, currentPublicInputs, enableHonkVerifier);
+  // const { 
+  //   isValidProofViaHonkVerifier: wagmiVerificationResult, 
+  //   isLoading: isWagmiLoading, 
+  //   error: wagmiError,
+  //   proofHex
+  // } = useHonkVerifier(currentProof, currentPublicInputs, enableHonkVerifier);
   
   // Effect to log Wagmi results when they change
-  useEffect(() => {
-    if (enableHonkVerifier && !isWagmiLoading) {
-      console.log('🎯 Wagmi Hook Results:');
-      console.log(`  - isLoading: ${isWagmiLoading}`);
-      console.log(`  - error:`, wagmiError);
-      console.log(`  - verification result: ${wagmiVerificationResult}`);
-      console.log(`  - proofHex: ${proofHex}`);
-    }
-  }, [wagmiVerificationResult, isWagmiLoading, wagmiError, proofHex, enableHonkVerifier]);
+  // useEffect(() => {
+  //   if (enableHonkVerifier && !isWagmiLoading) {
+  //     console.log('🎯 Wagmi Hook Results:');
+  //     console.log(`  - isLoading: ${isWagmiLoading}`);
+  //     console.log(`  - error:`, wagmiError);
+  //     console.log(`  - verification result: ${wagmiVerificationResult}`);
+  //     console.log(`  - proofHex: ${proofHex}`);
+  //   }
+  // }, [wagmiVerificationResult, isWagmiLoading, wagmiError, proofHex, enableHonkVerifier]);
 
   const onSuccess = async(resp: CredentialResponse) => {
     if (!resp.credential) return;
@@ -121,8 +121,8 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
         // } = useHonkVerifier(proof, publicInputs, enableHonkVerifier);
 
         // Log Wagmi hook results (these will update asynchronously)
-        console.log(`Wagmi hook - isLoading: ${isWagmiLoading}, error:`, wagmiError);
-        console.log(`Wagmi hook - verification result: ${wagmiVerificationResult}`);
+        // console.log(`Wagmi hook - isLoading: ${isWagmiLoading}, error:`, wagmiError);
+        // console.log(`Wagmi hook - verification result: ${wagmiVerificationResult}`);
 
         const { isValidProof } = await verifyZkJwtProof(signer, proof, publicInputs);
         console.log(`Is a proof valid via the ZkJwtProofVerifier?: ${isValidProof}`);

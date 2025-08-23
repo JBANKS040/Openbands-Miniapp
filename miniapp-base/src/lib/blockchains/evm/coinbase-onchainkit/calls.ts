@@ -1,23 +1,19 @@
-import { Transaction, TransactionButton, LifecycleStatus} from '@coinbase/onchainkit/transaction';
-import { baseSepolia } from 'wagmi/chains';
+const clickContractAddress = '0x67c97D1FB8184F038592b2109F854dfb09C77C75';
+const clickContractAbi = [
+  {
+    type: 'function',
+    name: 'click',
+    inputs: [],
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+] as const;
 
-// ---cut-before---
-
-const callsCallback = async () => { 
-  const res = await fetch('api.transaction.com/createTransaction'); 
-  const callData = await res.json(); 
-  return callData; 
-} 
-
-export default function TransactionWithCalls() {
-
-  return (
-    <Transaction
-      chainId={baseSepolia.id}
-      calls={callsCallback}
-      onStatus={(status: LifecycleStatus) => console.log('Transaction status:', status)}
-    >
-      <TransactionButton />
-    </Transaction>
-  );
-}
+export const calls = [
+  {
+    address: clickContractAddress,
+    abi: clickContractAbi,
+    functionName: 'click',
+    args: [],
+  }
+];
