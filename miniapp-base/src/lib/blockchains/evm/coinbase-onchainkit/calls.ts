@@ -11,9 +11,7 @@ const clickContractAbi = [
 
 export const calls = [
   {
-    address: clickContractAddress,
-    abi: clickContractAbi,
-    functionName: 'click',
-    args: [],
+    to: clickContractAddress as `0x${string}`,
+    data: '0x7d55923d' as `0x${string}`, // click() function selector
   }
 ];

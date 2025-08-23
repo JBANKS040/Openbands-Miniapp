@@ -10,7 +10,7 @@ import { hashEmail } from "@/lib/blockchains/evm/utils/convert-string-to-poseido
 import { BrowserProvider, JsonRpcSigner } from "ethers";
 
 // @dev - Transaction component using the OnChainKit
-import { TransactionComponents } from "@/lib/blockchains/evm/coinbase-onchainkit/TransactionComponents";
+import TransactionComponents from "@/components/coinbase-onchainkit/TransactionComponents";
 
 // @dev - Blockchain related imports
 //import { connectToEvmWallet } from "../lib/blockchains/evm/connect-wallets/connect-to-evm-wallet";
