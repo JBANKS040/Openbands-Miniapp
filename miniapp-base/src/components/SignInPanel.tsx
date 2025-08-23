@@ -9,6 +9,9 @@ import { extractDomain } from "@/lib/google-jwt/google-jwt";
 import { hashEmail } from "@/lib/blockchains/evm/utils/convert-string-to-poseidon-hash";
 import { BrowserProvider, JsonRpcSigner } from "ethers";
 
+// @dev - OnChainKit Transaction
+import { TransactionComponents } from "@/lib/blockchains/evm/coinbase-onchainkit/TransactionComponents";
+
 // @dev - Blockchain related imports
 //import { connectToEvmWallet } from "../lib/blockchains/evm/connect-wallets/connect-to-evm-wallet";
 import { verifyViaHonkVerifierWithEthersjs, verifyViaHonkVerifierWithWagmi, useHonkVerifier } from "../lib/blockchains/evm/smart-contracts/honk-verifier";
@@ -108,6 +111,14 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
 
         const { isValidProofViaHonkVerifier: isValidProofViaHonkVerifierWithWagmi } = await verifyViaHonkVerifierWithWagmi(signer, proof, publicInputs);
         console.log(`Is a proof valid via the HonkVerifier (alternative ethers.js)?: ${isValidProofViaHonkVerifierWithWagmi}`);
+
+        // @dev - [Error]: "Invalid hook call. Hooks can only be called inside of the body of a function component."
+        // const { 
+        //   isValidProofViaHonkVerifier: wagmiVerificationResult, 
+        //   isLoading: isWagmiLoading, 
+        //   error: wagmiError,
+        //   proofHex
+        // } = useHonkVerifier(proof, publicInputs, enableHonkVerifier);
 
         // Log Wagmi hook results (these will update asynchronously)
         console.log(`Wagmi hook - isLoading: ${isWagmiLoading}, error:`, wagmiError);
