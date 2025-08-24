@@ -37,8 +37,9 @@ export default function TransactionComponents() {
   return address ? (
     <Transaction
       chainId={BASE_MAINNET_CHAIN_ID}
-      //calls={calls}
-      calls={honkVerifierCalls}
+      calls={calls}
+      //calls={honkVerifierCalls}
+      //contracts={}
       isSponsored={true}
       onStatus={handleOnStatus}
     >

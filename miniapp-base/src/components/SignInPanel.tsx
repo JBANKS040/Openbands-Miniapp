@@ -9,8 +9,11 @@ import { extractDomain } from "@/lib/google-jwt/google-jwt";
 import { hashEmail } from "@/lib/blockchains/evm/utils/convert-string-to-poseidon-hash";
 import { BrowserProvider, JsonRpcSigner } from "ethers";
 
-// @dev - Transaction component using the OnChainKit
-import TransactionComponents from "@/components/coinbase-onchainkit/TransactionComponents";
+// @dev - Transaction component using the OnChainKit over MiniKitProvider
+import { Transaction } from "@coinbase/onchainkit/transaction";
+//import TransactionComponents from "@/components/coinbase-onchainkit/TransactionComponents";
+import { calls } from '@/lib/blockchains/evm/coinbase-onchainkit/calls';
+import { honkVerifierCalls } from '@/lib/blockchains/evm/coinbase-onchainkit/honk-verifier-calls';
 
 // @dev - Blockchain related imports
 //import { connectToEvmWallet } from "../lib/blockchains/evm/connect-wallets/connect-to-evm-wallet";
@@ -21,38 +24,19 @@ import {
   getPublicInputsOfZkJwtProof, 
   getNullifiersByDomainAndEmailHashAndWalletAddresses
 } from "../lib/blockchains/evm/smart-contracts/zk-jwt-proof-manager";
+import { Content } from "next/dist/compiled/@next/font/dist/google";
 
 export function SignInPanel({ provider, signer }: { provider: BrowserProvider; signer: JsonRpcSigner }) {
   const { signIn } = useApp();
 
   const [userInfo, setUserInfo] = useState<UserInfo>({ email: "", idToken: "" });
   const [error, setError] = useState<string | null>(null);
-  const [currentProof, setCurrentProof] = useState<Uint8Array | null>(null);
-  const [currentPublicInputs, setCurrentPublicInputs] = useState<Array<string | number> | null>(null);
-  const [enableHonkVerifier, setEnableHonkVerifier] = useState(false);
-  
+  const [showTransaction, setShowTransaction] = useState(false);
+  const [userAuthenticated, setUserAuthenticated] = useState(false);
+
   // Check if we have a real Google Client ID
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
   const hasValidGoogleClientId = googleClientId && googleClientId !== "";
-  
-  // Use the Wagmi hook at component level (this is the proper way!)
-  // const { 
-  //   isValidProofViaHonkVerifier: wagmiVerificationResult, 
-  //   isLoading: isWagmiLoading, 
-  //   error: wagmiError,
-  //   proofHex
-  // } = useHonkVerifier(currentProof, currentPublicInputs, enableHonkVerifier);
-  
-  // Effect to log Wagmi results when they change
-  // useEffect(() => {
-  //   if (enableHonkVerifier && !isWagmiLoading) {
-  //     console.log('🎯 Wagmi Hook Results:');
-  //     console.log(`  - isLoading: ${isWagmiLoading}`);
-  //     console.log(`  - error:`, wagmiError);
-  //     console.log(`  - verification result: ${wagmiVerificationResult}`);
-  //     console.log(`  - proofHex: ${proofHex}`);
-  //   }
-  // }, [wagmiVerificationResult, isWagmiLoading, wagmiError, proofHex, enableHonkVerifier]);
 
   const onSuccess = async(resp: CredentialResponse) => {
     if (!resp.credential) return;
@@ -101,28 +85,11 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
         // @dev - Smart contract interactions
         console.log(`signer (in the SignInPanel):`, signer); // @dev - The data type of "signer" is an "object" type.
 
-        // Set state to trigger Wagmi hook verification
-        setCurrentProof(proof);
-        setCurrentPublicInputs(publicInputs);
-        setEnableHonkVerifier(true);
-
         const { isValidProofViaHonkVerifier: isValidProofViaHonkVerifierWithEthersjs } = await verifyViaHonkVerifierWithEthersjs(signer, proof, publicInputs);
         console.log(`Is a proof valid via the HonkVerifier (with Ethers.js)?: ${isValidProofViaHonkVerifierWithEthersjs}`);
 
         const { isValidProofViaHonkVerifier: isValidProofViaHonkVerifierWithWagmi } = await verifyViaHonkVerifierWithWagmi(signer, proof, publicInputs);
         console.log(`Is a proof valid via the HonkVerifier (alternative ethers.js)?: ${isValidProofViaHonkVerifierWithWagmi}`);
-
-        // @dev - [Error]: "Invalid hook call. Hooks can only be called inside of the body of a function component."
-        // const { 
-        //   isValidProofViaHonkVerifier: wagmiVerificationResult, 
-        //   isLoading: isWagmiLoading, 
-        //   error: wagmiError,
-        //   proofHex
-        // } = useHonkVerifier(proof, publicInputs, enableHonkVerifier);
-
-        // Log Wagmi hook results (these will update asynchronously)
-        // console.log(`Wagmi hook - isLoading: ${isWagmiLoading}, error:`, wagmiError);
-        // console.log(`Wagmi hook - verification result: ${wagmiVerificationResult}`);
 
         const { isValidProof } = await verifyZkJwtProof(signer, proof, publicInputs);
         console.log(`Is a proof valid via the ZkJwtProofVerifier?: ${isValidProof}`);
@@ -150,6 +117,12 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
         //   console.error('Error to record public inputs on-chain (BASE):', error);
         // }
 
+        // @dev - Handle Google authentication
+        setUserAuthenticated(true);
+        
+        // @dev - Immediately trigger Transaction component <--This is notified by the `useEffect()`
+        setShowTransaction(true);
+
         // We'll discard the email/token for privacy and just sign in anonymously
         signIn(domainFromZkJwtCircuit);
       } else if (nullifierFromOnChainByDomainAndEmailHashAndWalletAddress !== "0x0000000000000000000000000000000000000000000000000000000000000000") {
@@ -172,6 +145,12 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
           _hashedEmailFromOnChain === hashedEmailFromGoogleJwt &&
           _walletAddressFromOnChain === walletAddressFromConnectedWallet
         ) {
+          // @dev - Handle Google authentication
+          setUserAuthenticated(true);
+          
+          // @dev - Immediately trigger Transaction component <--This is notified by the `useEffect()`
+          setShowTransaction(true);
+
           // We'll discard the email/token for privacy and just sign in anonymously
           signIn(domainFromGoogleJwt);
         }
@@ -213,13 +192,21 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
           </div>
 
           <div className="flex justify-center">
-            {hasValidGoogleClientId ? (
+            {hasValidGoogleClientId && !userAuthenticated ? (
               <GoogleLogin
                 onSuccess={onSuccess}
                 onError={() => console.error('Login Failed')}
                 useOneTap
                 theme="outline"
                 size="large"
+              />
+            ) : showTransaction ? (
+              <Transaction 
+                calls={calls}
+                isSponsored={true}
+                onSuccess={(response) => {
+                  console.log('Transaction successful:', response);
+                }}
               />
             ) : (
               <div className="text-center p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
