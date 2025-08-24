@@ -12,7 +12,8 @@ export async function verifyViaHonkVerifier(
   publicInputs: Array<string | number>
 ): Promise<{ isValidProofViaHonkVerifier: boolean }> {
   // @dev - Create the HonkVerifier contract instance
-  const honkVerifierAddress: string = process.env.NEXT_PUBLIC_HONK_VERIFIER_ON_BASE_TESTNET || "";
+  const honkVerifierAddress: string = process.env.NEXT_PUBLIC_HONK_VERIFIER_ON_BASE_MAINNET || "";
+  //const honkVerifierAddress: string = process.env.NEXT_PUBLIC_HONK_VERIFIER_ON_BASE_TESTNET || "";
   const honkVerifierAbi = artifactOfHonkVerifier.abi;
   const honkVerifier = new Contract(honkVerifierAddress, honkVerifierAbi, signer);
   console.log(`honkVerifierAddress: ${honkVerifierAddress}`);
