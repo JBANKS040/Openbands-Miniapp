@@ -54,6 +54,7 @@ async function _generateZkJwtProof(
     shaPrecomputeTillKeys: ["email", "email_verified"],
     maxSignedDataLength: 640,
   });
+  console.log("jwtInputs", jwtInputs);
 
   const domainUint8Array = new Uint8Array(MAX_DOMAIN_LENGTH);
   domainUint8Array.set(Uint8Array.from(new TextEncoder().encode(domain)));
@@ -83,7 +84,11 @@ async function _generateZkJwtProof(
 
   // Generate witness and prove
   const startTime = performance.now();
-  const { witness } = await noir.execute(inputs as InputMap);
+  console.log(`startTime:`, startTime);
+
+  const { witness } = await noir.execute(inputs as InputMap); // @dev - [Error]: "decoding token: Error: Assertion failed: Bit size for lhs 128 does not match op bit size 128"
+  console.log(`witness:`, witness);
+
   const generatedProof = await backend.generateProof(witness, { keccak: true }); // @dev - This is used when storing the proof/publicInputs into the EVM Blockchain via the Solidity Smart Contract.
   //const proof = await backend.generateProof(witness);                 // @dev - This is used when storing the proof/publicInputs into the Web2 Database via Supabase.
   console.log(`generatedProof: ${JSON.stringify(generatedProof, null, 2)}`);
