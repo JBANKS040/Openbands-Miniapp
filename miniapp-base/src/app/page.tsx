@@ -9,6 +9,9 @@ import { PostCard } from '@/components/PostCard';
 import { SortToggle } from '@/components/SortToggle';
 import Link from 'next/link';
 
+// @dev - Transaction component using the OnChainKit
+import TransactionComponents from "@/components/coinbase-onchainkit/TransactionComponents";
+
 // @dev - Blockchain related imports
 import { connectToEvmWallet } from '../lib/blockchains/evm/connect-wallets/connect-to-evm-wallet';
 import { BrowserProvider, JsonRpcSigner } from 'ethers';
@@ -158,6 +161,8 @@ export default function Home() {
               <PostCard key={post.id} post={post} onLiked={() => refetch({ silent: true })} />
             ))
           )}
+          
+          <TransactionComponents />
         </div>
       </main>
 

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import { useApp } from "@/context/AppContext";
@@ -9,26 +9,35 @@ import { extractDomain } from "@/lib/google-jwt/google-jwt";
 import { hashEmail } from "@/lib/blockchains/evm/utils/convert-string-to-poseidon-hash";
 import { BrowserProvider, JsonRpcSigner } from "ethers";
 
+// @dev - Transaction component using the OnChainKit over MiniKitProvider
+import { Transaction } from "@coinbase/onchainkit/transaction";
+//import TransactionComponents from "@/components/coinbase-onchainkit/TransactionComponents";
+import { calls } from '@/lib/blockchains/evm/coinbase-onchainkit/calls';
+import { honkVerifierCalls } from '@/lib/blockchains/evm/coinbase-onchainkit/honk-verifier-calls';
+
 // @dev - Blockchain related imports
 //import { connectToEvmWallet } from "../lib/blockchains/evm/connect-wallets/connect-to-evm-wallet";
-import { verifyViaHonkVerifier } from "../lib/blockchains/evm/smart-contracts/honk-verifier";
+import { verifyViaHonkVerifierWithEthersjs, verifyViaHonkVerifierWithWagmi, useHonkVerifier } from "../lib/blockchains/evm/smart-contracts/honk-verifier";
 import { verifyZkJwtProof } from "../lib/blockchains/evm/smart-contracts/zk-jwt-proof-verifier";
 import { 
   recordPublicInputsOfZkJwtProof,
   getPublicInputsOfZkJwtProof, 
   getNullifiersByDomainAndEmailHashAndWalletAddresses
 } from "../lib/blockchains/evm/smart-contracts/zk-jwt-proof-manager";
+import { Content } from "next/dist/compiled/@next/font/dist/google";
 
 export function SignInPanel({ provider, signer }: { provider: BrowserProvider; signer: JsonRpcSigner }) {
   const { signIn } = useApp();
 
   const [userInfo, setUserInfo] = useState<UserInfo>({ email: "", idToken: "" });
   const [error, setError] = useState<string | null>(null);
-  
+  const [showTransaction, setShowTransaction] = useState(false);
+  const [userAuthenticated, setUserAuthenticated] = useState(false);
+
   // Check if we have a real Google Client ID
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
   const hasValidGoogleClientId = googleClientId && googleClientId !== "";
-  
+
   const onSuccess = async(resp: CredentialResponse) => {
     if (!resp.credential) return;
     
@@ -76,8 +85,11 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
         // @dev - Smart contract interactions
         console.log(`signer (in the SignInPanel):`, signer); // @dev - The data type of "signer" is an "object" type.
 
-        const { isValidProofViaHonkVerifier } = await verifyViaHonkVerifier(signer, proof, publicInputs);
-        console.log(`Is a proof valid via the HonkVerifier?: ${isValidProofViaHonkVerifier}`);  // @dev - [Error]: PublicInputsLengthWrong()
+        const { isValidProofViaHonkVerifier: isValidProofViaHonkVerifierWithEthersjs } = await verifyViaHonkVerifierWithEthersjs(signer, proof, publicInputs);
+        console.log(`Is a proof valid via the HonkVerifier (with Ethers.js)?: ${isValidProofViaHonkVerifierWithEthersjs}`);
+
+        const { isValidProofViaHonkVerifier: isValidProofViaHonkVerifierWithWagmi } = await verifyViaHonkVerifierWithWagmi(signer, proof, publicInputs);
+        console.log(`Is a proof valid via the HonkVerifier (alternative ethers.js)?: ${isValidProofViaHonkVerifierWithWagmi}`);
 
         const { isValidProof } = await verifyZkJwtProof(signer, proof, publicInputs);
         console.log(`Is a proof valid via the ZkJwtProofVerifier?: ${isValidProof}`);
@@ -98,12 +110,18 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
           createdAt: new Date().toISOString() // Current timestamp
         };
 
-        try {
-          const { txReceipt } = await recordPublicInputsOfZkJwtProof(signer, proof, publicInputs, separatedPublicInputs);
-          console.log(`txReceipt: ${JSON.stringify(txReceipt, null, 2)}`);
-        } catch (error) {
-          console.error('Error to record public inputs on-chain (BASE):', error);
-        }
+        // try {
+        //   const { txReceipt } = await recordPublicInputsOfZkJwtProof(signer, proof, publicInputs, separatedPublicInputs);
+        //   console.log(`txReceipt: ${JSON.stringify(txReceipt, null, 2)}`);
+        // } catch (error) {
+        //   console.error('Error to record public inputs on-chain (BASE):', error);
+        // }
+
+        // @dev - Handle Google authentication
+        setUserAuthenticated(true);
+        
+        // @dev - Immediately trigger Transaction component <--This is notified by the `useEffect()`
+        setShowTransaction(true);
 
         // We'll discard the email/token for privacy and just sign in anonymously
         signIn(domainFromZkJwtCircuit);
@@ -127,6 +145,12 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
           _hashedEmailFromOnChain === hashedEmailFromGoogleJwt &&
           _walletAddressFromOnChain === walletAddressFromConnectedWallet
         ) {
+          // @dev - Handle Google authentication
+          setUserAuthenticated(true);
+          
+          // @dev - Immediately trigger Transaction component <--This is notified by the `useEffect()`
+          setShowTransaction(true);
+
           // We'll discard the email/token for privacy and just sign in anonymously
           signIn(domainFromGoogleJwt);
         }
@@ -168,13 +192,21 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
           </div>
 
           <div className="flex justify-center">
-            {hasValidGoogleClientId ? (
+            {hasValidGoogleClientId && !userAuthenticated ? (
               <GoogleLogin
                 onSuccess={onSuccess}
                 onError={() => console.error('Login Failed')}
                 useOneTap
                 theme="outline"
                 size="large"
+              />
+            ) : showTransaction ? (
+              <Transaction 
+                calls={calls}
+                isSponsored={true}
+                onSuccess={(response) => {
+                  console.log('Transaction successful:', response);
+                }}
               />
             ) : (
               <div className="text-center p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
