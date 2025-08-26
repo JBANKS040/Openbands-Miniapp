@@ -29,14 +29,14 @@ export interface GoogleJwtPayload {
   kid: string;
 }
 
-export interface JWK {
-  kty: string;
-  alg: string;
-  kid: string;
-  n: string;
-  e: string;
-  use: string;
-}
+// export interface JWK {
+//   kty: string;
+//   alg: string;
+//   kid: string;
+//   n: string;
+//   e: string;
+//   use: string;
+// }
 
 export interface UserInfo {
   email: string;

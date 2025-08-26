@@ -3,8 +3,9 @@ import React, { useState } from "react";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import { useApp } from "@/context/AppContext";
-import { generateZkJwtProof } from "@/lib/circuits/zk-jwt-proof-generation";
-import type { UserInfo, GoogleJwtPayload, JWK } from "@/lib/types";
+import { generateZkJwtProof, OPENBANDS_MINIAPP_CIRCUIT_HELPER } from "@/lib/circuits/zk-jwt-proof-generation";
+import { getGooglePublicKey } from "@/lib/google-jwt/google-jwt";
+import type { UserInfo, GoogleJwtPayload } from "@/lib/types";
 import { extractDomain } from "@/lib/google-jwt/google-jwt";
 import { hashEmail } from "@/lib/blockchains/evm/utils/convert-string-to-poseidon-hash";
 import { BrowserProvider, JsonRpcSigner } from "ethers";
@@ -42,6 +43,13 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
         idToken: resp.credential
       });
 
+      // @dev - Retrieve a JWT public key
+      const [headerB64] = resp.credential.split('.');
+      //const [headerB64] = userInfo.idToken.split('.');
+      const header = JSON.parse(atob(headerB64));
+      const kid = header.kid;
+      const jwtPubkey = await getGooglePublicKey(kid);
+
       // @dev - Log (NOTE: This should be removed later)
       console.log(`decoded: ${JSON.stringify(decoded, null, 2)}`);
       console.log(`User email: ${email}`);
@@ -57,11 +65,17 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
       // @dev - Retrieve a nullifierHash, which is stored on-chain and is associated with a given wallet address
       const { nullifierFromOnChainByDomainAndEmailHashAndWalletAddress } = await getNullifiersByDomainAndEmailHashAndWalletAddresses(signer, domainFromGoogleJwt, hashedEmailFromGoogleJwt);
       console.log(`nullifier (from on-chain) by a domain, emailHash, wallet address: ${nullifierFromOnChainByDomainAndEmailHashAndWalletAddress}`);
+      //const nullifierFromOnChainByDomainAndEmailHashAndWalletAddress = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
       // @dev - If there is no nullifierFromOnChain, which is stored on-chain and is associated with a given wallet address, it will be recorded on-chain (BASE).
       if (nullifierFromOnChainByDomainAndEmailHashAndWalletAddress === "0x0000000000000000000000000000000000000000000000000000000000000000") {
         // @dev - Generate a zkJWT proof
-        const { proof, publicInputs } = await generateZkJwtProof(decoded.email, resp.credential);
+        const { proof, publicInputs } = await OPENBANDS_MINIAPP_CIRCUIT_HELPER.generateProof({
+          idToken: resp.credential,
+          jwtPubkey: await getGooglePublicKey(kid),
+          domain: domainFromGoogleJwt
+        });
+        //const { proof, publicInputs } = await generateZkJwtProof(decoded.email, resp.credential);
 
         // @dev - Log (NOTE: The data type of a given proof and publicInputs are "object". Hence, the ${} method can not be used in the console.log())
         console.log(`Generated zkJWT proof:`, proof);
