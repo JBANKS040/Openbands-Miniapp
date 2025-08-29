@@ -84,8 +84,9 @@ async function _generateZkJwtProof(
 
   const { Noir, UltraHonkBackend } = await initProver();
 
-  const circuitArtifact = await import(`./artifacts/openbands_miniapp.json`);
-  
+  //const circuitArtifact = await import(`./artifacts/openbands_miniapp.json`);
+  const circuitArtifact = await import(`./artifacts/circuit.json`);
+
   const backend = new UltraHonkBackend(circuitArtifact.bytecode, { threads: 8 });
   
   const noir = new Noir(circuitArtifact as CompiledCircuit);
