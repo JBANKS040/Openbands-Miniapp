@@ -54,11 +54,11 @@ async function _generateZkJwtProof(
     shaPrecomputeTillKeys: ["email", "email_verified"],
     maxSignedDataLength: 640,
   });
-  console.log("jwtInputs", jwtInputs);
 
   const domainUint8Array = new Uint8Array(MAX_DOMAIN_LENGTH);
   domainUint8Array.set(Uint8Array.from(new TextEncoder().encode(domain)));
 
+  // Pass limb arrays as strings (not numbers)
   const inputs = {
     partial_data: jwtInputs.partial_data,
     partial_hash: jwtInputs.partial_hash,
@@ -73,6 +73,13 @@ async function _generateZkJwtProof(
     }
   };
 
+  // Log the full JSON of the inputs for ABI debugging
+  try {
+    console.log("Full circuit input JSON:", JSON.stringify(inputs));
+  } catch (e) {
+    console.log("Could not stringify inputs for debug log", e);
+  }
+
   console.log("Openbands circuit inputs", inputs);
 
   const { Noir, UltraHonkBackend } = await initProver();
@@ -82,8 +89,7 @@ async function _generateZkJwtProof(
   const backend = new UltraHonkBackend(circuitArtifact.bytecode, { threads: 8 });
   
   const noir = new Noir(circuitArtifact as CompiledCircuit);
-
-  // Generate witness and prove
+  
   const startTime = performance.now();
   console.log(`startTime:`, startTime);
 
@@ -178,7 +184,7 @@ export const OPENBANDS_MINIAPP_CIRCUIT_HELPER = {
     const { witness } = await noir.execute(inputs as InputMap);
     const generatedProof = await backend.generateProof(witness, { keccak: true }); // @dev - This is used when storing the proof/publicInputs into the EVM Blockchain via the Solidity Smart Contract.
     //const proof = await backend.generateProof(witness);                 // @dev - This is used when storing the proof/publicInputs into the Web2 Database via Supabase.
-    console.log(`generatedProof (in openbands.ts): ${JSON.stringify(generatedProof, null, 2)}`);
+    console.log(`generatedProof (in the zk-jwt-proof-generation.ts): ${JSON.stringify(generatedProof, null, 2)}`);
 
     const provingTime = performance.now() - startTime;
 
