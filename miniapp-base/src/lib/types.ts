@@ -42,3 +42,15 @@ export interface UserInfo {
   email: string;
   idToken: string;
 }
+
+/**
+ * Ephemeral key pair generated and stored in the browser's local storage
+ * This key is used to sign messages.
+ */
+export interface EphemeralKey {
+  privateKey: bigint;
+  publicKey: bigint;
+  salt: bigint;
+  expiry: Date;
+  ephemeralPubkeyHash: bigint;
+}

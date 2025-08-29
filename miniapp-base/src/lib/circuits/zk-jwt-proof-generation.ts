@@ -6,6 +6,10 @@ import { generateInputs } from "noir-jwt";
 import { InputMap, type CompiledCircuit } from "@noir-lang/noir_js";
 import { initProver } from "./lazy-modules";
 
+// @dev - Ephemeral key management
+import { generateEphemeralKey, signMessage, verifyMessageSignature } from "./ephemeral-key/ephemeral-key-generation";
+import { EphemeralKey } from "../types";
+
 const MAX_DOMAIN_LENGTH = 64;
 
 export interface ZkJwtProofResult {
@@ -24,8 +28,12 @@ export async function generateZkJwtProof(email: string, idToken: string): Promis
 
   const jwtHeader = getJwtHeader(idToken);
   const jwtPubkey = await getGooglePublicKey(jwtHeader.kid);
+  
+  // @dev - Generate ephemeral key pair and a random salt
+  const ephemeralKey = await generateEphemeralKey();
+  console.log("ephemeralKey:", ephemeralKey);
 
-  const { proof, publicInputs } = await _generateZkJwtProof(idToken, jwtPubkey, domain);
+  const { proof, publicInputs } = await _generateZkJwtProof(idToken, jwtPubkey, ephemeralKey, domain);
 
   return { proof, publicInputs };
 }
@@ -40,7 +48,8 @@ export async function generateZkJwtProof(email: string, idToken: string): Promis
 async function _generateZkJwtProof(
   idToken: string,
   jwtPubkey: JsonWebKey,
-  domain: string,
+  ephemeralKey: EphemeralKey,
+  domain: string
 ): Promise<ZkJwtProofResult> {
   if (!idToken || !jwtPubkey) {
     throw new Error(
@@ -67,6 +76,9 @@ async function _generateZkJwtProof(
     jwt_pubkey_modulus_limbs: jwtInputs.pubkey_modulus_limbs,
     jwt_pubkey_redc_params_limbs: jwtInputs.redc_params_limbs,
     jwt_signature_limbs: jwtInputs.signature_limbs,
+    ephemeral_pubkey: (ephemeralKey.publicKey >> 3n).toString(),
+    ephemeral_pubkey_salt: ephemeralKey.salt.toString(),
+    ephemeral_pubkey_expiry: Math.floor(ephemeralKey.expiry.getTime() / 1000).toString(),
     domain: {
       storage: Array.from(domainUint8Array),
       len: domain.length,
@@ -127,84 +139,84 @@ async function _generateZkJwtProof(
 
 
 
-/**
- * @dev - zkJWT proof generation
- */
-export const OPENBANDS_MINIAPP_CIRCUIT_HELPER = {
-  generateProof: async ({
-    idToken,
-    jwtPubkey,
-    domain
-  }: {
-    idToken: string;
-    jwtPubkey: JsonWebKey;
-    domain: string;
-  }) => {
-    if (!idToken || !jwtPubkey) {
-      throw new Error(
-        "[JWT Circuit] Proof generation failed: idToken and jwtPubkey are required"
-      );
-    }
+// /**
+//  * @dev - zkJWT proof generation
+//  */
+// export const OPENBANDS_MINIAPP_CIRCUIT_HELPER = {
+//   generateProof: async ({
+//     idToken,
+//     jwtPubkey,
+//     domain
+//   }: {
+//     idToken: string;
+//     jwtPubkey: JsonWebKey;
+//     domain: string;
+//   }) => {
+//     if (!idToken || !jwtPubkey) {
+//       throw new Error(
+//         "[JWT Circuit] Proof generation failed: idToken and jwtPubkey are required"
+//       );
+//     }
 
-    const jwtInputs = await generateInputs({
-      jwt: idToken,
-      pubkey: jwtPubkey,
-      shaPrecomputeTillKeys: ["email", "email_verified"],
-      maxSignedDataLength: 640,
-    });
+//     const jwtInputs = await generateInputs({
+//       jwt: idToken,
+//       pubkey: jwtPubkey,
+//       shaPrecomputeTillKeys: ["email", "email_verified"],
+//       maxSignedDataLength: 640,
+//     });
 
-    const domainUint8Array = new Uint8Array(MAX_DOMAIN_LENGTH);
-    domainUint8Array.set(Uint8Array.from(new TextEncoder().encode(domain)));
+//     const domainUint8Array = new Uint8Array(MAX_DOMAIN_LENGTH);
+//     domainUint8Array.set(Uint8Array.from(new TextEncoder().encode(domain)));
 
-    const inputs = {
-      partial_data: jwtInputs.partial_data,
-      partial_hash: jwtInputs.partial_hash,
-      full_data_length: jwtInputs.full_data_length,
-      base64_decode_offset: jwtInputs.base64_decode_offset,
-      jwt_pubkey_modulus_limbs: jwtInputs.pubkey_modulus_limbs,
-      jwt_pubkey_redc_params_limbs: jwtInputs.redc_params_limbs,
-      jwt_signature_limbs: jwtInputs.signature_limbs,
-      domain: {
-        storage: Array.from(domainUint8Array),
-        len: domain.length,
-      }
-    };
+//     const inputs = {
+//       partial_data: jwtInputs.partial_data,
+//       partial_hash: jwtInputs.partial_hash,
+//       full_data_length: jwtInputs.full_data_length,
+//       base64_decode_offset: jwtInputs.base64_decode_offset,
+//       jwt_pubkey_modulus_limbs: jwtInputs.pubkey_modulus_limbs,
+//       jwt_pubkey_redc_params_limbs: jwtInputs.redc_params_limbs,
+//       jwt_signature_limbs: jwtInputs.signature_limbs,
+//       domain: {
+//         storage: Array.from(domainUint8Array),
+//         len: domain.length,
+//       }
+//     };
 
-    console.log("Openbands circuit inputs", inputs);
+//     console.log("Openbands circuit inputs", inputs);
 
-    const { Noir, UltraHonkBackend } = await initProver();
+//     const { Noir, UltraHonkBackend } = await initProver();
 
-    let circuitArtifact: any;
-    circuitArtifact = await import(`./artifacts/openbands_miniapp.json`);
+//     let circuitArtifact: any;
+//     //circuitArtifact = await import(`./artifacts/openbands_miniapp.json`);
 
-    const backend = new UltraHonkBackend(circuitArtifact.bytecode, { threads: 8 });
-    const noir = new Noir(circuitArtifact as CompiledCircuit);
+//     const backend = new UltraHonkBackend(circuitArtifact.bytecode, { threads: 8 });
+//     const noir = new Noir(circuitArtifact as CompiledCircuit);
 
-    // Generate witness and prove
-    const startTime = performance.now();
-    const { witness } = await noir.execute(inputs as InputMap);
-    const generatedProof = await backend.generateProof(witness, { keccak: true }); // @dev - This is used when storing the proof/publicInputs into the EVM Blockchain via the Solidity Smart Contract.
-    //const proof = await backend.generateProof(witness);                 // @dev - This is used when storing the proof/publicInputs into the Web2 Database via Supabase.
-    console.log(`generatedProof (in the zk-jwt-proof-generation.ts): ${JSON.stringify(generatedProof, null, 2)}`);
+//     // Generate witness and prove
+//     const startTime = performance.now();
+//     const { witness } = await noir.execute(inputs as InputMap);
+//     const generatedProof = await backend.generateProof(witness, { keccak: true }); // @dev - This is used when storing the proof/publicInputs into the EVM Blockchain via the Solidity Smart Contract.
+//     //const proof = await backend.generateProof(witness);                 // @dev - This is used when storing the proof/publicInputs into the Web2 Database via Supabase.
+//     console.log(`generatedProof (in the zk-jwt-proof-generation.ts): ${JSON.stringify(generatedProof, null, 2)}`);
 
-    const provingTime = performance.now() - startTime;
+//     const provingTime = performance.now() - startTime;
 
-    console.log(`Proof generated in ${provingTime}ms`);
+//     console.log(`Proof generated in ${provingTime}ms`);
 
-    // @dev - Proof and PublicInputs
-    const proof = generatedProof.proof;
-    const publicInputs = generatedProof.publicInputs;
-    console.log(`proof: ${ JSON.stringify(generatedProof.proof, null, 2) }`);
-    console.log(`publicInputs: ${ JSON.stringify(generatedProof.publicInputs, null, 2) }`);
+//     // @dev - Proof and PublicInputs
+//     const proof = generatedProof.proof;
+//     const publicInputs = generatedProof.publicInputs;
+//     console.log(`proof: ${ JSON.stringify(generatedProof.proof, null, 2) }`);
+//     console.log(`publicInputs: ${ JSON.stringify(generatedProof.publicInputs, null, 2) }`);
 
-    //console.log(`type of proof: ${ typeof proof }`);               // @dev - [Return]: "object" 
-    //console.log(`type of publicInputs: ${ typeof publicInputs }`); // @dev - [Return]: "object" 
+//     //console.log(`type of proof: ${ typeof proof }`);               // @dev - [Return]: "object" 
+//     //console.log(`type of publicInputs: ${ typeof publicInputs }`); // @dev - [Return]: "object" 
 
-    // @dev - [TEST]: Proof verification with NoirJS
-    //const isValidProof = await backend.verifyProof(generatedProof, { keccak: true });
-    //console.log(`isValidProof (via NoirJS): ${ isValidProof }`); // @dev - [Result]: True
+//     // @dev - [TEST]: Proof verification with NoirJS
+//     //const isValidProof = await backend.verifyProof(generatedProof, { keccak: true });
+//     //console.log(`isValidProof (via NoirJS): ${ isValidProof }`); // @dev - [Result]: True
 
-    // @dev - Return
-    return { proof, publicInputs };
-  }
-}
+//     // @dev - Return
+//     return { proof, publicInputs };
+//   }
+// }
