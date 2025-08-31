@@ -70,12 +70,23 @@ export async function getPublicInputsOfZkJwtProof(signer: JsonRpcSigner, nullifi
 }
 
 /**
- * @notice - ZkJwtProofManager.sol# getNullifierByWalletAddress()
+ * @notice - ZkJwtProofManager.sol# getNullifiersByDomainAndWalletAddresses()
  */
-export async function getNullifiersByDomainAndEmailHashAndWalletAddresses(signer: JsonRpcSigner, domain: string, emailHash: string): Promise<{ nullifierFromOnChainByDomainAndEmailHashAndWalletAddress: string }> {
+export async function getNullifiersByDomainAndWalletAddresses(signer: JsonRpcSigner, domain: string): Promise<{ nullifierFromOnChainByDomainAndWalletAddress: string }> {
   // @dev - Set the ZkJwtProofManager contract instance
   const { zkJwtProofManager } = await setContractInstance(signer);
 
-  const nullifierFromOnChainByDomainAndEmailHashAndWalletAddress = await zkJwtProofManager.getNullifiersByDomainAndEmailHashAndWalletAddresses(domain, emailHash);
-  return { nullifierFromOnChainByDomainAndEmailHashAndWalletAddress };
+  const nullifierFromOnChainByDomainAndWalletAddress = await zkJwtProofManager.getNullifiersByDomainAndWalletAddresses(domain);
+  return { nullifierFromOnChainByDomainAndWalletAddress };
 }
+
+/**
+ * @notice - ZkJwtProofManager.sol# getNullifiersByDomainAndEmailHashAndWalletAddresses()
+ */
+// export async function getNullifiersByDomainAndEmailHashAndWalletAddresses(signer: JsonRpcSigner, domain: string, emailHash: string): Promise<{ nullifierFromOnChainByDomainAndEmailHashAndWalletAddress: string }> {
+//   // @dev - Set the ZkJwtProofManager contract instance
+//   const { zkJwtProofManager } = await setContractInstance(signer);
+
+//   const nullifierFromOnChainByDomainAndEmailHashAndWalletAddress = await zkJwtProofManager.getNullifiersByDomainAndEmailHashAndWalletAddresses(domain, emailHash);
+//   return { nullifierFromOnChainByDomainAndEmailHashAndWalletAddress };
+// }
