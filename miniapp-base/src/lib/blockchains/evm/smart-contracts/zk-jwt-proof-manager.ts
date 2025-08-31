@@ -26,7 +26,7 @@ export async function recordPublicInputsOfZkJwtProof(
   separatedPublicInputs: {
     domain: string;
     nullifierHash: string;
-    emailHash: string;
+    //emailHash: string;   // [TODO]: A proper hashing method is to be considered later.
     walletAddress: string;
     createdAt: string;
   }
