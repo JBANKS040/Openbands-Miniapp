@@ -6,6 +6,7 @@ import { generateInputs } from "noir-jwt";
 import { InputMap, type CompiledCircuit } from "@noir-lang/noir_js";
 import { initProver } from "./lazy-modules";
 
+//const MAX_PARTIAL_DATA_LENGTH = 640
 const MAX_DOMAIN_LENGTH = 64;
 
 export interface ZkJwtProofResult {
@@ -73,6 +74,14 @@ async function _generateZkJwtProof(
   };
 
   console.log("Openbands circuit inputs", inputs);
+
+  // @dev - [Debug]:
+  console.log("partial_data length:", inputs.partial_data.length);
+  console.log("partial_hash length:", inputs.partial_hash.length);
+  console.log("jwt_pubkey_modulus_limbs length:", inputs.jwt_pubkey_modulus_limbs.length);
+  console.log("jwt_signature_limbs length:", inputs.jwt_signature_limbs.length);
+  console.log("domain.storage length:", inputs.domain.storage.length);
+  console.log("domain.len:", inputs.domain.len);
 
   const { Noir, UltraHonkBackend } = await initProver();
 
