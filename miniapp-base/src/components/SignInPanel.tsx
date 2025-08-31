@@ -120,8 +120,8 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
         console.log(`publicInputs (from on-chain): ${JSON.stringify(publicInputsFromOnChain, null, 2)}`);
         const _domainFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[0];
         const _nullifierFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[1];
-        const _hashedEmailFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[2];
-        const _walletAddressFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[3];
+        //const _hashedEmailFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[2];  // [TODO]: A proper hashing method is to be considered later.
+        const _walletAddressFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[2];
 
         if (
           _domainFromOnChain === domainFromGoogleJwt && 
