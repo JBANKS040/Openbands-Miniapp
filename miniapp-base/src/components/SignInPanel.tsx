@@ -74,7 +74,7 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
         console.log(`domain (from email): ${domainFromZkJwtCircuit}`); // @dev - i.e. "example-company.com"
 
         // @dev - Smart contract interactions
-        console.log(`signer (in the SignInPanel):`, signer); // @dev - The data type of "signer" is an "object" type.
+        //console.log(`signer (in the SignInPanel):`, signer); // @dev - The data type of "signer" is an "object" type.
 
         const { isValidProofViaHonkVerifier } = await verifyViaHonkVerifier(signer, proof, publicInputs);
         console.log(`Is a proof valid via the HonkVerifier?: ${isValidProofViaHonkVerifier}`);  // @dev - [Error]: PublicInputsLengthWrong()
