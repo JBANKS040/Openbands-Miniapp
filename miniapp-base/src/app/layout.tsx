@@ -3,9 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ClientProviders from "@/components/ClientProviders";
 
-// @dev - Connecting a Browser Wallet button
-import ConnectWalletButton from '../components/connect-wallets/ConnectWalletButton';
-
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -51,10 +48,6 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ClientProviders>{children}</ClientProviders>
-
-        <div className="flex justify-center items-center h-screen">
-          <ConnectWalletButton />
-        </div>
       </body>
     </html>
   );
