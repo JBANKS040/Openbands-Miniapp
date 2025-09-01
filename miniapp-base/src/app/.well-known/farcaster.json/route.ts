@@ -37,6 +37,9 @@ export async function GET() {
       ogDescription: process.env.NEXT_PUBLIC_APP_OG_DESCRIPTION,
       ogImageUrl: process.env.NEXT_PUBLIC_APP_OG_IMAGE,
       noindex: true,
+    },
+    baseBuilder: {
+      allowedAddresses: ["0x..."] // @dev - Your BASE Account address 
     }),
   });
 }
