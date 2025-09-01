@@ -6,6 +6,7 @@ import { generateInputs } from "noir-jwt";
 import { InputMap, type CompiledCircuit } from "@noir-lang/noir_js";
 import { initProver } from "./lazy-modules";
 
+//const MAX_PARTIAL_DATA_LENGTH = 640
 const MAX_DOMAIN_LENGTH = 64;
 
 export interface ZkJwtProofResult {

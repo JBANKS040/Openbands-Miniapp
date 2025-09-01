@@ -9,6 +9,9 @@ import { PostCard } from '@/components/PostCard';
 import { SortToggle } from '@/components/SortToggle';
 import Link from 'next/link';
 
+// @dev - Connecting a Browser Wallet button
+import ConnectWalletButton from '../components/connect-wallets/ConnectWalletButton';
+
 // @dev - Blockchain related imports
 import { connectToEvmWallet } from '../lib/blockchains/evm/connect-wallets/connect-to-evm-wallet';
 import { BrowserProvider, JsonRpcSigner } from 'ethers';
@@ -121,6 +124,10 @@ export default function Home() {
               >
                 Sign In to Post
               </button>
+
+              <div className="px-4 py-2 text-white rounded-lg text-sm font-medium">
+                <ConnectWalletButton />
+              </div>
             </div>
           </div>
         )}
