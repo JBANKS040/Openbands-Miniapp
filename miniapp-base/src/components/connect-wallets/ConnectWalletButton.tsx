@@ -39,9 +39,9 @@ export default function ConnectWalletButton() {
   return (
     <button
       onClick={connectWallet}
-      className="bg-blue-600 text-white px-4 py-2 rounded-xl shadow-md hover:bg-blue-700"
+      className="bg-blue-600 text-white px-2 py-1 rounded-lg text-xs font-medium hover:bg-blue-700"
     >
-      {account ? `Connected: ${account.slice(0, 6)}...` : "Connect Wallet"}
+      {account ? ` ${account.slice(0, 6)}...` : "Connect Wallet"}
     </button>
   );
 }

@@ -14,7 +14,7 @@
     "splashBackgroundColor": "#0000ff",
     "homeUrl": "https://miniapp.openbands.xyz",
     "primaryCategory": "social",
-    "noindex": true
+    "noindex": false
   },
   "baseBuilder": {
     "allowedAddresses": ["0xBDcda61d8dd602CF9d516C9D2f200E362242C57D"]

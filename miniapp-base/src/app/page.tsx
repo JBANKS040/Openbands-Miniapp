@@ -75,12 +75,7 @@ export default function Home() {
                   </svg>
                 </button>
               ) : (
-                <button
-                  onClick={() => setShowSignIn(true)}
-                  className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
-                >
-                  Sign In
-                </button>
+                <ConnectWalletButton />
               )}
             </div>
           </div>
@@ -125,9 +120,7 @@ export default function Home() {
                 Sign In to Post
               </button>
 
-              <div className="px-4 py-2 text-white rounded-lg text-sm font-medium">
-                <ConnectWalletButton />
-              </div>
+              
             </div>
           </div>
         )}
