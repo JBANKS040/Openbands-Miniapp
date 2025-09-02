@@ -11,6 +11,8 @@
     "description": "The anonymous social network for verified employees",
     "iconUrl": "https://miniapp.openbands.xyz/Openbands.png",
     "splashImageUrl": "https://miniapp.openbands.xyz/splash.png",
+    "heroImageUrl": "https://miniapp.openbands.xyz/hero.png",
+    "ogImageUrl": "https://miniapp.openbands.xyz/hero.png",
     "splashBackgroundColor": "#0000ff",
     "homeUrl": "https://miniapp.openbands.xyz",
     "primaryCategory": "social",
