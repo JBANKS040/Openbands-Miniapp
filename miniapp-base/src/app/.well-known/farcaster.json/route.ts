@@ -25,7 +25,7 @@ export async function GET() {
       description: process.env.NEXT_PUBLIC_APP_DESCRIPTION || 'The anonymous social network for verified employees',
       screenshotUrls: [],
       iconUrl: process.env.NEXT_PUBLIC_APP_ICON || `${URL}/Openbands.png`,
-      splashImageUrl: process.env.NEXT_PUBLIC_APP_SPLASH_IMAGE || `${URL}/splash.jpeg`,
+      splashImageUrl: process.env.NEXT_PUBLIC_APP_SPLASH_IMAGE || `${URL}/splash.png`,
       splashBackgroundColor: process.env.NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR || '#0000ff',
       homeUrl: URL,
       webhookUrl: URL ? `${URL}/api/webhook` : undefined,
