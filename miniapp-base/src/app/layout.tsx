@@ -19,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
   
   return {
     title: projectName,
-    description: "Openbands Mini App",
+    description: "The anonymous social network for verified employees",
     other: {
       'fc:frame': JSON.stringify({
         version: 'next',
@@ -32,7 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
             type: 'launch_frame',
             name: projectName,
             url: URL,
-            splashImageUrl: process.env.NEXT_PUBLIC_APP_SPLASH_IMAGE || URL ? `${URL}/splash.png` : undefined,
+            splashImageUrl: process.env.NEXT_PUBLIC_APP_SPLASH_IMAGE || (URL ? `${URL}/splash.png` : undefined),
             splashBackgroundColor: process.env.NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR || "#0000ff",
           },
         },
