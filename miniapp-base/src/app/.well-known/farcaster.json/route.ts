@@ -9,8 +9,33 @@ function withValidProperties(
   );
 }
 
-export async function GET() {
-  const URL = process.env.NEXT_PUBLIC_URL;
+function parseAllowedAddresses(input: unknown): string[] | undefined {
+  if (!input) return undefined;
+  if (Array.isArray(input)) return input as string[];
+  if (typeof input === 'string') {
+    try {
+      const asJson = JSON.parse(input);
+      if (Array.isArray(asJson)) return asJson as string[];
+    } catch {
+      return input
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+    }
+  }
+  return undefined;
+}
+
+export async function GET(req: Request) {
+  const envUrl = process.env.NEXT_PUBLIC_URL;
+  const inferredOrigin = (() => {
+    try {
+      return new URL(req.url).origin;
+    } catch {
+      return undefined;
+    }
+  })();
+  const URL = envUrl || inferredOrigin || 'https://miniapp.openbands.xyz';
 
   return Response.json({
     accountAssociation: {
@@ -28,7 +53,7 @@ export async function GET() {
       splashImageUrl: process.env.NEXT_PUBLIC_APP_SPLASH_IMAGE || `${URL}/splash.png`,
       splashBackgroundColor: process.env.NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR || '#0000ff',
       homeUrl: URL,
-      webhookUrl: URL ? `${URL}/api/webhook` : undefined,
+      webhookUrl: `${URL}/api/webhook`,
       primaryCategory: process.env.NEXT_PUBLIC_APP_PRIMARY_CATEGORY || 'social',
       tags: [],
       heroImageUrl: process.env.NEXT_PUBLIC_APP_HERO_IMAGE || `${URL}/hero.png`,
@@ -39,7 +64,10 @@ export async function GET() {
       noindex: false,
     }),
     baseBuilder: {
-      allowedAddresses: process.env.NEXT_PUBLIC_BASE_BUILDER_ALLOWED_ADDRESSES || ['0xBDcda61d8dd602CF9d516C9D2f200E362242C57D'],
+      allowedAddresses:
+        parseAllowedAddresses(process.env.NEXT_PUBLIC_BASE_BUILDER_ALLOWED_ADDRESSES) || [
+          '0xBDcda61d8dd602CF9d516C9D2f200E362242C57D',
+        ],
     },
   });
 }
