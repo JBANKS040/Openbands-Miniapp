@@ -2,7 +2,13 @@
 'use client'
 import { useState, useEffect } from 'react';
 
-import { Wallet } from '@coinbase/onchainkit/wallet';
+import { 
+  Wallet, 
+  ConnectWallet, 
+  WalletDropdown, WalletDropdownDisconnect, 
+} from '@coinbase/onchainkit/wallet';
+
+import { Identity, Avatar, Name, Address, EthBalance } from '@coinbase/onchainkit/identity';
 
 // @dev - Blockchain related imports
 //import { connectToEvmWallet } from '../../lib/blockchains/evm/connect-wallets/connect-to-evm-wallet';
@@ -40,12 +46,20 @@ export default function ConnectWalletButtonWithOnchainkit() {
   // };
 
   return (
-    // <button
-    //   onClick={connectWallet}
-    //   className="bg-blue-600 text-white px-2 py-1 rounded-lg text-xs font-medium hover:bg-blue-700"
-    // >
-    //   {account ? ` ${account.slice(0, 6)}...` : "Connect Wallet"}
-    // </button>
-    <Wallet />
+    <Wallet>
+      <ConnectWallet>
+        <Avatar className="h-6 w-6" />
+        <Name />
+      </ConnectWallet>
+      <WalletDropdown>
+        <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
+          <Avatar />
+          <Name />
+          <Address />
+          <EthBalance />
+        </Identity>
+        <WalletDropdownDisconnect />
+      </WalletDropdown>
+    </Wallet>
   );
 }
