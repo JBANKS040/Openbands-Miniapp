@@ -1,7 +1,7 @@
 import { Wallet } from '@coinbase/onchainkit/wallet';
 
 /**
- * @notice - Connect to Ethereum using <Wallet /> component powered by BASE's OnChainKit.
+ * @notice - Connect to Ethereum using <Wallet /> component (icl. Wallet Modal) powered by BASE's OnChainKit.
  * @dev - ref). https://docs.base.org/onchainkit/wallet/wallet
  */
 export async function connectToEvmWalletWithOnChainKit(): Promise<{ provider: BrowserProvider, signer: JsonRpcSigner }> {

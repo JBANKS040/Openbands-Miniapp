@@ -14,7 +14,28 @@ export default function ClientProviders({ children }: PropsWithChildren) {
 
   return (
     <AppProvider>
-      <MiniKitProvider apiKey={apiKey} chain={base}>
+      <MiniKitProvider 
+        apiKey={apiKey} 
+        chain={base}
+        config={{
+          appearance: {
+            name: 'OpenBands MiniApp',
+            logo: 'https://your-logo.com',
+            mode: '400',
+            theme: 'default',
+          },
+          wallet: {
+            display: 'modal',
+            termsUrl: 'https://...',
+            privacyUrl: 'https://...',
+            supportedWallets: { 
+              rabby: true, 
+              trust: true, 
+              frame: true, 
+            }, 
+          },
+        }}
+      >
         <GoogleOAuthProvider clientId={clientId}>
           {children}
         </GoogleOAuthProvider>
