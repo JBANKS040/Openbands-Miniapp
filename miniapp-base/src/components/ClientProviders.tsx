@@ -21,7 +21,7 @@ export default function ClientProviders({ children }: PropsWithChildren) {
           appearance: {
             name: 'OpenBands MiniApp',
             logo: 'https://your-logo.com',
-            mode: '400',
+            //mode: '400',
             theme: 'default',
           },
           wallet: {
