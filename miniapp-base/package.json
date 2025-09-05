@@ -21,7 +21,8 @@
     "noir-jwt": "0.4.5",
     "pino-pretty": "^13.1.1",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "@rainbow-me/rainbowkit": "^2.2.8"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

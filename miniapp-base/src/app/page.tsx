@@ -12,6 +12,7 @@ import Link from 'next/link';
 // @dev - Connecting a Browser Wallet button
 import ConnectWalletButton from '../components/connect-wallets/ConnectWalletButton';
 import ConnectWalletButtonWithOnchainkit from '../components/connect-wallets/ConnectWalletButtonWithOnchainkit';
+import ConnectWalletButtonWithRainbowkit from '@/components/connect-wallets/ConnectWalletButtonWithRainbowkit';
 
 // @dev - Blockchain related imports
 import { connectToEvmWallet } from '../lib/blockchains/evm/connect-wallets/connect-to-evm-wallet';
@@ -77,7 +78,8 @@ export default function Home() {
                 </button>
               ) : (
                 // <ConnectWalletButton />
-                <ConnectWalletButtonWithOnchainkit />
+                // <ConnectWalletButtonWithOnchainkit />
+                <ConnectWalletButtonWithRainbowkit />
               )}
             </div>
           </div>
