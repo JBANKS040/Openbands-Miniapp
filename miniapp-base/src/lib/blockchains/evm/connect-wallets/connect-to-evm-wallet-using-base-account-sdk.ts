@@ -1,11 +1,12 @@
-import { createBaseAccountSDK, base } from '@base-org/account';
+// import { createBaseAccountSDK, base } from '@base-org/account';
+// import type { Config } from 'wagmi';
 
 /**
  * @notice - Base Account SDK instance to get a provider and interact with the Base chain.
  * @notice - This would be worked with a <Wallet /> component and Wallet Modal powered by BASE's OnChainKit.
  * @dev - ref). https://docs.base.org/onchainkit/wallet/wallet
  */
-// export async function connectToEvmWalletUsingBaseAccountSDK(): Promise<{ provider: any, config: any }> {
+// export async function connectToEvmWalletUsingBaseAccountSDK(): Promise<{ provider: unknown, config: Config }> {
 //   const sdk = createBaseAccountSDK({
 //     appName: 'My App Name',
 //     appLogoUrl: 'https://example.com/logo.png',
