@@ -8,14 +8,8 @@ import {
   getDefaultConfig,
   RainbowKitProvider,
 } from '@rainbow-me/rainbowkit';
-import { WagmiProvider } from 'wagmi';
-import {
-  mainnet,
-  polygon,
-  optimism,
-  arbitrum,
-  base,
-} from 'wagmi/chains';
+import { WagmiProvider, Config } from 'wagmi';
+import { base } from 'wagmi/chains';
 import {
   QueryClientProvider,
   QueryClient,
@@ -45,7 +39,7 @@ export default function ConnectWalletButtonWithRainbowkit() {
 }
 
 
-export function setConfigAndQueryClient(): { config: unknown, queryClient: QueryClient } {
+export function setConfigAndQueryClient(): { config: Config, queryClient: QueryClient } {
   // Set up config for RainbowKit
   const config = getDefaultConfig({
     appName: 'My RainbowKit App',
