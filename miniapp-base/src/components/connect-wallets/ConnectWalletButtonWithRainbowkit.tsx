@@ -45,7 +45,7 @@ export default function ConnectWalletButtonWithRainbowkit() {
 }
 
 
-export function setConfigAndQueryClient(): { config: any, queryClient: QueryClient } {
+export function setConfigAndQueryClient(): { config: unknown, queryClient: QueryClient } {
   // Set up config for RainbowKit
   const config = getDefaultConfig({
     appName: 'My RainbowKit App',
