@@ -1,7 +1,7 @@
 import { Contract, JsonRpcSigner, InterfaceAbi } from "ethers";
 
 // @dev - Blockchain related imports
-import artifactOfZkJwtProofVerifier from './artifacts/ZkJwtProofVerifier.sol/ZkJwtProofVerifier.json';
+import artifactOfZkJwtProofVerifier from '../artifacts/ZkJwtProofVerifier.sol/ZkJwtProofVerifier.json';
 
 /**
  * @notice - ZkJwtProofVerifier.sol#verifyZkJwtProof(), which the HonkVerifier# verify() isinternally called.

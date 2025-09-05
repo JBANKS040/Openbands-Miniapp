@@ -11,14 +11,14 @@ import { BrowserProvider, JsonRpcSigner } from "ethers";
 
 // @dev - Blockchain related imports
 //import { connectToEvmWallet } from "../lib/blockchains/evm/connect-wallets/connect-to-evm-wallet";
-import { verifyViaHonkVerifier } from "../lib/blockchains/evm/smart-contracts/honk-verifier";
-import { verifyZkJwtProof } from "../lib/blockchains/evm/smart-contracts/zk-jwt-proof-verifier";
+import { verifyViaHonkVerifier } from "../lib/blockchains/evm/smart-contracts/ethers-js/honk-verifier";
+import { verifyZkJwtProof } from "../lib/blockchains/evm/smart-contracts/ethers-js/zk-jwt-proof-verifier";
 import { 
   recordPublicInputsOfZkJwtProof,
   getPublicInputsOfZkJwtProof, 
   getNullifiersByDomainAndWalletAddresses
   //getNullifiersByDomainAndEmailHashAndWalletAddresses
-} from "../lib/blockchains/evm/smart-contracts/zk-jwt-proof-manager";
+} from "../lib/blockchains/evm/smart-contracts/ethers-js/zk-jwt-proof-manager";
 
 export function SignInPanel({ provider, signer }: { provider: BrowserProvider; signer: JsonRpcSigner }) {
   const { signIn } = useApp();
