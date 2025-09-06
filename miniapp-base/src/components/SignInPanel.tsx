@@ -22,7 +22,11 @@ import {
 
 import {
   recordPublicInputsOfZkJwtProof,
+  setContractInstance
 } from "@/lib/blockchains/evm/smart-contracts/wagmi/zk-jwt-proof-manager";
+import { useWriteContract } from 'wagmi'
+
+import { write } from "fs";
 
 
 export function SignInPanel({ provider, signer }: { provider: BrowserProvider; signer: JsonRpcSigner }) {
@@ -35,6 +39,10 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
   const hasValidGoogleClientId = googleClientId && googleClientId !== "";
   
+  // ✅ hooks must be at the top level
+  const { writeContract: recordPublicInputsOfZkJwtProof, isPending: recordPublicInputsOfZkJwtProofIsPending } = useWriteContract();
+  //const { writeContract: functionName, isPending: functionIsPending } = useWriteContract();
+
   const onSuccess = async(resp: CredentialResponse) => {
     if (!resp.credential) return;
     
@@ -106,7 +114,21 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
         };
 
         try {
-          const { tx } = await recordPublicInputsOfZkJwtProof(proof, publicInputs, separatedPublicInputs);
+          // @dev - Convert Uint8Array proof to hex string proofHex
+          const proofHex = "0x" + Buffer.from(proof).toString("hex");
+          console.log(`proofHex: ${proofHex}`);
+
+          // @dev - [Result]: Successful
+          const { zkJwtProofManagerContractAddress, zkJwtProofManagerAbi } = setContractInstance();
+          recordPublicInputsOfZkJwtProof({
+            abi: zkJwtProofManagerAbi,
+            address: zkJwtProofManagerContractAddress as `0x${string}`,
+            functionName: 'recordPublicInputsOfZkJwtProof',
+            args: [proofHex, publicInputs, separatedPublicInputs]
+          });
+
+
+          //await recordPublicInputsOfZkJwtProof(functionName, proof, publicInputs, separatedPublicInputs);
           //const { txReceipt } = await recordPublicInputsOfZkJwtProof(signer, proof, publicInputs, separatedPublicInputs);
           //console.log(`txReceipt: ${JSON.stringify(txReceipt, null, 2)}`);
         } catch (error) {

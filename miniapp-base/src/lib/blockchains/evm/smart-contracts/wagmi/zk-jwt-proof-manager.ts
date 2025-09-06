@@ -8,7 +8,7 @@ import artifactOfZkJwtProofManager from '../artifacts/ZkJwtProofManager.sol/ZkJw
 /**
  * @notice - Set the ZkJwtProofManager contract instance
  */
-export async function setContractInstance(): Promise<{ zkJwtProofManagerContractAddress: string, zkJwtProofManagerAbi: any }> {
+export function setContractInstance(): { zkJwtProofManagerContractAddress: string, zkJwtProofManagerAbi: any } {
   // @dev - Create the ZkJwtProofManager contract instance
   const zkJwtProofManagerContractAddress: string = process.env.NEXT_PUBLIC_ZK_JWT_PROOF_MANAGER_ON_BASE_MAINNET || "";  
   //const zkJwtProofManagerContractAddress: string = process.env.NEXT_PUBLIC_ZK_JWT_PROOF_MANAGER_ON_BASE_TESTNET || "";  
@@ -19,13 +19,13 @@ export async function setContractInstance(): Promise<{ zkJwtProofManagerContract
 
 export function callSmartContractFunction(contractAddress: string, abi: any, functionName: string, args: any[]) {
   // @dev - Wagmi
-  const { data: hash, writeContract } = useWriteContract();
+  //const { data: hash, writeContract } = useWriteContract();
 
   writeContract({
-    contractAddress,
-    abi,
-    functionName,
-    args
+    address: contractAddress as `0x${string}`,
+    abi: abi,
+    functionName: functionName,
+    args: args
   })
 
   console.log("Transaction Hash: ", hash);
@@ -34,43 +34,38 @@ export function callSmartContractFunction(contractAddress: string, abi: any, fun
 /**
  * @notice - ZkJwtProofManager.sol# recordPublicInputsOfZkJwtProof() with Wagmi.
  */
-export async function recordPublicInputsOfZkJwtProof(
-  proof: Uint8Array,
-  publicInputs: Array<string | number>,
-  separatedPublicInputs: {
-    domain: string;
-    nullifierHash: string;
-    //emailHash: string;   // [TODO]: A proper hashing method is to be considered later.
-    walletAddress: string;
-    createdAt: string;
-  }
-): Promise<{ tx: any }> {
-  // @dev - Wagmi
+
+// Custom hook for recording public inputs on-chain
+export function recordPublicInputsOfZkJwtProof() {
   const { data: hash, writeContract } = useWriteContract();
 
-  // @dev - Set the ZkJwtProofManager contract instance
-  const { zkJwtProofManagerContractAddress, zkJwtProofManagerAbi } = await setContractInstance();
+  // Returns an async function to call the contract
+  return async function recordPublicInputsOfZkJwtProof(
+    _recordPublicInputsOfZkJwtProof: typeof writeContract,
+    proof: Uint8Array,
+    publicInputs: Array<string | number>,
+    separatedPublicInputs: {
+      domain: string;
+      nullifierHash: string;
+      //emailHash?: string;
+      walletAddress: string;
+      createdAt: string;
+    }
+  ) {
+    // @dev - Set the ZkJwtProofManager contract instance
+    const { zkJwtProofManagerContractAddress, zkJwtProofManagerAbi } = await setContractInstance();
 
-  // @dev - Convert Uint8Array proof to hex string proofHex
-  const proofHex = "0x" + Buffer.from(proof).toString("hex");
-  console.log(`proofHex: ${proofHex}`);
-  
-  // @dev - Call the recordPublicInputsOfZkJwtProof() function in the ZkJwtProofManager.sol
-  let tx: any;
-  //let txReceipt: any | null = null;
-  try {
-    tx = callSmartContractFunction(
-      zkJwtProofManagerContractAddress,
-      zkJwtProofManagerAbi,
-      "recordPublicInputsOfZkJwtProof",
-      [proofHex, publicInputs, separatedPublicInputs]
-    );
-    
-    // Wait for the transaction to be included.
-    //txReceipt = await tx.wait();
-  } catch (err) {
-    console.error(`Failed to send a transaction on BASE: ${err}`);
+    // @dev - Convert Uint8Array proof to hex string proofHex
+    const proofHex = "0x" + Buffer.from(proof).toString("hex");
+    console.log(`proofHex: ${proofHex}`);
+
+    let tx: any;
+
+    _recordPublicInputsOfZkJwtProof({
+      address: zkJwtProofManagerContractAddress as `0x${string}`,
+      abi: zkJwtProofManagerAbi,
+      functionName: "recordPublicInputsOfZkJwtProof",
+      args: [proofHex, publicInputs, separatedPublicInputs]
+    });
   }
-
-  return { tx };
 }
