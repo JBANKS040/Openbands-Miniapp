@@ -15,6 +15,7 @@ const geistMono = Geist_Mono({
 
 export async function generateMetadata(): Promise<Metadata> {
   const URL = process.env.NEXT_PUBLIC_URL;
+  const BASE = URL ? URL.replace(/\/$/, "") : undefined;
   const projectName = process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME || "Openbands";
   
   return {
@@ -23,16 +24,16 @@ export async function generateMetadata(): Promise<Metadata> {
     other: {
       'fc:frame': JSON.stringify({
         version: 'next',
-        imageUrl: process.env.NEXT_PUBLIC_APP_HERO_IMAGE || (URL ? `${URL}/hero.png` : undefined),
-        ogImageUrl: process.env.NEXT_PUBLIC_APP_OG_IMAGE || (URL ? `${URL}/hero.png` : undefined),
-        heroImageUrl: process.env.NEXT_PUBLIC_APP_HERO_IMAGE || (URL ? `${URL}/hero.png` : undefined),
+        imageUrl: process.env.NEXT_PUBLIC_APP_HERO_IMAGE || (BASE ? `${BASE}/hero.png` : undefined),
+        ogImageUrl: process.env.NEXT_PUBLIC_APP_OG_IMAGE || (BASE ? `${BASE}/hero.png` : undefined),
+        heroImageUrl: process.env.NEXT_PUBLIC_APP_HERO_IMAGE || (BASE ? `${BASE}/hero.png` : undefined),
         button: {
           title: `Launch ${projectName}`,
           action: {
             type: 'launch_frame',
             name: projectName,
-            url: URL,
-            splashImageUrl: process.env.NEXT_PUBLIC_APP_SPLASH_IMAGE || (URL ? `${URL}/splash.png` : undefined),
+            url: BASE,
+            splashImageUrl: process.env.NEXT_PUBLIC_APP_SPLASH_IMAGE || (BASE ? `${BASE}/splash.png` : undefined),
             splashBackgroundColor: process.env.NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR || "#0000ff",
           },
         },
