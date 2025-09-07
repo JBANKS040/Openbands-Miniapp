@@ -8,7 +8,7 @@ import artifactOfZkJwtProofManager from '../artifacts/ZkJwtProofManager.sol/ZkJw
 /**
  * @notice - Set the ZkJwtProofManager contract instance
  */
-export function setContractInstance(): { zkJwtProofManagerContractAddress: string, zkJwtProofManagerAbi: any } {
+export function setContractInstance(): { zkJwtProofManagerContractAddress: string, zkJwtProofManagerAbi: unknown } {
   // @dev - Create the ZkJwtProofManager contract instance
   const zkJwtProofManagerContractAddress: string = process.env.NEXT_PUBLIC_ZK_JWT_PROOF_MANAGER_ON_BASE_MAINNET || "";  
   //const zkJwtProofManagerContractAddress: string = process.env.NEXT_PUBLIC_ZK_JWT_PROOF_MANAGER_ON_BASE_TESTNET || "";  
@@ -59,7 +59,7 @@ export function recordPublicInputsOfZkJwtProof() {
     const proofHex = "0x" + Buffer.from(proof).toString("hex");
     console.log(`proofHex: ${proofHex}`);
 
-    let tx: any;
+    // let tx: any;
 
     // _recordPublicInputsOfZkJwtProof({
     //   address: zkJwtProofManagerContractAddress as `0x${string}`,
