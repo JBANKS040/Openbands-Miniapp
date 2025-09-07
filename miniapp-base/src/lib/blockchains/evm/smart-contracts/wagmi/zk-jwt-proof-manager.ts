@@ -17,19 +17,19 @@ export function setContractInstance(): { zkJwtProofManagerContractAddress: strin
   return { zkJwtProofManagerContractAddress, zkJwtProofManagerAbi };
 }
 
-export function callSmartContractFunction(contractAddress: string, abi: any, functionName: string, args: any[]) {
-  // @dev - Wagmi
-  //const { data: hash, writeContract } = useWriteContract();
+// export function callSmartContractFunction(contractAddress: string, abi: any, functionName: string, args: any[]) {
+//   // @dev - Wagmi
+//   //const { data: hash, writeContract } = useWriteContract();
 
-  writeContract({
-    address: contractAddress as `0x${string}`,
-    abi: abi,
-    functionName: functionName,
-    args: args
-  })
+//   writeContract({
+//     address: contractAddress as `0x${string}`,
+//     abi: abi,
+//     functionName: functionName,
+//     args: args
+//   })
 
-  console.log("Transaction Hash: ", hash);
-}
+//   console.log("Transaction Hash: ", hash);
+// }
 
 /**
  * @notice - ZkJwtProofManager.sol# recordPublicInputsOfZkJwtProof() with Wagmi.
@@ -37,11 +37,11 @@ export function callSmartContractFunction(contractAddress: string, abi: any, fun
 
 // Custom hook for recording public inputs on-chain
 export function recordPublicInputsOfZkJwtProof() {
-  const { data: hash, writeContract } = useWriteContract();
+  //const { data: hash, writeContract } = useWriteContract();
 
   // Returns an async function to call the contract
   return async function recordPublicInputsOfZkJwtProof(
-    _recordPublicInputsOfZkJwtProof: typeof writeContract,
+    //_recordPublicInputsOfZkJwtProof: typeof writeContract,
     proof: Uint8Array,
     publicInputs: Array<string | number>,
     separatedPublicInputs: {
@@ -61,11 +61,11 @@ export function recordPublicInputsOfZkJwtProof() {
 
     let tx: any;
 
-    _recordPublicInputsOfZkJwtProof({
-      address: zkJwtProofManagerContractAddress as `0x${string}`,
-      abi: zkJwtProofManagerAbi,
-      functionName: "recordPublicInputsOfZkJwtProof",
-      args: [proofHex, publicInputs, separatedPublicInputs]
-    });
+    // _recordPublicInputsOfZkJwtProof({
+    //   address: zkJwtProofManagerContractAddress as `0x${string}`,
+    //   abi: zkJwtProofManagerAbi,
+    //   functionName: "recordPublicInputsOfZkJwtProof",
+    //   args: [proofHex, publicInputs, separatedPublicInputs]
+    // });
   }
 }
