@@ -140,7 +140,7 @@ export async function GET(req: Request) {
   return new Response(JSON.stringify(payload), {
     headers: {
       'content-type': 'application/json; charset=utf-8',
-      'cache-control': 'public, max-age=300',
+      'cache-control': 'public, max-age=3600',
     },
   });
 }
