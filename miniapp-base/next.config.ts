@@ -10,9 +10,28 @@ const nextConfig: NextConfig = {
           { key: "Content-Type", value: "application/json; charset=utf-8" },
         ],
       },
+      // Explicit assets used by manifest/embeds
       {
-        // Cache common image assets longer for crawlers
-        source: "/:path*{.png,.jpg,.jpeg,.gif,.webp}",
+        source: "/hero.png",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=86400, immutable" },
+        ],
+      },
+      {
+        source: "/splash.png",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=86400, immutable" },
+        ],
+      },
+      {
+        source: "/Openbands.png",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=86400, immutable" },
+        ],
+      },
+      {
+        // Generic pattern for other images
+        source: "/(.*\\.(png|jpg|jpeg|gif|webp))",
         headers: [
           { key: "Cache-Control", value: "public, max-age=86400, immutable" },
         ],
