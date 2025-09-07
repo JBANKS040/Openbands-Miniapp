@@ -117,6 +117,7 @@ export async function GET(req: Request) {
       splashImageUrl: process.env.NEXT_PUBLIC_APP_SPLASH_IMAGE || `${BASE}/splash.png`,
       splashBackgroundColor: process.env.NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR || '#0000ff',
       homeUrl: BASE,
+      canonicalDomain: new URL(BASE).host,
       webhookUrl: `${BASE}/api/webhook`,
       primaryCategory: process.env.NEXT_PUBLIC_APP_PRIMARY_CATEGORY || 'social',
       tags,
