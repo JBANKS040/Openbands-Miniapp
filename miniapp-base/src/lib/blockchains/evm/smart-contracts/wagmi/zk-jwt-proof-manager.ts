@@ -18,19 +18,19 @@ export async function setContractInstance(): Promise<{ zkJwtProofManagerContract
   return { zkJwtProofManagerContractAddress, zkJwtProofManagerAbi: zkJwtProofManagerAbi as Abi };
 }
 
-function callSmartContractFunction(contractAddress: string, abi: any, functionName: string, args: any[]) {
-  // @dev - Wagmi
-  // const { data: hash, writeContract } = useWriteContract();
+// function callSmartContractFunction(contractAddress: string, abi: Abi, functionName: string, args: string[]) {
+//   // @dev - Wagmi
+//   const { data: hash, writeContract } = useWriteContract();
 
-  // writeContract({
-  //   address: contractAddress,
-  //   abi: abi,
-  //   functionName: functionName,
-  //   args: args
-  // })
+//   writeContract({
+//     address: contractAddress,
+//     abi: abi,
+//     functionName: functionName,
+//     args: args
+//   })
 
-  // console.log("Transaction Hash: ", hash);
-}
+//   console.log("Transaction Hash: ", hash);
+// }
 
 /**
  * @notice - ZkJwtProofManager.sol# recordPublicInputsOfZkJwtProof() with Wagmi.
@@ -60,7 +60,7 @@ export function recordPublicInputsOfZkJwtProof() {
     const proofHex = "0x" + Buffer.from(proof).toString("hex");
     console.log(`proofHex: ${proofHex}`);
 
-    // let tx: any;
+    // let tx: string | undefined;
     // try {
     //   tx = writeContract({
     //     address: zkJwtProofManagerContractAddress as `0x${string}`,
