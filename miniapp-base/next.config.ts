@@ -29,9 +29,33 @@ const nextConfig: NextConfig = {
           { key: "Cache-Control", value: "public, max-age=86400, immutable" },
         ],
       },
+      // Generic patterns without capturing groups (one per extension)
       {
-        // Generic pattern for other images
-        source: "/(.*\\.(png|jpg|jpeg|gif|webp))",
+        source: "/:path*.png",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=86400, immutable" },
+        ],
+      },
+      {
+        source: "/:path*.jpg",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=86400, immutable" },
+        ],
+      },
+      {
+        source: "/:path*.jpeg",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=86400, immutable" },
+        ],
+      },
+      {
+        source: "/:path*.gif",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=86400, immutable" },
+        ],
+      },
+      {
+        source: "/:path*.webp",
         headers: [
           { key: "Cache-Control", value: "public, max-age=86400, immutable" },
         ],
