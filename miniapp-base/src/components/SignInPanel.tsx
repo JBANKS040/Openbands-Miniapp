@@ -22,7 +22,7 @@ import {
 
 import {
   recordPublicInputsOfZkJwtProof,
-  setContractInstance
+  setZkJwtProofManagerContractInstance
 } from "@/lib/blockchains/evm/smart-contracts/wagmi/zk-jwt-proof-manager";
 import { useWriteContract } from 'wagmi'
 import { convertProofToHex } from "@/lib/blockchains/evm/utils/convert-proof-to-hex";
@@ -74,7 +74,7 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
       console.log(`nullifier (from on-chain) by a domain, wallet address: ${nullifierFromOnChainByDomainAndWalletAddress}`);
 
       // @dev - If there is no nullifierFromOnChain, which is stored on-chain and is associated with a given wallet address, it will be recorded on-chain (BASE).
-      //if (nullifierFromOnChainByDomainAndWalletAddress === "0x0000000000000000000000000000000000000000000000000000000000000000") {
+      if (nullifierFromOnChainByDomainAndWalletAddress === "0x0000000000000000000000000000000000000000000000000000000000000000") {
         // @dev - Generate a zkJWT proof
         const { proof, publicInputs } = await generateZkJwtProof(decoded.email, resp.credential);
 
@@ -118,8 +118,8 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
           const proofHex = convertProofToHex(proof);
           console.log(`proofHex: ${proofHex}`);
 
-          // @dev - [Result]: Successful
-          const { zkJwtProofManagerContractAddress, zkJwtProofManagerAbi } = setContractInstance();
+          // @dev - Call the ZkJwtProofManager#recordPublicInputsOfZkJwtProof() with Wagmi
+          const { zkJwtProofManagerContractAddress, zkJwtProofManagerAbi } = setZkJwtProofManagerContractInstance();
           recordPublicInputsOfZkJwtProof({
             abi: zkJwtProofManagerAbi,
             address: zkJwtProofManagerContractAddress as `0x${string}`,
@@ -134,32 +134,32 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
 
         // We'll discard the email/token for privacy and just sign in anonymously
         signIn(domainFromZkJwtCircuit);
-      // } else if (nullifierFromOnChainByDomainAndWalletAddress !== "0x0000000000000000000000000000000000000000000000000000000000000000") {
-      //   // @dev - Get a domain from JWT and wallet address from a connected wallet
-      //   //const domainFromGoogleJwt = extractDomain(decoded.email);
-      //   const walletAddressFromConnectedWallet = signer.address;
-      //   console.log(`walletAddressFromConnectedWallet: ${walletAddressFromConnectedWallet}`);
+      } else if (nullifierFromOnChainByDomainAndWalletAddress !== "0x0000000000000000000000000000000000000000000000000000000000000000") {
+        // @dev - Get a domain from JWT and wallet address from a connected wallet
+        //const domainFromGoogleJwt = extractDomain(decoded.email);
+        const walletAddressFromConnectedWallet = signer.address;
+        console.log(`walletAddressFromConnectedWallet: ${walletAddressFromConnectedWallet}`);
 
-      //   // @dev - Get public inputs from on-chain
-      //   const publicInputsFromOnChain = await getPublicInputsOfZkJwtProof(signer, nullifierFromOnChainByDomainAndWalletAddress);
-      //   console.log(`publicInputs (from on-chain): ${JSON.stringify(publicInputsFromOnChain, null, 2)}`);
-      //   const _domainFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[0];
-      //   const _nullifierFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[1];
-      //   //const _hashedEmailFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[2];  // [TODO]: A proper hashing method is to be considered later.
-      //   const _walletAddressFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[2];
+        // @dev - Get public inputs from on-chain
+        const publicInputsFromOnChain = await getPublicInputsOfZkJwtProof(signer, nullifierFromOnChainByDomainAndWalletAddress);
+        console.log(`publicInputs (from on-chain): ${JSON.stringify(publicInputsFromOnChain, null, 2)}`);
+        const _domainFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[0];
+        const _nullifierFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[1];
+        //const _hashedEmailFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[2];  // [TODO]: A proper hashing method is to be considered later.
+        const _walletAddressFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[2];
 
-      //   if (
-      //     _domainFromOnChain === domainFromGoogleJwt && 
-      //     _nullifierFromOnChain === nullifierFromOnChainByDomainAndWalletAddress && 
-      //     //_hashedEmailFromOnChain === hashedEmailFromGoogleJwt && // [TODO]: A proper hashing method is to be considered later.
-      //     _walletAddressFromOnChain === walletAddressFromConnectedWallet
-      //   ) {
-      //     // We'll discard the email/token for privacy and just sign in anonymously
-      //     signIn(domainFromGoogleJwt);
-      //   }
-      // } else {
-      //   return;
-      // }
+        if (
+          _domainFromOnChain === domainFromGoogleJwt && 
+          _nullifierFromOnChain === nullifierFromOnChainByDomainAndWalletAddress && 
+          //_hashedEmailFromOnChain === hashedEmailFromGoogleJwt && // [TODO]: A proper hashing method is to be considered later.
+          _walletAddressFromOnChain === walletAddressFromConnectedWallet
+        ) {
+          // We'll discard the email/token for privacy and just sign in anonymously
+          signIn(domainFromGoogleJwt);
+        }
+      } else {
+        return;
+      }
 
       // // We'll discard the email/token for privacy and just sign in anonymously
       // signIn();

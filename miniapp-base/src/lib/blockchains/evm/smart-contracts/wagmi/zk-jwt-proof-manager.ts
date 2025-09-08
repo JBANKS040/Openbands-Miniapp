@@ -9,7 +9,7 @@ import artifactOfZkJwtProofManager from '../artifacts/ZkJwtProofManager.sol/ZkJw
 /**
  * @notice - Set the ZkJwtProofManager contract instance
  */
-export function setContractInstance(): { zkJwtProofManagerContractAddress: string, zkJwtProofManagerAbi: Abi } {
+export function setZkJwtProofManagerContractInstance(): { zkJwtProofManagerContractAddress: string, zkJwtProofManagerAbi: Abi } {
   // @dev - Create the ZkJwtProofManager contract instance
   const zkJwtProofManagerContractAddress: string = process.env.NEXT_PUBLIC_ZK_JWT_PROOF_MANAGER_ON_BASE_MAINNET || "";  
   //const zkJwtProofManagerContractAddress: string = process.env.NEXT_PUBLIC_ZK_JWT_PROOF_MANAGER_ON_BASE_TESTNET || "";  
