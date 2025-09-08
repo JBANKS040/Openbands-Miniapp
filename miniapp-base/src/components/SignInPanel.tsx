@@ -21,11 +21,14 @@ import {
 } from "@/lib/blockchains/evm/smart-contracts/ethers-js/zk-jwt-proof-manager";
 
 import {
-  recordPublicInputsOfZkJwtProof,
-  setZkJwtProofManagerContractInstance
+  //recordPublicInputsOfZkJwtProof,
+  setZkJwtProofManagerContractInstance,
+  zkJwtProofManagerContractConfig
 } from "@/lib/blockchains/evm/smart-contracts/wagmi/zk-jwt-proof-manager";
 import { useWriteContract, useReadContract } from 'wagmi'
+import { readContract } from '@wagmi/core'
 import { convertProofToHex } from "@/lib/blockchains/evm/utils/convert-proof-to-hex";
+import { wagmiConfig } from "@/lib/blockchains/evm/smart-contracts/wagmi/config";
 
 import { write } from "fs";
 
@@ -39,13 +42,8 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
   const hasValidGoogleClientId = googleClientId && googleClientId !== "";
   
-  // ✅ hooks must be at the top level
+  // [NOTE]: Hooks must be at the top level for a write contract function call
   const { writeContract: recordPublicInputsOfZkJwtProof, isPending: recordPublicInputsOfZkJwtProofIsPending } = useWriteContract();
-  //const { writeContract: functionName, isPending: functionIsPending } = useWriteContract();
-  const { 
-    readContract: getPublicInputsOfZkJwtProof, 
-    readContract: getNullifiersByDomainAndWalletAddresses 
-  } = useReadContract();
 
   const onSuccess = async(resp: CredentialResponse) => {
     if (!resp.credential) return;
@@ -76,7 +74,7 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
       const { zkJwtProofManagerContractAddress, zkJwtProofManagerAbi } = setZkJwtProofManagerContractInstance();
 
       // @dev - Retrieve a nullifierHash, which is stored on-chain and is associated with a given wallet address
-      const nullifierFromOnChainByDomainAndWalletAddress = getNullifiersByDomainAndWalletAddresses({
+      const nullifierFromOnChainByDomainAndWalletAddress = await readContract(wagmiConfig, {
           abi: zkJwtProofManagerAbi,
           address: zkJwtProofManagerContractAddress as `0x${string}`,
           functionName: 'getNullifiersByDomainAndWalletAddresses',
@@ -153,14 +151,14 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
         console.log(`walletAddressFromConnectedWallet: ${walletAddressFromConnectedWallet}`);
 
         // @dev - Get public inputs from on-chain
-        const publicInputsFromOnChain = getPublicInputsOfZkJwtProof({
+        const publicInputsFromOnChain = await readContract(wagmiConfig, {
             abi: zkJwtProofManagerAbi,
             address: zkJwtProofManagerContractAddress as `0x${string}`,
             functionName: 'getPublicInputsOfZkJwtProof',
             args: [nullifierFromOnChainByDomainAndWalletAddress]
         });
-        //const publicInputsFromOnChain = await getPublicInputsOfZkJwtProof(signer, nullifierFromOnChainByDomainAndWalletAddress);
         console.log(`publicInputs (from on-chain): ${JSON.stringify(publicInputsFromOnChain, null, 2)}`);
+
         const _domainFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[0];
         const _nullifierFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[1];
         //const _hashedEmailFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[2];  // [TODO]: A proper hashing method is to be considered later.

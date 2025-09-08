@@ -14,9 +14,16 @@ export function setZkJwtProofManagerContractInstance(): { zkJwtProofManagerContr
   const zkJwtProofManagerContractAddress: string = process.env.NEXT_PUBLIC_ZK_JWT_PROOF_MANAGER_ON_BASE_MAINNET || "";  
   //const zkJwtProofManagerContractAddress: string = process.env.NEXT_PUBLIC_ZK_JWT_PROOF_MANAGER_ON_BASE_TESTNET || "";  
   const zkJwtProofManagerAbi = artifactOfZkJwtProofManager.abi;
-  console.log(`zkJwtProofManagerContractAddress: ${zkJwtProofManagerContractAddress}`);
+  //console.log(`zkJwtProofManagerContractAddress: ${zkJwtProofManagerContractAddress}`);
   return { zkJwtProofManagerContractAddress, zkJwtProofManagerAbi: zkJwtProofManagerAbi as Abi };
 }
+
+
+const { zkJwtProofManagerContractAddress, zkJwtProofManagerAbi } = setZkJwtProofManagerContractInstance();
+export const zkJwtProofManagerContractConfig = {
+  address: zkJwtProofManagerContractAddress,
+  abi: zkJwtProofManagerAbi,
+} as const
 
 // function callSmartContractFunction(contractAddress: string, abi: Abi, functionName: string, args: string[]) {
 //   // @dev - Wagmi

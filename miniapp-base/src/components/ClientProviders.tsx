@@ -17,7 +17,6 @@ export default function ClientProviders({ children }: PropsWithChildren) {
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";                // @dev - Production
   //const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID_STAGING || "";      // @dev - Staging
   //const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID_DEVELOPMENT || "";  // @dev - Local development and "Preview"
-  console.log("Google OAuth Client ID: ", clientId);
   const apiKey =
     process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY ||
     process.env.NEXT_PUBLIC_CDP_CLIENT_API_KEY ||
