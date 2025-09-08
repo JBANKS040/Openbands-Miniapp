@@ -126,9 +126,6 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
             functionName: 'recordPublicInputsOfZkJwtProof',
             args: [proofHex, publicInputs, separatedPublicInputs]
           });
-
-
-          //await recordPublicInputsOfZkJwtProof(functionName, proof, publicInputs, separatedPublicInputs);
           //const { txReceipt } = await recordPublicInputsOfZkJwtProof(signer, proof, publicInputs, separatedPublicInputs);
           //console.log(`txReceipt: ${JSON.stringify(txReceipt, null, 2)}`);
         } catch (error) {
