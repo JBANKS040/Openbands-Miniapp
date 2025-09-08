@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useMiniKit } from '@coinbase/onchainkit/minikit';
 import { useApp } from '@/context/AppContext';
-import { usePosts } from '@/lib/supabase';
+import { usePosts, useCompanies } from '@/lib/supabase';
 import { SignInPanel } from '@/components/SignInPanel';
 import { PostComposer } from '@/components/PostComposer';
 import { PostCard } from '@/components/PostCard';
@@ -21,6 +21,7 @@ export default function Home() {
   const [showSignIn, setShowSignIn] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
 
   // @dev - Fetch from an EVM wallet
   const [provider, setProvider] = useState<BrowserProvider | null>(null);
@@ -28,6 +29,9 @@ export default function Home() {
 
   // Fetch posts from Supabase
   const { posts, loading, error, refetch } = usePosts(sort);
+  
+  // Fetch companies for search
+  const { companies } = useCompanies();
 
   // MiniKit frame lifecycle: signal ready once mounted
   const { setFrameReady, isFrameReady } = useMiniKit(); // @dev - [NOTE]: When the local development, this line, which includes the "setFrameReady", "isFrameReady", "#useMiniKit" should be commented out to avoid an error. (For this line and the lines in the useEffect())
@@ -45,22 +49,38 @@ export default function Home() {
     init();
   }, [isFrameReady, setFrameReady]);
 
-  // Close dropdown when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (showDropdown) {
         setShowDropdown(false);
       }
+      if (showSearchDropdown) {
+        setShowSearchDropdown(false);
+      }
     };
 
-    if (showDropdown) {
+    if (showDropdown || showSearchDropdown) {
       document.addEventListener('click', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('click', handleClickOutside);
     };
-  }, [showDropdown]);
+  }, [showDropdown, showSearchDropdown]);
+
+  // Filter companies based on search query
+  const filteredCompanies = companies.filter(company =>
+    company.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Handle company selection
+  const handleCompanySelect = (company: string) => {
+    setSearchQuery('');
+    setShowSearchDropdown(false);
+    // Navigate to company page
+    window.location.href = `/company/${company}`;
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -120,7 +140,15 @@ export default function Home() {
                   type="text"
                   placeholder="Search by company"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setShowSearchDropdown(e.target.value.length > 0);
+                  }}
+                  onFocus={() => {
+                    if (searchQuery.length > 0) {
+                      setShowSearchDropdown(true);
+                    }
+                  }}
                   className="w-full px-3 py-1.5 pl-8 text-sm bg-gray-100 border-0 rounded-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors"
                 />
                 <svg 
@@ -131,6 +159,35 @@ export default function Home() {
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
+                
+                {/* Search Results Dropdown */}
+                {showSearchDropdown && filteredCompanies.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 max-h-48 overflow-y-auto">
+                    {filteredCompanies.slice(0, 10).map((company) => (
+                      <button
+                        key={company}
+                        onClick={() => handleCompanySelect(company)}
+                        className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg transition-colors"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                          </svg>
+                          <span className="text-gray-800">{company}</span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                
+                {/* No Results */}
+                {showSearchDropdown && searchQuery.length > 0 && filteredCompanies.length === 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
+                    <div className="px-3 py-2 text-sm text-gray-500 text-center">
+                      No companies found
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
             

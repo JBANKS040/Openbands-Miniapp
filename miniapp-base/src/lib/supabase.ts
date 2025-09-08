@@ -410,3 +410,55 @@ export async function likeComment(commentId: string, anonymousId: string, compan
       ]);
   }
 }
+
+export function useCompanies() {
+  const [companies, setCompanies] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchCompanies = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Check if Supabase is configured
+      if (!isSupabaseConfigured()) {
+        setCompanies([]);
+        setError(null);
+        setLoading(false);
+        return;
+      }
+
+      const supabaseClient = getSupabase();
+
+      // Get distinct company domains from posts
+      const { data, error: fetchError } = await supabaseClient
+        .from('posts')
+        .select('company_domain')
+        .not('company_domain', 'is', null);
+
+      if (fetchError) throw fetchError;
+
+      // Extract unique company domains
+      const uniqueCompanies = Array.from(
+        new Set(
+          (data || [])
+            .map(row => row.company_domain)
+            .filter(Boolean)
+        )
+      ).sort();
+
+      setCompanies(uniqueCompanies);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch companies');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCompanies();
+  }, [fetchCompanies]);
+
+  return { companies, loading, error, refetch: fetchCompanies };
+}

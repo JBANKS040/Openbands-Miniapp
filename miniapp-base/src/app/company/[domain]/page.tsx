@@ -18,21 +18,7 @@ export default function CompanyPage() {
   // Fetch posts for this specific company
   const { posts, loading, error, refetch } = useCompanyPosts(domain, sort);
 
-  const canPost = companyDomain === domain;
-
-  if (!isAuthenticated || !anonymousId) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-white rounded-lg shadow-sm border p-6 text-center">
-          <h2 className="text-xl font-semibold mb-4">Sign in required</h2>
-          <p className="text-gray-600 mb-4">You need to sign in to view company pages.</p>
-          <Link href="/" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-            Go to sign in
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  const canPost = isAuthenticated && companyDomain === domain;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -50,7 +36,7 @@ export default function CompanyPage() {
             
             <div className="flex items-center space-x-4">
               <SortToggle sort={sort} onSortChange={setSort} />
-              {isAuthenticated && (
+              {isAuthenticated ? (
                 <button
                   onClick={signOut}
                   className="p-1 hover:bg-gray-100 rounded"
@@ -60,6 +46,13 @@ export default function CompanyPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                   </svg>
                 </button>
+              ) : (
+                <Link 
+                  href="/"
+                  className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+                >
+                  Sign In
+                </Link>
               )}
             </div>
           </div>
@@ -70,6 +63,20 @@ export default function CompanyPage() {
       <main className="max-w-md mx-auto px-4 py-4 space-y-6">
         {canPost ? (
           <PostComposer onPosted={() => refetch({ silent: true })} />
+        ) : !isAuthenticated ? (
+          <div className="bg-white rounded-lg shadow-sm border p-6">
+            <div className="text-center py-6">
+              <p className="text-gray-600 mb-2">
+                Sign in to post to this company page.
+              </p>
+              <Link 
+                href="/"
+                className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 mt-4"
+              >
+                Sign In to Post
+              </Link>
+            </div>
+          </div>
         ) : (
           <div className="bg-white rounded-lg shadow-sm border p-6">
             <div className="text-center py-6">
