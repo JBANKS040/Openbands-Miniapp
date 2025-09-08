@@ -81,12 +81,12 @@ export default function CompanyPage() {
           <div className="bg-white rounded-lg shadow-sm border p-6">
             <div className="text-center py-6">
               <p className="text-gray-600 mb-2">
-                You can only post to your own company page.
+                Only users from <span className="font-semibold">{domain}</span> can post here.
               </p>
               <p className="text-sm text-gray-500">
                 Your company: <span className="font-medium">{companyDomain || 'Unknown'}</span>
               </p>
-              {companyDomain && (
+              {companyDomain && companyDomain !== domain && (
                 <Link 
                   href={`/company/${companyDomain}`}
                   className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 mt-4"

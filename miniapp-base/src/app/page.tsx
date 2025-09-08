@@ -7,6 +7,7 @@ import { SignInPanel } from '@/components/SignInPanel';
 import { PostComposer } from '@/components/PostComposer';
 import { PostCard } from '@/components/PostCard';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 // @dev - Connecting a Browser Wallet button
 import ConnectWalletButton from '../components/connect-wallets/ConnectWalletButton';
@@ -22,6 +23,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+  const router = useRouter();
 
   // @dev - Fetch from an EVM wallet
   const [provider, setProvider] = useState<BrowserProvider | null>(null);
@@ -78,8 +80,8 @@ export default function Home() {
   const handleCompanySelect = (company: string) => {
     setSearchQuery('');
     setShowSearchDropdown(false);
-    // Navigate to company page
-    window.location.href = `/company/${company}`;
+    // Navigate to company page using Next.js router
+    router.push(`/company/${company}`);
   };
 
   return (

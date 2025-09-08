@@ -15,10 +15,23 @@ interface AppContextValue extends AppState {
 const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: PropsWithChildren) {
-  const [state, setState] = useState<AppState>({
-    isAuthenticated: false,
-    anonymousId: null,
-    companyDomain: null,
+  const [state, setState] = useState<AppState>(() => {
+    // Initialize state from localStorage if available
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('app-auth-state');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch {
+          // If parsing fails, use default state
+        }
+      }
+    }
+    return {
+      isAuthenticated: false,
+      anonymousId: null,
+      companyDomain: null,
+    };
   });
 
   const signIn = useCallback((domain: string) => {
@@ -29,19 +42,33 @@ export function AppProvider({ children }: PropsWithChildren) {
     // Later this will be replaced with ZK proof verification
     const companyDomain = domain;
 
-    setState({
+    const newState = {
       isAuthenticated: true,
       anonymousId,
       companyDomain,
-    });
+    };
+
+    setState(newState);
+    
+    // Persist to localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('app-auth-state', JSON.stringify(newState));
+    }
   }, []);
 
   const signOut = useCallback(() => {
-    setState({
+    const newState = {
       isAuthenticated: false,
       anonymousId: null,
       companyDomain: null,
-    });
+    };
+
+    setState(newState);
+    
+    // Clear from localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('app-auth-state');
+    }
   }, []);
 
   const value: AppContextValue = {
