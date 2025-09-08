@@ -24,7 +24,7 @@ import {
   recordPublicInputsOfZkJwtProof,
   setZkJwtProofManagerContractInstance
 } from "@/lib/blockchains/evm/smart-contracts/wagmi/zk-jwt-proof-manager";
-import { useWriteContract } from 'wagmi'
+import { useWriteContract, useReadContract } from 'wagmi'
 import { convertProofToHex } from "@/lib/blockchains/evm/utils/convert-proof-to-hex";
 
 import { write } from "fs";
@@ -42,6 +42,10 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
   // ✅ hooks must be at the top level
   const { writeContract: recordPublicInputsOfZkJwtProof, isPending: recordPublicInputsOfZkJwtProofIsPending } = useWriteContract();
   //const { writeContract: functionName, isPending: functionIsPending } = useWriteContract();
+  const { 
+    readContract: getPublicInputsOfZkJwtProof, 
+    readContract: getNullifiersByDomainAndWalletAddresses 
+  } = useReadContract();
 
   const onSuccess = async(resp: CredentialResponse) => {
     if (!resp.credential) return;
@@ -68,8 +72,17 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
       const hashedEmailFromGoogleJwt = hashEmail(email);
       console.log('a hashed email (from JWT):', hashedEmailFromGoogleJwt);
 
+      // @dev - Set the ZkJwtProofManager contract instance (contract address + ABI)
+      const { zkJwtProofManagerContractAddress, zkJwtProofManagerAbi } = setZkJwtProofManagerContractInstance();
+
       // @dev - Retrieve a nullifierHash, which is stored on-chain and is associated with a given wallet address
-      const { nullifierFromOnChainByDomainAndWalletAddress } = await getNullifiersByDomainAndWalletAddresses(signer, domainFromGoogleJwt);
+      const nullifierFromOnChainByDomainAndWalletAddress = getNullifiersByDomainAndWalletAddresses({
+          abi: zkJwtProofManagerAbi,
+          address: zkJwtProofManagerContractAddress as `0x${string}`,
+          functionName: 'getNullifiersByDomainAndWalletAddresses',
+          args: [domainFromGoogleJwt]
+      });
+      //const { nullifierFromOnChainByDomainAndWalletAddress } = await getNullifiersByDomainAndWalletAddresses(signer, domainFromGoogleJwt);
       //const { nullifierFromOnChainByDomainAndEmailHashAndWalletAddress } = await getNullifiersByDomainAndEmailHashAndWalletAddresses(signer, domainFromGoogleJwt, hashedEmailFromGoogleJwt);
       console.log(`nullifier (from on-chain) by a domain, wallet address: ${nullifierFromOnChainByDomainAndWalletAddress}`);
 
@@ -91,11 +104,11 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
         // @dev - Smart contract interactions
         //console.log(`signer (in the SignInPanel):`, signer); // @dev - The data type of "signer" is an "object" type.
 
-        const { isValidProofViaHonkVerifier } = await verifyViaHonkVerifier(signer, proof, publicInputs);
-        console.log(`Is a proof valid via the HonkVerifier?: ${isValidProofViaHonkVerifier}`);  // @dev - [Error]: PublicInputsLengthWrong()
+        //const { isValidProofViaHonkVerifier } = await verifyViaHonkVerifier(signer, proof, publicInputs);
+        //console.log(`Is a proof valid via the HonkVerifier?: ${isValidProofViaHonkVerifier}`);  // @dev - [Error]: PublicInputsLengthWrong()
 
-        const { isValidProof } = await verifyZkJwtProof(signer, proof, publicInputs);
-        console.log(`Is a proof valid via the ZkJwtProofVerifier?: ${isValidProof}`);
+        //const { isValidProof } = await verifyZkJwtProof(signer, proof, publicInputs);
+        //console.log(`Is a proof valid via the ZkJwtProofVerifier?: ${isValidProof}`);
 
         // @dev - Prepare separated public inputs for the smart contract
         const nullifierFromZkJwtCircuit = publicInputs[publicInputs.length - 1]; // @dev - The nullifier is the last of the public inputs
@@ -119,7 +132,6 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
           console.log(`proofHex: ${proofHex}`);
 
           // @dev - Call the ZkJwtProofManager#recordPublicInputsOfZkJwtProof() with Wagmi
-          const { zkJwtProofManagerContractAddress, zkJwtProofManagerAbi } = setZkJwtProofManagerContractInstance();
           recordPublicInputsOfZkJwtProof({
             abi: zkJwtProofManagerAbi,
             address: zkJwtProofManagerContractAddress as `0x${string}`,
@@ -141,7 +153,13 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
         console.log(`walletAddressFromConnectedWallet: ${walletAddressFromConnectedWallet}`);
 
         // @dev - Get public inputs from on-chain
-        const publicInputsFromOnChain = await getPublicInputsOfZkJwtProof(signer, nullifierFromOnChainByDomainAndWalletAddress);
+        const publicInputsFromOnChain = getPublicInputsOfZkJwtProof({
+            abi: zkJwtProofManagerAbi,
+            address: zkJwtProofManagerContractAddress as `0x${string}`,
+            functionName: 'getPublicInputsOfZkJwtProof',
+            args: [nullifierFromOnChainByDomainAndWalletAddress]
+        });
+        //const publicInputsFromOnChain = await getPublicInputsOfZkJwtProof(signer, nullifierFromOnChainByDomainAndWalletAddress);
         console.log(`publicInputs (from on-chain): ${JSON.stringify(publicInputsFromOnChain, null, 2)}`);
         const _domainFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[0];
         const _nullifierFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[1];

@@ -21,56 +21,55 @@ export function setZkJwtProofManagerContractInstance(): { zkJwtProofManagerContr
 // function callSmartContractFunction(contractAddress: string, abi: Abi, functionName: string, args: string[]) {
 //   // @dev - Wagmi
 //   const { data: hash, writeContract } = useWriteContract();
-
+// 
 //   writeContract({
 //     address: contractAddress,
 //     abi: abi,
 //     functionName: functionName,
 //     args: args
 //   })
-
+// 
 //   console.log("Transaction Hash: ", hash);
 // }
 
 /**
  * @notice - ZkJwtProofManager.sol# recordPublicInputsOfZkJwtProof() with Wagmi.
+ * @dev - [NOTE]: Not used at the moment.
  */
-
-// Custom hook for recording public inputs on-chain
-export function recordPublicInputsOfZkJwtProof() {
-  //const { data: hash, writeContract } = useWriteContract();
-
-  // Returns an async function to call the contract
-  return async function recordPublicInputsOfZkJwtProof(
-    //_recordPublicInputsOfZkJwtProof: typeof writeContract,
-    proof: Uint8Array,
-    publicInputs: Array<string | number>,
-    separatedPublicInputs: {
-      domain: string;
-      nullifierHash: string;
-      //emailHash?: string;
-      walletAddress: string;
-      createdAt: string;
-    }
-  ) {
-    // @dev - Set the ZkJwtProofManager contract instance
-    const { zkJwtProofManagerContractAddress, zkJwtProofManagerAbi } = await setContractInstance();
-
-    // @dev - Convert Uint8Array proof to hex string proofHex
-    const proofHex = "0x" + Buffer.from(proof).toString("hex");
-    console.log(`proofHex: ${proofHex}`);
-
-    // let tx: string | undefined;
-    // try {
-    //   tx = writeContract({
-    //     address: zkJwtProofManagerContractAddress as `0x${string}`,
-    //     abi: zkJwtProofManagerAbi,
-    //     functionName: "recordPublicInputsOfZkJwtProof",
-    //     args: [proofHex, publicInputs, separatedPublicInputs]
-    //   });
-    // } catch (err) {
-    //   console.error(`Failed to send a // transaction on BASE: ${err}`);
-    // }
-    // return { tx };
-  }
-}
+// export function recordPublicInputsOfZkJwtProof() {
+//   const { data: hash, writeContract } = useWriteContract();
+// 
+//   // Returns an async function to call the contract
+//   return async function recordPublicInputsOfZkJwtProof(
+//     //_recordPublicInputsOfZkJwtProof: typeof writeContract,
+//     proof: Uint8Array,
+//     publicInputs: Array<string | number>,
+//     separatedPublicInputs: {
+//       domain: string;
+//       nullifierHash: string;
+//       //emailHash?: string;
+//       walletAddress: string;
+//       createdAt: string;
+//     }
+//   ) {
+//     // @dev - Set the ZkJwtProofManager contract instance
+//     const { zkJwtProofManagerContractAddress, zkJwtProofManagerAbi } = await setZkJwtProofManagerContractInstance();
+// 
+//     // @dev - Convert Uint8Array proof to hex string proofHex
+//     const proofHex = "0x" + Buffer.from(proof).toString("hex");
+//     console.log(`proofHex: ${proofHex}`);
+// 
+//     let tx: string | undefined;
+//     try {
+//       tx = writeContract({
+//         address: zkJwtProofManagerContractAddress as `0x${string}`,
+//         abi: zkJwtProofManagerAbi,
+//         functionName: "recordPublicInputsOfZkJwtProof",
+//         args: [proofHex, publicInputs, separatedPublicInputs]
+//       });
+//     } catch (err) {
+//       console.error(`Failed to send a // transaction on BASE: ${err}`);
+//     }
+//     return { tx };
+//   }
+// }
