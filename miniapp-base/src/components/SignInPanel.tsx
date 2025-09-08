@@ -149,7 +149,9 @@ export function SignInPanel() { // @dev - For Wagmi
       } else if (nullifierFromOnChainByDomainAndWalletAddress !== "0x0000000000000000000000000000000000000000000000000000000000000000") {
         // @dev - Get a domain from JWT and wallet address from a connected wallet
         //const domainFromGoogleJwt = extractDomain(decoded.email);
-        const walletAddressFromConnectedWallet = signer.address;
+        
+        const walletAddressFromConnectedWallet = getAccount(wagmiConfig).address;
+        //const walletAddressFromConnectedWallet = signer.address;
         console.log(`walletAddressFromConnectedWallet: ${walletAddressFromConnectedWallet}`);
 
         // @dev - Get public inputs from on-chain
