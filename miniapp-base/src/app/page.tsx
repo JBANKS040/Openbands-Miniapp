@@ -6,7 +6,6 @@ import { usePosts } from '@/lib/supabase';
 import { SignInPanel } from '@/components/SignInPanel';
 import { PostComposer } from '@/components/PostComposer';
 import { PostCard } from '@/components/PostCard';
-import { SortToggle } from '@/components/SortToggle';
 import Link from 'next/link';
 
 // @dev - Connecting a Browser Wallet button
@@ -20,6 +19,8 @@ export default function Home() {
   const { isAuthenticated, anonymousId, companyDomain, signOut } = useApp();
   const [sort, setSort] = useState<'new' | 'hot'>('new');
   const [showSignIn, setShowSignIn] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
 
   // @dev - Fetch from an EVM wallet
   const [provider, setProvider] = useState<BrowserProvider | null>(null);
@@ -44,26 +45,97 @@ export default function Home() {
     init();
   }, [isFrameReady, setFrameReady]);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showDropdown) {
+        setShowDropdown(false);
+      }
+    };
+
+    if (showDropdown) {
+      document.addEventListener('click', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [showDropdown]);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="sticky top-0 z-10 bg-white border-b">
         <div className="max-w-md mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
-                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          <div className="flex items-center justify-between gap-3">
+            {/* Filter Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setShowDropdown(!showDropdown)}
+                className="flex items-center space-x-2 px-4 py-2 bg-gray-100 rounded-lg text-base font-semibold text-gray-800 hover:bg-gray-200 transition-colors min-w-[80px]"
+              >
+                <span>{sort === 'new' ? 'New' : 'Hot'}</span>
+                <svg 
+                  className={`w-4 h-4 transition-transform ${showDropdown ? 'rotate-180' : ''}`} 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
-              </div>
-              <div>
-                <h1 className="text-sm font-bold text-gray-900">Feed</h1>
-                <p className="text-xs text-gray-500">All Companies</p>
+              </button>
+              
+              {showDropdown && (
+                <div className="absolute top-full left-0 mt-1 w-28 bg-white border border-gray-200 rounded-lg shadow-lg z-20">
+                  <button
+                    onClick={() => {
+                      setSort('new');
+                      setShowDropdown(false);
+                    }}
+                    className={`w-full px-4 py-2.5 text-left text-base font-semibold hover:bg-gray-50 first:rounded-t-lg transition-colors ${
+                      sort === 'new' ? 'bg-blue-50 text-blue-700' : 'text-gray-800'
+                    }`}
+                  >
+                    New
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSort('hot');
+                      setShowDropdown(false);
+                    }}
+                    className={`w-full px-4 py-2.5 text-left text-base font-semibold hover:bg-gray-50 last:rounded-b-lg transition-colors ${
+                      sort === 'hot' ? 'bg-blue-50 text-blue-700' : 'text-gray-800'
+                    }`}
+                  >
+                    Hot
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Search Bar */}
+            <div className="flex-1 max-w-xs">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search by company"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full px-3 py-1.5 pl-8 text-sm bg-gray-100 border-0 rounded-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors"
+                />
+                <svg 
+                  className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
               </div>
             </div>
             
-            <div className="flex items-center space-x-3">
-              <SortToggle sort={sort} onSortChange={setSort} />
+            {/* Connect Wallet Button */}
+            <div className="flex-shrink-0">
               {isAuthenticated ? (
                 <button
                   onClick={signOut}
