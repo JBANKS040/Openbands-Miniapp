@@ -38,12 +38,12 @@ export default function Home() {
       setFrameReady();
     }
 
-    async function init() {
-      const { provider, signer } = await connectToEvmWallet(); // @dev - Connect to EVM wallet (i.e. MetaMask) on page load
-      setProvider(provider);
-      setSigner(signer);
-    }
-    init();
+    // async function init() {
+    //   const { provider, signer } = await connectToEvmWallet(); // @dev - Connect to EVM wallet (i.e. MetaMask) on page load
+    //   setProvider(provider);
+    //   setSigner(signer);
+    // }
+    // init();
   }, [isFrameReady, setFrameReady]);
 
   return (
@@ -182,13 +182,16 @@ export default function Home() {
                   </svg>
                 </button>
               </div>
+              {/* 
               {provider && signer ? (
                 <SignInPanel provider={provider} signer={signer} />
               ) : (
                 <div className="flex items-center justify-center p-4">
                   <div className="text-gray-500">Loading wallet connection...</div>
                 </div>
-              )}
+              )} 
+              */}
+              <SignInPanel />
             </div>
           </div>
         </div>

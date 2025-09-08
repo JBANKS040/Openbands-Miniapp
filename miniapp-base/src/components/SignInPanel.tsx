@@ -26,13 +26,14 @@ import {
   zkJwtProofManagerContractConfig
 } from "@/lib/blockchains/evm/smart-contracts/wagmi/zk-jwt-proof-manager";
 import { useWriteContract, useReadContract } from 'wagmi'
-import { readContract } from '@wagmi/core'
+import { readContract, getAccount } from '@wagmi/core'
 import { convertProofToHex } from "@/lib/blockchains/evm/utils/convert-proof-to-hex";
 import { wagmiConfig } from "@/lib/blockchains/evm/smart-contracts/wagmi/config";
 
 import { write } from "fs";
 
-export function SignInPanel({ provider, signer }: { provider: BrowserProvider; signer: JsonRpcSigner }) {
+export function SignInPanel() { // @dev - For Wagmi
+//export function SignInPanel({ provider, signer }: { provider: BrowserProvider; signer: JsonRpcSigner }) { // @dev - For ethers.js
   const { signIn } = useApp();
 
   const [userInfo, setUserInfo] = useState<UserInfo>({ email: "", idToken: "" });
@@ -112,8 +113,9 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
         const nullifierFromZkJwtCircuit = publicInputs[publicInputs.length - 1]; // @dev - The nullifier is the last of the public inputs
         console.log(`nullifier (from zkJWT circuit): ${nullifierFromZkJwtCircuit}`);
 
-        const walletAddressFromConnectedWallet = signer.address;
-        console.log(`signer.getAddress(): ${walletAddressFromConnectedWallet}`);
+        const walletAddressFromConnectedWallet = getAccount(wagmiConfig).address;
+        //const walletAddressFromConnectedWallet = signer.address;
+        console.log(`walletAddress (from an connected wallet):`, walletAddressFromConnectedWallet);
 
         const separatedPublicInputs = {
           domain: domainFromZkJwtCircuit,
