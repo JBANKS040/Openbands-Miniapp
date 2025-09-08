@@ -97,9 +97,9 @@ export async function GET(req: Request) {
   const BASE = rawBase.replace(/\/$/, '');
 
   const tags =
-  parseTags(process.env.NEXT_PUBLIC_APP_TAGS) || ['social', 'anonymous', 'privacy', 'private'];  
+  parseTags(process.env.NEXT_PUBLIC_APP_TAGS)  
   const requiredChains =
-    parseRequiredChains(process.env.NEXT_PUBLIC_REQUIRED_CHAINS) || ['eip155:8453'];
+    parseRequiredChains(process.env.NEXT_PUBLIC_REQUIRED_CHAINS)
 
   const payload = {
     accountAssociation: {
@@ -109,31 +109,28 @@ export async function GET(req: Request) {
     },
     frame: withValidProperties({
       version: '1',
-      name: process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME || 'Openbands',
-      subtitle: process.env.NEXT_PUBLIC_APP_SUBTITLE || 'Anonymous. Verified. Raw.',
-      description: process.env.NEXT_PUBLIC_APP_DESCRIPTION || 'The anonymous social network for verified employees',
-      screenshotUrls: parseScreenshotUrls(process.env.NEXT_PUBLIC_APP_SCREENSHOTS),
-      iconUrl: process.env.NEXT_PUBLIC_APP_ICON || `${BASE}/Openbands.png`,
-      splashImageUrl: process.env.NEXT_PUBLIC_APP_SPLASH_IMAGE || `${BASE}/splash.png`,
-      splashBackgroundColor: process.env.NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR || '#0000ff',
+      name: process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME,
+      subtitle: process.env.NEXT_PUBLIC_APP_SUBTITLE,
+      description: process.env.NEXT_PUBLIC_APP_DESCRIPTION,
+      iconUrl: process.env.NEXT_PUBLIC_APP_ICON,
+      splashImageUrl: process.env.NEXT_PUBLIC_APP_SPLASH_IMAGE,
+      splashBackgroundColor: process.env.NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR,
       homeUrl: BASE,
       canonicalDomain: new URL(BASE).host,
       webhookUrl: `${BASE}/api/webhook`,
-      primaryCategory: process.env.NEXT_PUBLIC_APP_PRIMARY_CATEGORY || 'social',
+      primaryCategory: process.env.NEXT_PUBLIC_APP_PRIMARY_CATEGORY,
       tags,
-      heroImageUrl: process.env.NEXT_PUBLIC_APP_HERO_IMAGE || `${BASE}/hero.png`,
+      heroImageUrl: process.env.NEXT_PUBLIC_APP_HERO_IMAGE,
       ogTitle: process.env.NEXT_PUBLIC_APP_OG_TITLE,
       ogDescription: process.env.NEXT_PUBLIC_APP_OG_DESCRIPTION,
-      ogImageUrl: process.env.NEXT_PUBLIC_APP_OG_IMAGE || `${BASE}/hero.png`,
+      ogImageUrl: process.env.NEXT_PUBLIC_APP_OG_IMAGE,
       tagline: process.env.NEXT_PUBLIC_APP_TAGLINE,
       requiredChains,
       noindex: false,
     }),
     baseBuilder: {
       allowedAddresses:
-        parseAllowedAddresses(process.env.NEXT_PUBLIC_BASE_BUILDER_ALLOWED_ADDRESSES) || [
-          '0xBDcda61d8dd602CF9d516C9D2f200E362242C57D',
-        ],
+        parseAllowedAddresses(process.env.NEXT_PUBLIC_BASE_BUILDER_ALLOWED_ADDRESSES)
     },
   };
 

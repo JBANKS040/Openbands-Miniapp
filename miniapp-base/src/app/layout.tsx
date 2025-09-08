@@ -16,25 +16,25 @@ const geistMono = Geist_Mono({
 export async function generateMetadata(): Promise<Metadata> {
   const URL = process.env.NEXT_PUBLIC_URL;
   const BASE = URL ? URL.replace(/\/$/, "") : undefined;
-  const projectName = process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME || "Openbands";
+  const projectName = process.env.NEXT_PUBLIC_ONCHAINKIT_PROJECT_NAME
   
   return {
     title: projectName,
-    description: "The anonymous social network for verified employees",
+    description: process.env.NEXT_PUBLIC_APP_DESCRIPTION,
     other: {
       'fc:frame': JSON.stringify({
         version: 'next',
-        imageUrl: process.env.NEXT_PUBLIC_APP_HERO_IMAGE || (BASE ? `${BASE}/hero.png` : undefined),
-        ogImageUrl: process.env.NEXT_PUBLIC_APP_OG_IMAGE || (BASE ? `${BASE}/hero.png` : undefined),
-        heroImageUrl: process.env.NEXT_PUBLIC_APP_HERO_IMAGE || (BASE ? `${BASE}/hero.png` : undefined),
+        imageUrl: process.env.NEXT_PUBLIC_APP_HERO_IMAGE,
+        ogImageUrl: process.env.NEXT_PUBLIC_APP_OG_IMAGE,
+        heroImageUrl: process.env.NEXT_PUBLIC_APP_HERO_IMAGE,
         button: {
           title: `Launch ${projectName}`,
           action: {
             type: 'launch_frame',
             name: projectName,
             url: BASE,
-            splashImageUrl: process.env.NEXT_PUBLIC_APP_SPLASH_IMAGE || (BASE ? `${BASE}/splash.png` : undefined),
-            splashBackgroundColor: process.env.NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR || "#0000ff",
+            splashImageUrl: process.env.NEXT_PUBLIC_APP_SPLASH_IMAGE,
+            splashBackgroundColor: process.env.NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR
           },
         },
       }),
