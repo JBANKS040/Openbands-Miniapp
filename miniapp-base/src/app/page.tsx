@@ -71,9 +71,9 @@ export default function Home() {
     };
   }, [showDropdown, showSearchDropdown]);
 
-  // Filter companies based on search query
+  // Filter companies based on search query (starts with)
   const filteredCompanies = companies.filter(company =>
-    company.toLowerCase().includes(searchQuery.toLowerCase())
+    company.toLowerCase().startsWith(searchQuery.toLowerCase())
   );
 
   // Handle company selection
