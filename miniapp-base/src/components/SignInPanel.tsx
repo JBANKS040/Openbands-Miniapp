@@ -25,9 +25,9 @@ import {
   setContractInstance
 } from "@/lib/blockchains/evm/smart-contracts/wagmi/zk-jwt-proof-manager";
 import { useWriteContract } from 'wagmi'
+import { convertProofToHex } from "@/lib/blockchains/evm/utils/convert-proof-to-hex";
 
 import { write } from "fs";
-
 
 export function SignInPanel({ provider, signer }: { provider: BrowserProvider; signer: JsonRpcSigner }) {
   const { signIn } = useApp();
@@ -115,7 +115,7 @@ export function SignInPanel({ provider, signer }: { provider: BrowserProvider; s
 
         try {
           // @dev - Convert Uint8Array proof to hex string proofHex
-          const proofHex = "0x" + Buffer.from(proof).toString("hex");
+          const proofHex = convertProofToHex(proof);
           console.log(`proofHex: ${proofHex}`);
 
           // @dev - [Result]: Successful
