@@ -4,7 +4,7 @@ import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import { useApp } from "@/context/AppContext";
 import { generateZkJwtProof } from "@/lib/circuits/zk-jwt-proof-generation";
-import type { UserInfo, GoogleJwtPayload, JWK } from "@/lib/types";
+import type { UserInfo, GoogleJwtPayload, JWK, PublicInputs } from "@/lib/types";
 import { extractDomain } from "@/lib/google-jwt/google-jwt";
 import { hashEmail } from "@/lib/blockchains/evm/utils/convert-string-to-poseidon-hash";
 import { BrowserProvider, JsonRpcSigner } from "ethers";
@@ -23,7 +23,7 @@ import {
 import {
   //recordPublicInputsOfZkJwtProof,
   setZkJwtProofManagerContractInstance,
-  zkJwtProofManagerContractConfig
+  zkJwtProofManagerContractConfig,
 } from "@/lib/blockchains/evm/smart-contracts/wagmi/zk-jwt-proof-manager";
 import { useWriteContract, useReadContract } from 'wagmi'
 import { readContract, getAccount } from '@wagmi/core'
@@ -76,10 +76,10 @@ export function SignInPanel() { // @dev - For Wagmi
 
       // @dev - Retrieve a nullifierHash, which is stored on-chain and is associated with a given wallet address
       const nullifierFromOnChainByDomainAndWalletAddress = await readContract(wagmiConfig, {
-          abi: zkJwtProofManagerAbi,
-          address: zkJwtProofManagerContractAddress as `0x${string}`,
-          functionName: 'getNullifiersByDomainAndWalletAddresses',
-          args: [domainFromGoogleJwt]
+        abi: zkJwtProofManagerAbi,
+        address: zkJwtProofManagerContractAddress as `0x${string}`,
+        functionName: 'getNullifiersByDomainAndWalletAddresses',
+        args: [domainFromGoogleJwt]
       });
       //const { nullifierFromOnChainByDomainAndWalletAddress } = await getNullifiersByDomainAndWalletAddresses(signer, domainFromGoogleJwt);
       //const { nullifierFromOnChainByDomainAndEmailHashAndWalletAddress } = await getNullifiersByDomainAndEmailHashAndWalletAddresses(signer, domainFromGoogleJwt, hashedEmailFromGoogleJwt);
@@ -155,12 +155,12 @@ export function SignInPanel() { // @dev - For Wagmi
         console.log(`walletAddressFromConnectedWallet: ${walletAddressFromConnectedWallet}`);
 
         // @dev - Get public inputs from on-chain
-        const publicInputsFromOnChain = await readContract(wagmiConfig, {
+        const publicInputsFromOnChain: PublicInputs = await readContract(wagmiConfig, {
             abi: zkJwtProofManagerAbi,
             address: zkJwtProofManagerContractAddress as `0x${string}`,
             functionName: 'getPublicInputsOfZkJwtProof',
             args: [nullifierFromOnChainByDomainAndWalletAddress]
-        });
+        }) as PublicInputs;
         console.log(`publicInputs (from on-chain): ${JSON.stringify(publicInputsFromOnChain, null, 2)}`);
 
         const _domainFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[0];
