@@ -42,3 +42,8 @@ export interface UserInfo {
   email: string;
   idToken: string;
 }
+
+export type PublicInputs = {
+  publicInputsFromOnChain: [string, string, string]; // tuple (if always 3 elements)
+  // or use: publicInputsFromOnChain: string[];
+};

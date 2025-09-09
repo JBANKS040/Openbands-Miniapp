@@ -7,6 +7,9 @@ import { useState, useEffect } from 'react';
 // @dev - Blockchain related imports
 import { connectToEvmWallet } from '../../lib/blockchains/evm/connect-wallets/connect-to-evm-wallet';
 
+/**
+ * @notice - A button component to connect to an EVM wallet (e.g., MetaMask) by using "ethers.js (v6)"
+ */
 export default function ConnectWalletButton() {
   const [account, setAccount] = useState<string | null>(null);
 

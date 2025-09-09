@@ -1,7 +1,7 @@
 import { Contract, JsonRpcSigner } from "ethers";
 
 // @dev - Blockchain related imports
-import artifactOfHonkVerifier from './artifacts/honk_vk.sol/HonkVerifier.json';
+import artifactOfHonkVerifier from '../artifacts/honk_vk.sol/HonkVerifier.json';
 
 /**
  * @notice - HonkVerifier# verify()

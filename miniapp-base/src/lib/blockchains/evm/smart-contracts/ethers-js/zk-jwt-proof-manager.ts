@@ -1,7 +1,7 @@
 import { Contract, JsonRpcSigner, TransactionResponse, TransactionReceipt } from "ethers";
 
 // @dev - Blockchain related imports
-import artifactOfZkJwtProofManager from './artifacts/ZkJwtProofManager.sol/ZkJwtProofManager.json';
+import artifactOfZkJwtProofManager from '../artifacts/ZkJwtProofManager.sol/ZkJwtProofManager.json';
 
 /**
  * @notice - Set the ZkJwtProofManager contract instance
