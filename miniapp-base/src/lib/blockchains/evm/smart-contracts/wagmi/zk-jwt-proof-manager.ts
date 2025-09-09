@@ -1,5 +1,7 @@
-// Wagmi
-// ref). Write Contract - https://wagmi.sh/react/guides/write-to-contract#_3-add-a-form-handler
+/**
+ * @notice - This file is a library to interact with the ZkJwtProofManager smart contract using Wagmi.
+ * @dev - ref). Write Contract - https://wagmi.sh/react/guides/write-to-contract#_3-add-a-form-handler
+ */
 import { useWriteContract } from 'wagmi'
 import type { Abi } from 'viem';
 
@@ -18,7 +20,10 @@ export function setZkJwtProofManagerContractInstance(): { zkJwtProofManagerContr
   return { zkJwtProofManagerContractAddress, zkJwtProofManagerAbi: zkJwtProofManagerAbi as Abi };
 }
 
-
+/**
+ * @notice - Set the ZkJwtProofManager contract instance as a "zkJwtProofManagerContractConfig" 
+ * @dev - [NOTE]: Currently, this variable is not used.
+ */
 const { zkJwtProofManagerContractAddress, zkJwtProofManagerAbi } = setZkJwtProofManagerContractInstance();
 export const zkJwtProofManagerContractConfig = {
   address: zkJwtProofManagerContractAddress,

@@ -3,23 +3,25 @@ import React, { useState } from "react";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import { useApp } from "@/context/AppContext";
+import { write } from "fs";
 import { generateZkJwtProof } from "@/lib/circuits/zk-jwt-proof-generation";
 import type { UserInfo, GoogleJwtPayload, JWK, PublicInputs } from "@/lib/types";
 import { extractDomain } from "@/lib/google-jwt/google-jwt";
 import { hashEmail } from "@/lib/blockchains/evm/utils/convert-string-to-poseidon-hash";
-import { BrowserProvider, JsonRpcSigner } from "ethers";
 
-// @dev - Blockchain related imports
-//import { connectToEvmWallet } from "../lib/blockchains/evm/connect-wallets/connect-to-evm-wallet";
-import { verifyViaHonkVerifier } from "../lib/blockchains/evm/smart-contracts/ethers-js/honk-verifier";
-import { verifyZkJwtProof } from "../lib/blockchains/evm/smart-contracts/ethers-js/zk-jwt-proof-verifier";
-import { 
-  //recordPublicInputsOfZkJwtProof,
-  getPublicInputsOfZkJwtProof, 
-  getNullifiersByDomainAndWalletAddresses
-  //getNullifiersByDomainAndEmailHashAndWalletAddresses
-} from "@/lib/blockchains/evm/smart-contracts/ethers-js/zk-jwt-proof-manager";
+// @dev - Ethers.js related imports
+// import { BrowserProvider, JsonRpcSigner } from "ethers";
+// //import { connectToEvmWallet } from "../lib/blockchains/evm/connect-wallets/connect-to-evm-wallet";
+// import { verifyViaHonkVerifier } from "../lib/blockchains/evm/smart-contracts/ethers-js/honk-verifier";
+// import { verifyZkJwtProof } from "../lib/blockchains/evm/smart-contracts/ethers-js/zk-jwt-proof-verifier";
+// import { 
+//   //recordPublicInputsOfZkJwtProof,
+//   getPublicInputsOfZkJwtProof, 
+//   getNullifiersByDomainAndWalletAddresses
+//   //getNullifiersByDomainAndEmailHashAndWalletAddresses
+// } from "@/lib/blockchains/evm/smart-contracts/ethers-js/zk-jwt-proof-manager";
 
+// @dev - Wagmi related imports
 import {
   //recordPublicInputsOfZkJwtProof,
   setZkJwtProofManagerContractInstance,
@@ -27,10 +29,10 @@ import {
 } from "@/lib/blockchains/evm/smart-contracts/wagmi/zk-jwt-proof-manager";
 import { useWriteContract, useReadContract } from 'wagmi'
 import { readContract, getAccount } from '@wagmi/core'
-import { convertProofToHex } from "@/lib/blockchains/evm/utils/convert-proof-to-hex";
 import { wagmiConfig } from "@/lib/blockchains/evm/smart-contracts/wagmi/config";
 
-import { write } from "fs";
+// @dev - Utility function to convert a ZK Proof to Hex
+import { convertProofToHex } from "@/lib/blockchains/evm/utils/convert-proof-to-hex";
 
 export function SignInPanel() { // @dev - For Wagmi
 //export function SignInPanel({ provider, signer }: { provider: BrowserProvider; signer: JsonRpcSigner }) { // @dev - For ethers.js
@@ -100,7 +102,7 @@ export function SignInPanel() { // @dev - For Wagmi
         const domainFromZkJwtCircuit = decoded.email.split('@')[1];
         console.log(`domain (from email): ${domainFromZkJwtCircuit}`); // @dev - i.e. "example-company.com"
 
-        // @dev - Smart contract interactions
+        // @dev - Smart contract interactions via ethers.js
         //console.log(`signer (in the SignInPanel):`, signer); // @dev - The data type of "signer" is an "object" type.
 
         //const { isValidProofViaHonkVerifier } = await verifyViaHonkVerifier(signer, proof, publicInputs);
