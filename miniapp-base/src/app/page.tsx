@@ -163,7 +163,7 @@ export default function Home() {
                     <ul className="text-xs text-gray-600 space-y-0.5">
                       <li>• Sign in with work email to verify company</li>
                       <li>• Post anonymously - identity protected</li>
-                      <li>• Browse by "New" or "Hot" posts</li>
+                      <li>• Browse by &quot;New&quot; or &quot;Hot&quot; posts</li>
                       <li>• Like and comment on company posts</li>
                       <li>• Search other companies</li>
                     </ul>
