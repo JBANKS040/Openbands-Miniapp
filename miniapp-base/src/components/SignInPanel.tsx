@@ -27,8 +27,8 @@ import {
   setZkJwtProofManagerContractInstance,
   zkJwtProofManagerContractConfig,
 } from "@/lib/blockchains/evm/smart-contracts/wagmi/zk-jwt-proof-manager";
-import { useWriteContract, useReadContract } from 'wagmi'
-import { readContract, getAccount } from '@wagmi/core'
+//import { useWriteContract, useReadContract } from 'wagmi'
+import { simulateContract, writeContract, readContract, getAccount } from '@wagmi/core'
 import { wagmiConfig } from "@/lib/blockchains/evm/smart-contracts/wagmi/config";
 
 // @dev - Utility function to convert a ZK Proof to Hex
@@ -46,7 +46,7 @@ export function SignInPanel() { // @dev - For Wagmi
   const hasValidGoogleClientId = googleClientId && googleClientId !== "";
   
   // [NOTE]: Hooks must be at the top level for a write contract function call
-  const { writeContract: recordPublicInputsOfZkJwtProof, isPending: recordPublicInputsOfZkJwtProofIsPending } = useWriteContract();
+  //const { writeContract: recordPublicInputsOfZkJwtProof, isPending: recordPublicInputsOfZkJwtProofIsPending } = useWriteContract();
 
   const onSuccess = async(resp: CredentialResponse) => {
     if (!resp.credential) return;
@@ -134,20 +134,29 @@ export function SignInPanel() { // @dev - For Wagmi
           console.log(`proofHex: ${proofHex}`);
 
           // @dev - Call the ZkJwtProofManager#recordPublicInputsOfZkJwtProof() with Wagmi
-          recordPublicInputsOfZkJwtProof({
+          const { request } = await simulateContract(wagmiConfig, {
+          //recordPublicInputsOfZkJwtProof({
             abi: zkJwtProofManagerAbi,
             address: zkJwtProofManagerContractAddress as `0x${string}`,
             functionName: 'recordPublicInputsOfZkJwtProof',
             args: [proofHex, publicInputs, separatedPublicInputs]
           });
+          const txHash = await writeContract(wagmiConfig, request);
+          console.log(`Transaction hash: ${txHash}`);
           //const { txReceipt } = await recordPublicInputsOfZkJwtProof(signer, proof, publicInputs, separatedPublicInputs);
           //console.log(`txReceipt: ${JSON.stringify(txReceipt, null, 2)}`);
+
+          // @dev - Sign in after the public inputs are recorded on-chain, which a txHash is filled.
+          // @dev - [NOTE]: We'll discard the email/token for privacy and just sign in anonymously
+          if (txHash) {
+            signIn(domainFromZkJwtCircuit);
+          }
         } catch (error) {
           console.error('Error to record public inputs on-chain (BASE):', error);
         }
 
         // We'll discard the email/token for privacy and just sign in anonymously
-        signIn(domainFromZkJwtCircuit);
+        //signIn(domainFromZkJwtCircuit);
       } else if (nullifierFromOnChainByDomainAndWalletAddress !== "0x0000000000000000000000000000000000000000000000000000000000000000") {
         // @dev - Get a domain from JWT and wallet address from a connected wallet
         //const domainFromGoogleJwt = extractDomain(decoded.email);
@@ -180,7 +189,7 @@ export function SignInPanel() { // @dev - For Wagmi
           signIn(domainFromGoogleJwt);
         }
       } else {
-        return;
+        //return;
       }
 
       // // We'll discard the email/token for privacy and just sign in anonymously
