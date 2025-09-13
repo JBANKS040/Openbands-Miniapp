@@ -62,6 +62,12 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  webpack: (config) => {
+    config.resolve.fallback = {
+      buffer: require.resolve("buffer/"), // @dev - This is for preventing from the "buf.writeBigUInt64BE is not function" error, which is caused by the bb.js v0.87.0
+    };
+    return config;
+  }
 };
 
 export default nextConfig;
