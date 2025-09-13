@@ -1,3 +1,5 @@
+//import { Crs, Barretenberg, RawBuffer, UltraHonkBackend } from './index.js';
+const { RawBuffer, Crs } = await import("@aztec/bb.js");
 import { Barretenberg, UltraHonkBackend } from "@aztec/bb.js";
 import { Noir, CompiledCircuit } from "@noir-lang/noir_js";
 

@@ -60,6 +60,13 @@ const nextConfig: NextConfig = {
           { key: "Cache-Control", value: "public, max-age=86400, immutable" },
         ],
       },
+      // { // @dev - This block is for preventing from the "buf.writeBigUInt64BE is not function" error, which is caused by the bb.js v0.87.0
+      //   source: '/:path*',
+      //   headers: [
+      //     { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
+      //     { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+      //   ],
+      // }
     ];
   },
   webpack: (config) => {
