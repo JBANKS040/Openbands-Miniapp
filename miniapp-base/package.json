@@ -23,8 +23,7 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "@rainbow-me/rainbowkit": "^2.2.8",
-    "buffer": "^6.0.3",
-    "webpack": "^5.95.0"
+    "buffer": "^6.0.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
