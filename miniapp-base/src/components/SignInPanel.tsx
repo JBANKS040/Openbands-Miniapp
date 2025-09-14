@@ -80,11 +80,11 @@ export function SignInPanel() { // @dev - For Wagmi
       const nullifierFromOnChainByDomainAndWalletAddress = await readContract(wagmiConfig, {
         abi: zkJwtProofManagerAbi,
         address: zkJwtProofManagerContractAddress as `0x${string}`,
-        functionName: 'getNullifiersByDomainAndWalletAddresses',
+        functionName: 'getNullifiersByDomainAndWalletAddress',
         args: [domainFromGoogleJwt]
       });
-      //const { nullifierFromOnChainByDomainAndWalletAddress } = await getNullifiersByDomainAndWalletAddresses(signer, domainFromGoogleJwt);
-      //const { nullifierFromOnChainByDomainAndEmailHashAndWalletAddress } = await getNullifiersByDomainAndEmailHashAndWalletAddresses(signer, domainFromGoogleJwt, hashedEmailFromGoogleJwt);
+      //const { nullifierFromOnChainByDomainAndWalletAddress } = await getNullifiersByDomainAndWalletAddress(signer, domainFromGoogleJwt);
+      //const { nullifierFromOnChainByDomainAndEmailHashAndWalletAddress } = await getNullifiersByDomainAndEmailHashAndWalletAddress(signer, domainFromGoogleJwt, hashedEmailFromGoogleJwt);
       console.log(`nullifier (from on-chain) by a domain, wallet address: ${nullifierFromOnChainByDomainAndWalletAddress}`);
 
       // @dev - If there is no nullifierFromOnChain, which is stored on-chain and is associated with a given wallet address, it will be recorded on-chain (BASE).
