@@ -73,6 +73,10 @@ export function SignInPanel() { // @dev - For Wagmi
       const hashedEmailFromGoogleJwt = hashEmail(email);
       console.log('a hashed email (from JWT):', hashedEmailFromGoogleJwt);
 
+      const walletAddressFromConnectedWallet = getAccount(wagmiConfig).address;
+      //const walletAddressFromConnectedWallet = signer.address;
+      console.log(`walletAddressFromConnectedWallet: ${walletAddressFromConnectedWallet}`);
+
       // @dev - Set the ZkJwtProofManager contract instance (contract address + ABI)
       const { zkJwtProofManagerContractAddress, zkJwtProofManagerAbi } = setZkJwtProofManagerContractInstance();
 
@@ -81,7 +85,7 @@ export function SignInPanel() { // @dev - For Wagmi
         abi: zkJwtProofManagerAbi,
         address: zkJwtProofManagerContractAddress as `0x${string}`,
         functionName: 'getNullifiersByDomainAndWalletAddress',
-        args: [domainFromGoogleJwt]
+        args: [domainFromGoogleJwt, walletAddressFromConnectedWallet]
       });
       //const { nullifierFromOnChainByDomainAndWalletAddress } = await getNullifiersByDomainAndWalletAddress(signer, domainFromGoogleJwt);
       //const { nullifierFromOnChainByDomainAndEmailHashAndWalletAddress } = await getNullifiersByDomainAndEmailHashAndWalletAddress(signer, domainFromGoogleJwt, hashedEmailFromGoogleJwt);
@@ -161,10 +165,6 @@ export function SignInPanel() { // @dev - For Wagmi
       } else if (nullifierFromOnChainByDomainAndWalletAddress !== "0x0000000000000000000000000000000000000000000000000000000000000000") {
         // @dev - Get a domain from JWT and wallet address from a connected wallet
         //const domainFromGoogleJwt = extractDomain(decoded.email);
-        
-        const walletAddressFromConnectedWallet = getAccount(wagmiConfig).address;
-        //const walletAddressFromConnectedWallet = signer.address;
-        console.log(`walletAddressFromConnectedWallet: ${walletAddressFromConnectedWallet}`);
 
         // @dev - Get public inputs from on-chain
         const publicInputsFromOnChain: PublicInputs = await readContract(wagmiConfig, {
