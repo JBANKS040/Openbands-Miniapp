@@ -123,6 +123,7 @@ export function SignInPanel() { // @dev - For Wagmi
           domain: domainFromZkJwtCircuit,
           //domain: decoded.email.split('@')[1], // Extract domain from email
           nullifierHash: nullifierFromZkJwtCircuit,
+          emailHash: "0x0000000000000000000000000000000000000000000000000000000000000000", // [TODO]: A proper hashing method is to be considered later.
           //emailHash: hashedEmailFromGoogleJwt,  // [TODO]: A proper hashing method is to be considered later.
           walletAddress: walletAddressFromConnectedWallet,
           createdAt: new Date().toISOString() // Current timestamp
