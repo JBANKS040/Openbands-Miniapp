@@ -28,7 +28,8 @@ import {
   zkJwtProofManagerContractConfig,
 } from "@/lib/blockchains/evm/smart-contracts/wagmi/zk-jwt-proof-manager";
 //import { useWriteContract, useReadContract } from 'wagmi'
-import { simulateContract, writeContract, readContract, getAccount, watchAccount } from '@wagmi/core'
+import { simulateContract, writeContract, readContract } from '@wagmi/core'
+import { useAccount } from 'wagmi'
 import { wagmiConfig } from "@/lib/blockchains/evm/smart-contracts/wagmi/config";
 import { useConnectModal } from '@rainbow-me/rainbowkit';
 
@@ -43,22 +44,15 @@ export function SignInPanel() { // @dev - For Wagmi
   const [error, setError] = useState<string | null>(null);
   const [showWalletPrompt, setShowWalletPrompt] = useState<boolean>(false);
   const { openConnectModal } = useConnectModal();
-  const [walletAddress, setWalletAddress] = useState<string | undefined>(getAccount(wagmiConfig).address);
-  const isWalletConnected = Boolean(walletAddress);
+  const { address } = useAccount();
+  const isWalletConnected = Boolean(address);
 
+  // Auto-dismiss the prompt as soon as a wallet connects (covers refresh and modal connect)
   useEffect(() => {
-    const unwatch = watchAccount(wagmiConfig, {
-      onChange(acct) {
-        setWalletAddress(acct?.address);
-        if (acct?.address) {
-          setShowWalletPrompt(false);
-        }
-      },
-    });
-    return () => {
-      unwatch?.();
-    };
-  }, []);
+    if (address && showWalletPrompt) {
+      setShowWalletPrompt(false);
+    }
+  }, [address, showWalletPrompt]);
   
   // Check if we have a real Google Client ID
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
@@ -99,10 +93,7 @@ export function SignInPanel() { // @dev - For Wagmi
       console.log('a hashed email (from JWT):', hashedEmailFromGoogleJwt);
 
       // @dev - Get a wallet address from a connected wallet via Wagmi
-      const accountViaWagmi = getAccount(wagmiConfig);
-      console.log(`accountViaWagmi:`, accountViaWagmi);
-
-      const walletAddressFromConnectedWallet = accountViaWagmi.address;
+      const walletAddressFromConnectedWallet = address as `0x${string}` | undefined;
       //const walletAddressFromConnectedWallet = getAccount(wagmiConfig).address;
       //const walletAddressFromConnectedWallet = signer.address;
       console.log(`walletAddressFromConnectedWallet`, walletAddressFromConnectedWallet);
@@ -319,7 +310,7 @@ export function SignInPanel() { // @dev - For Wagmi
               <div>
                 <p className="text-xs font-medium text-blue-900">How it works</p>
                 <p className="text-xs text-blue-700 mt-1">
-                  You create a cryptographic proof of your company email. <br/><br/>All personal information is kept private.<br/><br/> Only your company domain is visible. E.g. &quot;openbands.xyz&quot;
+                You generate a cryptographic proof using your company email. <br/><br/>Personal information remains private and never leaves your device.<br/><br/> Only your company domain is revealed. (e.g. &quot;openbands.xyz&quot;)
                 </p>
               </div>
             </div>
