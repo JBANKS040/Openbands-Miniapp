@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import { useApp } from "@/context/AppContext";
@@ -28,8 +28,9 @@ import {
   zkJwtProofManagerContractConfig,
 } from "@/lib/blockchains/evm/smart-contracts/wagmi/zk-jwt-proof-manager";
 //import { useWriteContract, useReadContract } from 'wagmi'
-import { simulateContract, writeContract, readContract, getAccount } from '@wagmi/core'
+import { simulateContract, writeContract, readContract, getAccount, watchAccount } from '@wagmi/core'
 import { wagmiConfig } from "@/lib/blockchains/evm/smart-contracts/wagmi/config";
+import { useConnectModal } from '@rainbow-me/rainbowkit';
 
 // @dev - Utility function to convert a ZK Proof to Hex
 import { convertProofToHex } from "@/lib/blockchains/evm/utils/convert-proof-to-hex";
@@ -40,6 +41,24 @@ export function SignInPanel() { // @dev - For Wagmi
 
   const [userInfo, setUserInfo] = useState<UserInfo>({ email: "", idToken: "" });
   const [error, setError] = useState<string | null>(null);
+  const [showWalletPrompt, setShowWalletPrompt] = useState<boolean>(false);
+  const { openConnectModal } = useConnectModal();
+  const [walletAddress, setWalletAddress] = useState<string | undefined>(getAccount(wagmiConfig).address);
+  const isWalletConnected = Boolean(walletAddress);
+
+  useEffect(() => {
+    const unwatch = watchAccount(wagmiConfig, {
+      onChange(acct) {
+        setWalletAddress(acct?.address);
+        if (acct?.address) {
+          setShowWalletPrompt(false);
+        }
+      },
+    });
+    return () => {
+      unwatch?.();
+    };
+  }, []);
   
   // Check if we have a real Google Client ID
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
@@ -48,7 +67,13 @@ export function SignInPanel() { // @dev - For Wagmi
   // [NOTE]: Hooks must be at the top level for a write contract function call
   //const { writeContract: recordPublicInputsOfZkJwtProof, isPending: recordPublicInputsOfZkJwtProofIsPending } = useWriteContract();
 
-  const onSuccess = async(resp: CredentialResponse) => {
+  const onSuccess = async (resp: CredentialResponse) => {
+    // Require wallet connection before continuing Google auth flow
+    if (!isWalletConnected) {
+      setShowWalletPrompt(true);
+      openConnectModal?.();
+      return;
+    }
     if (!resp.credential) return;
     
     try {
@@ -208,6 +233,29 @@ export function SignInPanel() { // @dev - For Wagmi
 
   return (
     <div className="bg-gray-50 p-3">
+      {/* Prompt to connect wallet first */}
+      {showWalletPrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl shadow-lg p-5 w-[90%] max-w-sm text-center">
+            <p className="text-sm font-semibold text-gray-900">Connect your wallet</p>
+            <p className="text-xs text-gray-600 mt-1">Please connect a wallet before continuing with Google sign in.</p>
+            <div className="mt-4 flex gap-2 justify-center">
+              <button
+                className="px-3 py-1.5 rounded-md bg-blue-600 text-white text-xs font-medium"
+                onClick={() => { openConnectModal?.(); }}
+              >
+                Connect wallet
+              </button>
+              <button
+                className="px-3 py-1.5 rounded-md border text-xs font-medium"
+                onClick={() => setShowWalletPrompt(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="w-full max-w-sm mx-auto">
         {/* Logo/Brand */}
         <div className="text-center mb-8">
@@ -231,15 +279,26 @@ export function SignInPanel() { // @dev - For Wagmi
             </p>
           </div>
 
-          <div className="flex justify-center">
+          <div className="flex justify-center relative">
             {hasValidGoogleClientId ? (
-              <GoogleLogin
-                onSuccess={onSuccess}
-                onError={() => console.error('Login Failed')}
-                useOneTap
-                theme="outline"
-                size="large"
-              />
+              <>
+                {!isWalletConnected && (
+                  // Overlay to intercept clicks when wallet is not connected
+                  <button
+                    type="button"
+                    aria-label="Connect wallet first"
+                    onClick={() => { setShowWalletPrompt(true); openConnectModal?.(); }}
+                    className="absolute inset-0 z-10 cursor-pointer bg-transparent"
+                  />
+                )}
+                <GoogleLogin
+                  onSuccess={onSuccess}
+                  onError={() => console.error('Login Failed')}
+                  useOneTap
+                  theme="outline"
+                  size="large"
+                />
+              </>
             ) : (
               <div className="text-center p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <p className="text-sm text-yellow-800">
@@ -248,6 +307,9 @@ export function SignInPanel() { // @dev - For Wagmi
               </div>
             )}
           </div>
+          {!isWalletConnected && (
+            <p className="text-center text-xs text-gray-600 mt-2">Please connect your wallet first to continue.</p>
+          )}
 
           <div className="mt-6 p-3 bg-blue-50 rounded-lg">
             <div className="flex items-start space-x-2">
