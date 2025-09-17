@@ -34,10 +34,14 @@ import { wagmiConfig } from "@/lib/blockchains/evm/smart-contracts/wagmi/config"
 // @dev - Utility function to convert a ZK Proof to Hex
 import { convertProofToHex } from "@/lib/blockchains/evm/utils/convert-proof-to-hex";
 
+// @dev - Spinner component
+import { Spinner } from "@/components/circuits/Spinner";
+
 export function SignInPanel() { // @dev - For Wagmi
 //export function SignInPanel({ provider, signer }: { provider: BrowserProvider; signer: JsonRpcSigner }) { // @dev - For ethers.js
   const { signIn } = useApp();
 
+  const [loading, setLoading] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo>({ email: "", idToken: "" });
   const [error, setError] = useState<string | null>(null);
   
@@ -49,6 +53,9 @@ export function SignInPanel() { // @dev - For Wagmi
   //const { writeContract: recordPublicInputsOfZkJwtProof, isPending: recordPublicInputsOfZkJwtProofIsPending } = useWriteContract();
 
   const onSuccess = async(resp: CredentialResponse) => {
+    // @dev - Display a loading spinner
+    setLoading(true);
+
     if (!resp.credential) return;
     
     try {
@@ -197,12 +204,11 @@ export function SignInPanel() { // @dev - For Wagmi
       } else {
         //return;
       }
-
-      // // We'll discard the email/token for privacy and just sign in anonymously
-      // signIn();
     } catch (err) {
       console.error('Error decoding token:', err);
       setError('Failed to authenticate with Google');
+    } finally {
+      setLoading(false); // @dev - Once a zkJWT proof is generated and a on-chain transaction is successful, a loading spinner is going to be hidden.
     }
   };
 
@@ -232,13 +238,20 @@ export function SignInPanel() { // @dev - For Wagmi
           </div>
 
           <div className="flex justify-center">
-            {hasValidGoogleClientId ? (
+            {loading ? (
+              <div className="flex items-center space-x-2">
+                <Spinner size={24} color="#2563eb" />
+                <span>Signing in...</span>
+                {/* <span className="animate-spin">🔄</span> */}
+              </div>
+            ) : hasValidGoogleClientId ? (
               <GoogleLogin
                 onSuccess={onSuccess}
                 onError={() => console.error('Login Failed')}
                 useOneTap
                 theme="outline"
                 size="large"
+                disabled={loading}
               />
             ) : (
               <div className="text-center p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
