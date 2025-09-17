@@ -73,6 +73,15 @@ export function SignInPanel() { // @dev - For Wagmi
       const hashedEmailFromGoogleJwt = hashEmail(email);
       console.log('a hashed email (from JWT):', hashedEmailFromGoogleJwt);
 
+      // @dev - Get a wallet address from a connected wallet via Wagmi
+      const accountViaWagmi = getAccount(wagmiConfig);
+      console.log(`accountViaWagmi:`, accountViaWagmi);
+
+      const walletAddressFromConnectedWallet = accountViaWagmi.address;
+      //const walletAddressFromConnectedWallet = getAccount(wagmiConfig).address;
+      //const walletAddressFromConnectedWallet = signer.address;
+      console.log(`walletAddressFromConnectedWallet`, walletAddressFromConnectedWallet);
+
       // @dev - Set the ZkJwtProofManager contract instance (contract address + ABI)
       const { zkJwtProofManagerContractAddress, zkJwtProofManagerAbi } = setZkJwtProofManagerContractInstance();
 
@@ -80,15 +89,15 @@ export function SignInPanel() { // @dev - For Wagmi
       const nullifierFromOnChainByDomainAndWalletAddress = await readContract(wagmiConfig, {
         abi: zkJwtProofManagerAbi,
         address: zkJwtProofManagerContractAddress as `0x${string}`,
-        functionName: 'getNullifiersByDomainAndWalletAddresses',
-        args: [domainFromGoogleJwt]
+        functionName: 'getNullifiersByDomainAndWalletAddress',
+        args: [domainFromGoogleJwt, walletAddressFromConnectedWallet]
       });
-      //const { nullifierFromOnChainByDomainAndWalletAddress } = await getNullifiersByDomainAndWalletAddresses(signer, domainFromGoogleJwt);
-      //const { nullifierFromOnChainByDomainAndEmailHashAndWalletAddress } = await getNullifiersByDomainAndEmailHashAndWalletAddresses(signer, domainFromGoogleJwt, hashedEmailFromGoogleJwt);
+      //const { nullifierFromOnChainByDomainAndWalletAddress } = await getNullifiersByDomainAndWalletAddress(signer, domainFromGoogleJwt);
+      //const { nullifierFromOnChainByDomainAndEmailHashAndWalletAddress } = await getNullifiersByDomainAndEmailHashAndWalletAddress(signer, domainFromGoogleJwt, hashedEmailFromGoogleJwt);
       console.log(`nullifier (from on-chain) by a domain, wallet address: ${nullifierFromOnChainByDomainAndWalletAddress}`);
 
       // @dev - If there is no nullifierFromOnChain, which is stored on-chain and is associated with a given wallet address, it will be recorded on-chain (BASE).
-      if (nullifierFromOnChainByDomainAndWalletAddress === "0x0000000000000000000000000000000000000000000000000000000000000000") {
+      if (nullifierFromOnChainByDomainAndWalletAddress == "0x0000000000000000000000000000000000000000000000000000000000000000") {
         // @dev - Generate a zkJWT proof
         const { proof, publicInputs } = await generateZkJwtProof(decoded.email, resp.credential);
 
@@ -115,14 +124,11 @@ export function SignInPanel() { // @dev - For Wagmi
         const nullifierFromZkJwtCircuit = publicInputs[publicInputs.length - 1]; // @dev - The nullifier is the last of the public inputs
         console.log(`nullifier (from zkJWT circuit): ${nullifierFromZkJwtCircuit}`);
 
-        const walletAddressFromConnectedWallet = getAccount(wagmiConfig).address;
-        //const walletAddressFromConnectedWallet = signer.address;
-        console.log(`walletAddress (from an connected wallet):`, walletAddressFromConnectedWallet);
-
         const separatedPublicInputs = {
           domain: domainFromZkJwtCircuit,
           //domain: decoded.email.split('@')[1], // Extract domain from email
           nullifierHash: nullifierFromZkJwtCircuit,
+          emailHash: "0x0000000000000000000000000000000000000000000000000000000000000000", // [TODO]: A proper hashing method is to be considered later.
           //emailHash: hashedEmailFromGoogleJwt,  // [TODO]: A proper hashing method is to be considered later.
           walletAddress: walletAddressFromConnectedWallet,
           createdAt: new Date().toISOString() // Current timestamp
@@ -157,13 +163,9 @@ export function SignInPanel() { // @dev - For Wagmi
 
         // We'll discard the email/token for privacy and just sign in anonymously
         //signIn(domainFromZkJwtCircuit);
-      } else if (nullifierFromOnChainByDomainAndWalletAddress !== "0x0000000000000000000000000000000000000000000000000000000000000000") {
+      } else if (nullifierFromOnChainByDomainAndWalletAddress != "0x0000000000000000000000000000000000000000000000000000000000000000") {
         // @dev - Get a domain from JWT and wallet address from a connected wallet
         //const domainFromGoogleJwt = extractDomain(decoded.email);
-        
-        const walletAddressFromConnectedWallet = getAccount(wagmiConfig).address;
-        //const walletAddressFromConnectedWallet = signer.address;
-        console.log(`walletAddressFromConnectedWallet: ${walletAddressFromConnectedWallet}`);
 
         // @dev - Get public inputs from on-chain
         const publicInputsFromOnChain: PublicInputs = await readContract(wagmiConfig, {
@@ -174,10 +176,14 @@ export function SignInPanel() { // @dev - For Wagmi
         }) as PublicInputs;
         console.log(`publicInputs (from on-chain): ${JSON.stringify(publicInputsFromOnChain, null, 2)}`);
 
-        const _domainFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[0];
-        const _nullifierFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[1];
-        //const _hashedEmailFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[2];  // [TODO]: A proper hashing method is to be considered later.
-        const _walletAddressFromOnChain = publicInputsFromOnChain.publicInputsFromOnChain[2];
+        const _domainFromOnChain: string = publicInputsFromOnChain.domain;
+        const _nullifierFromOnChain: string = publicInputsFromOnChain.nullifierHash;
+        //const _hashedEmailFromOnChain: string = publicInputsFromOnChain.emailHash;  // [TODO]: A proper hashing method is to be considered later.
+        const _walletAddressFromOnChain: string = publicInputsFromOnChain.walletAddress;
+        console.log(`_domainFromOnChain: ${_domainFromOnChain}`);
+        console.log(`_nullifierFromOnChain: ${_nullifierFromOnChain}`);
+        //console.log(`_hashedEmailFromOnChain: ${_hashedEmailFromOnChain}`);  // [TODO]: A proper hashing method is to be considered later.
+        console.log(`_walletAddressFromOnChain: ${_walletAddressFromOnChain}`);
 
         if (
           _domainFromOnChain === domainFromGoogleJwt && 

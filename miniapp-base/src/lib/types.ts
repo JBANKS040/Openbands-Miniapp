@@ -44,6 +44,10 @@ export interface UserInfo {
 }
 
 export type PublicInputs = {
-  publicInputsFromOnChain: [string, string, string]; // tuple (if always 3 elements)
-  // or use: publicInputsFromOnChain: string[];
+  domain: string; // e.g., "acme.com"
+  nullifierHash: string; // hex string
+  emailHash: string; // hex string (sha256 of email)
+  walletAddress: string; // hex string
+  createdAt: string; // epoch ms
+  //publicInputsFromOnChain: [string, string, string]; // tuple (if always 3 elements)
 };
