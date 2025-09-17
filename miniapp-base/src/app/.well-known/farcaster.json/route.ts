@@ -122,6 +122,7 @@ export async function GET(req: Request) {
       subtitle: process.env.NEXT_PUBLIC_APP_SUBTITLE,
       description: process.env.NEXT_PUBLIC_APP_DESCRIPTION,
       iconUrl: process.env.NEXT_PUBLIC_APP_ICON,
+      buttonTitle: process.env.NEXT_PUBLIC_APP_BUTTON_TITLE,
       splashImageUrl: process.env.NEXT_PUBLIC_APP_SPLASH_IMAGE,
       splashBackgroundColor: process.env.NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR,
       homeUrl: BASE,
