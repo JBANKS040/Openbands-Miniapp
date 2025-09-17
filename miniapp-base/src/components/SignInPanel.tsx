@@ -108,7 +108,7 @@ export function SignInPanel() { // @dev - For Wagmi
         //console.log(`Generated zkJWT public inputs: ${JSON.stringify(publicInputs, null, 2)}`);
 
         // @dev - Extract domain from email (instead of trying to decode from public inputs)
-        const domainFromZkJwtCircuit = decoded.email.split('@')[1];
+        const domainFromZkJwtCircuit = extractDomain(decoded.email);
         console.log(`domain (from email): ${domainFromZkJwtCircuit}`); // @dev - i.e. "example-company.com"
 
         // @dev - Smart contract interactions via ethers.js
