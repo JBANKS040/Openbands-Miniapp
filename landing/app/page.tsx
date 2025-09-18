@@ -115,9 +115,19 @@ export default function Page() {
           🏆 Noirhack 2025 — 1st Place
         </div>
         <h3 className="text-2xl sm:text-3xl font-bold text-white mb-6">Recognized by leading privacy advocates</h3>
-        <div className="flex items-center justify-center gap-12">
-          <img src="/aztec.png" alt="Aztec" className="h-14 w-auto opacity-95" />
-          <img src="/logoDark.png" alt="Noir" className="h-14 w-auto opacity-95" />
+        <div className="mx-auto max-w-[680px] sm:max-w-3xl px-3">
+          <div className="flex items-center justify-center gap-6 sm:gap-10 rounded-2xl border border-white/15 bg-white/5 backdrop-blur-sm px-4 py-3 sm:px-8 sm:py-4">
+            <img
+              src="/aztec.png"
+              alt="Aztec"
+              className="h-10 sm:h-12 md:h-14 lg:h-16 w-auto object-contain brightness-150 contrast-125 drop-shadow-[0_0_18px_rgba(255,255,255,0.5)]"
+            />
+            <img
+              src="/logoDark.png"
+              alt="Noir"
+              className="h-10 sm:h-12 md:h-14 lg:h-16 w-auto object-contain brightness-150 contrast-125 drop-shadow-[0_0_18px_rgba(255,255,255,0.5)]"
+            />
+          </div>
         </div>
       </section>
 
