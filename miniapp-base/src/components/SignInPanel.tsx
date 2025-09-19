@@ -189,7 +189,10 @@ export function SignInPanel() { // @dev - For Wagmi
           }
         } catch (error) {
           console.error('Error to record public inputs on-chain (BASE):', error);
-          toast.error(`Error: ${error.message}`);
+          if (error.message.includes("A given nullifierHash is already used, which means a given proof is already used")) {
+            toast.error("A given nullifierHash is already used, which means a given proof is already used.");
+            //toast.error(`Error: ${error.message}`);
+          }
         }
 
         // We'll discard the email/token for privacy and just sign in anonymously
