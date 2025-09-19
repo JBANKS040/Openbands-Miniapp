@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --gradient-start: #0B1020;
+  --gradient-end: #111A3A;
+}
+
+.gradient-bg {
+  background: radial-gradient(1200px 600px at 50% -20%, rgba(81,99,255,0.25), transparent 60%),
+              linear-gradient(180deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+}
+
+

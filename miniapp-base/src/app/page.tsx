@@ -156,17 +156,15 @@ export default function Home() {
                 {showHelpPopup && (
                   <div className="absolute top-full left-0 mt-2 w-72 max-w-[calc(100vw-2rem)] bg-white border border-gray-200 rounded-lg shadow-lg z-20 p-3">
                     <h3 className="font-semibold text-gray-900 mb-2 text-sm">About Openbands</h3>
-                    <p className="text-xs text-gray-600 mb-2">
-                      Anonymous company discussion platform for employees to share insights and discuss workplace topics.
-                    </p>
-                    <h4 className="font-medium text-gray-900 mb-1 text-xs">How it works:</h4>
-                    <ul className="text-xs text-gray-600 space-y-0.5">
-                      <li>• Sign in with work email to verify company</li>
-                      <li>• Post anonymously - identity protected</li>
-                      <li>• Browse by &quot;New&quot; or &quot;Hot&quot; posts</li>
-                      <li>• Like and comment on company posts</li>
-                      <li>• Search other companies</li>
+                    <p className="text-xs text-gray-600 mb-2">Join verified workplace conversations without giving up your privacy. With zero-knowledge proofs, your identity stays yours — all that&rsquo;s revealed is the company you work for.</p>
+                    <ul className="text-xs text-gray-600 space-y-2 mb-2">
+                      <li>• <span className="font-medium">Verified, not exposed</span> <br></br>Prove your company affiliation with your Google email, without sharing it.</li>
+                      <li>• <span className="font-medium">True anonymity</span> <br></br>Post and comment freely, your name never appears.</li>
+                      <li>• <span className="font-medium">Company-first feeds</span><br></br>See what’s trending inside your company, filter by New or Hot.</li>
+                      <li>• <span className="font-medium">Cross-company insights</span><br></br>Search other domains to explore their discussions.</li>
+                      <li>• <span className="font-medium">Privacy by design</span><br></br>Your data never leaves your device.</li>
                     </ul>
+                    <p className="text-[11px] text-gray-500">Openbands is where employees speak their minds — anonymous. verified. raw.</p>
                   </div>
                 )}
               </div>

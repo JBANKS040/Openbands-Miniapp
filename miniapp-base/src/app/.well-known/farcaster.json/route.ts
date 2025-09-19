@@ -93,7 +93,16 @@ export async function GET(req: Request) {
       return undefined;
     }
   })();
-  const rawBase = envUrl || inferredOrigin || 'https://miniapp.openbands.xyz';
+  const rawBase = envUrl || inferredOrigin;
+  if (!rawBase) {
+    return new Response(JSON.stringify({ error: 'Base URL missing. Set NEXT_PUBLIC_URL or ensure request has a valid origin.' }), {
+      status: 500,
+      headers: {
+        'content-type': 'application/json; charset=utf-8',
+        'cache-control': 'no-store',
+      },
+    });
+  }
   const BASE = rawBase.replace(/\/$/, '');
 
   const tags =
@@ -103,9 +112,9 @@ export async function GET(req: Request) {
 
   const payload = {
     accountAssociation: {
-      header: "eyJmaWQiOjExODIzNDAsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHhkQTliZDAzRTgxMEVlYjUxNzkxQ0ViQTJCNDYyM0Q2MTIwRTBkMGRGIn0",
-      payload: "eyJkb21haW4iOiJtaW5pYXBwLm9wZW5iYW5kcy54eXoifQ",
-      signature: "MHg0ZjJlNjAzMjU5NzUyNzZjYmQ0NmU4YzNhNTU1MzlhNjdiY2I1OTQ0NzIxOWRmZGJjMjU2MTM4MjVhZTczMDgxMDY4ZTNiODZlYjU0MjM3ZjI5ODdhNWY2MjhlZWM3OGFmZGVjMjcyM2FkNzAxZjhmY2RmMzNhYTgyMjM2OWQxZTFj",
+      header: process.env.NEXT_PUBLIC_ACCOUNT_ASSOCIATION_HEADER,
+      payload: process.env.NEXT_PUBLIC_ACCOUNT_ASSOCIATION_PAYLOAD,
+      signature: process.env.NEXT_PUBLIC_ACCOUNT_ASSOCIATION_SIGNATURE,
     },
     frame: withValidProperties({
       version: '1',
@@ -113,6 +122,7 @@ export async function GET(req: Request) {
       subtitle: process.env.NEXT_PUBLIC_APP_SUBTITLE,
       description: process.env.NEXT_PUBLIC_APP_DESCRIPTION,
       iconUrl: process.env.NEXT_PUBLIC_APP_ICON,
+      buttonTitle: process.env.NEXT_PUBLIC_APP_BUTTON_TITLE,
       splashImageUrl: process.env.NEXT_PUBLIC_APP_SPLASH_IMAGE,
       splashBackgroundColor: process.env.NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR,
       homeUrl: BASE,

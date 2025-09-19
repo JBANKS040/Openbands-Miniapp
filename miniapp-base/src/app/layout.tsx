@@ -26,7 +26,9 @@ export async function generateMetadata(): Promise<Metadata> {
         version: 'next',
         imageUrl: process.env.NEXT_PUBLIC_APP_HERO_IMAGE,
         ogImageUrl: process.env.NEXT_PUBLIC_APP_OG_IMAGE,
+        buttonTitle: process.env.NEXT_PUBLIC_APP_BUTTON_TITLE,
         heroImageUrl: process.env.NEXT_PUBLIC_APP_HERO_IMAGE,
+        noindex: false,
         button: {
           title: `Launch ${projectName}`,
           action: {

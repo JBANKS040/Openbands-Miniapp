@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import { useApp } from "@/context/AppContext";
@@ -28,8 +28,10 @@ import {
   zkJwtProofManagerContractConfig,
 } from "@/lib/blockchains/evm/smart-contracts/wagmi/zk-jwt-proof-manager";
 //import { useWriteContract, useReadContract } from 'wagmi'
-import { simulateContract, writeContract, readContract, getAccount } from '@wagmi/core'
+import { simulateContract, writeContract, readContract } from '@wagmi/core'
+import { useAccount } from 'wagmi'
 import { wagmiConfig } from "@/lib/blockchains/evm/smart-contracts/wagmi/config";
+import { useConnectModal } from '@rainbow-me/rainbowkit';
 
 // @dev - Utility function to convert a ZK Proof to Hex
 import { convertProofToHex } from "@/lib/blockchains/evm/utils/convert-proof-to-hex";
@@ -44,6 +46,17 @@ export function SignInPanel() { // @dev - For Wagmi
   const [loading, setLoading] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo>({ email: "", idToken: "" });
   const [error, setError] = useState<string | null>(null);
+  const [showWalletPrompt, setShowWalletPrompt] = useState<boolean>(false);
+  const { openConnectModal } = useConnectModal();
+  const { address } = useAccount();
+  const isWalletConnected = Boolean(address);
+
+  // Auto-dismiss the prompt as soon as a wallet connects (covers refresh and modal connect)
+  useEffect(() => {
+    if (address && showWalletPrompt) {
+      setShowWalletPrompt(false);
+    }
+  }, [address, showWalletPrompt]);
   
   // Check if we have a real Google Client ID
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
@@ -52,9 +65,16 @@ export function SignInPanel() { // @dev - For Wagmi
   // [NOTE]: Hooks must be at the top level for a write contract function call
   //const { writeContract: recordPublicInputsOfZkJwtProof, isPending: recordPublicInputsOfZkJwtProofIsPending } = useWriteContract();
 
-  const onSuccess = async(resp: CredentialResponse) => {
+  const onSuccess = async (resp: CredentialResponse) => {
     // @dev - Display a loading spinner
-    setLoading(true);
+    setLoading(true);    
+    
+    // Require wallet connection before continuing Google auth flow
+    if (!isWalletConnected) {
+      setShowWalletPrompt(true);
+      openConnectModal?.();
+      return;
+    }
 
     if (!resp.credential) return;
     
@@ -81,10 +101,7 @@ export function SignInPanel() { // @dev - For Wagmi
       console.log('a hashed email (from JWT):', hashedEmailFromGoogleJwt);
 
       // @dev - Get a wallet address from a connected wallet via Wagmi
-      const accountViaWagmi = getAccount(wagmiConfig);
-      console.log(`accountViaWagmi:`, accountViaWagmi);
-
-      const walletAddressFromConnectedWallet = accountViaWagmi.address;
+      const walletAddressFromConnectedWallet = address as `0x${string}` | undefined;
       //const walletAddressFromConnectedWallet = getAccount(wagmiConfig).address;
       //const walletAddressFromConnectedWallet = signer.address;
       console.log(`walletAddressFromConnectedWallet`, walletAddressFromConnectedWallet);
@@ -214,13 +231,34 @@ export function SignInPanel() { // @dev - For Wagmi
 
   return (
     <div className="bg-gray-50 p-3">
+      {/* Prompt to connect wallet first */}
+      {showWalletPrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl shadow-lg p-5 w-[90%] max-w-sm text-center">
+            <p className="text-sm font-semibold text-gray-900">Connect your wallet</p>
+            <p className="text-xs text-gray-600 mt-1">Please connect a wallet before continuing with Google sign in.</p>
+            <div className="mt-4 flex gap-2 justify-center">
+              <button
+                className="px-3 py-1.5 rounded-md bg-blue-600 text-white text-xs font-medium"
+                onClick={() => { openConnectModal?.(); }}
+              >
+                Connect wallet
+              </button>
+              <button
+                className="px-3 py-1.5 rounded-md border text-xs font-medium"
+                onClick={() => setShowWalletPrompt(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="w-full max-w-sm mx-auto">
         {/* Logo/Brand */}
         <div className="text-center mb-8">
-          <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mx-auto mb-4">
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
+          <div className="w-12 h-12 mx-auto mb-4">
+            <img src="/Openbands.png" alt="Openbands" className="w-12 h-12 rounded-lg object-cover" />
           </div>
           <h1 className="text-xl font-bold text-gray-900 mb-2">Welcome to OpenBands</h1>
           <p className="text-gray-600 text-sm">
@@ -237,7 +275,7 @@ export function SignInPanel() { // @dev - For Wagmi
             </p>
           </div>
 
-          <div className="flex justify-center">
+          <div className="flex justify-center relative">
             {loading ? (
               <div className="flex items-center space-x-2">
                 <Spinner size={24} color="#2563eb" />
@@ -246,13 +284,24 @@ export function SignInPanel() { // @dev - For Wagmi
                 {/* <p className="text-sm text-gray-600">Your proof is being generated. This takes 10-20 seconds.</p> */}
               </div>
             ) : hasValidGoogleClientId ? (
-              <GoogleLogin
-                onSuccess={onSuccess}
-                onError={() => console.error('Login Failed')}
-                useOneTap
-                theme="outline"
-                size="large"
-              />
+              <>
+                {!isWalletConnected && (
+                  // Overlay to intercept clicks when wallet is not connected
+                  <button
+                    type="button"
+                    aria-label="Connect wallet first"
+                    onClick={() => { setShowWalletPrompt(true); openConnectModal?.(); }}
+                    className="absolute inset-0 z-10 cursor-pointer bg-transparent"
+                  />
+                )}
+                <GoogleLogin
+                  onSuccess={onSuccess}
+                  onError={() => console.error('Login Failed')}
+                  useOneTap
+                  theme="outline"
+                  size="large"
+                />
+              </>
             ) : (
               <div className="text-center p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <p className="text-sm text-yellow-800">
@@ -261,6 +310,9 @@ export function SignInPanel() { // @dev - For Wagmi
               </div>
             )}
           </div>
+          {!isWalletConnected && (
+            <p className="text-center text-xs text-gray-600 mt-2">Please connect your wallet first to continue.</p>
+          )}
 
           <div className="mt-6 p-3 bg-blue-50 rounded-lg">
             <div className="flex items-start space-x-2">
@@ -270,7 +322,7 @@ export function SignInPanel() { // @dev - For Wagmi
               <div>
                 <p className="text-xs font-medium text-blue-900">How it works</p>
                 <p className="text-xs text-blue-700 mt-1">
-                  You create a cryptographic proof of your company email. <br/><br/>All personal information is kept private.<br/><br/> Only your company domain is visible. E.g. &quot;openbands.xyz&quot;
+                You generate a cryptographic proof using your company email. <br/><br/>Personal information remains private and never leaves your device.<br/><br/> Only your company domain is revealed. (e.g. &quot;openbands.xyz&quot;)
                 </p>
               </div>
             </div>
