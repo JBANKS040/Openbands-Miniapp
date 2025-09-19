@@ -36,10 +36,14 @@ import { useConnectModal } from '@rainbow-me/rainbowkit';
 // @dev - Utility function to convert a ZK Proof to Hex
 import { convertProofToHex } from "@/lib/blockchains/evm/utils/convert-proof-to-hex";
 
+// @dev - Spinner component
+import { Spinner } from "@/components/circuits/Spinner";
+
 export function SignInPanel() { // @dev - For Wagmi
 //export function SignInPanel({ provider, signer }: { provider: BrowserProvider; signer: JsonRpcSigner }) { // @dev - For ethers.js
   const { signIn } = useApp();
 
+  const [loading, setLoading] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo>({ email: "", idToken: "" });
   const [error, setError] = useState<string | null>(null);
   const [showWalletPrompt, setShowWalletPrompt] = useState<boolean>(false);
@@ -62,12 +66,16 @@ export function SignInPanel() { // @dev - For Wagmi
   //const { writeContract: recordPublicInputsOfZkJwtProof, isPending: recordPublicInputsOfZkJwtProofIsPending } = useWriteContract();
 
   const onSuccess = async (resp: CredentialResponse) => {
+    // @dev - Display a loading spinner
+    setLoading(true);    
+    
     // Require wallet connection before continuing Google auth flow
     if (!isWalletConnected) {
       setShowWalletPrompt(true);
       openConnectModal?.();
       return;
     }
+
     if (!resp.credential) return;
     
     try {
@@ -124,7 +132,7 @@ export function SignInPanel() { // @dev - For Wagmi
         //console.log(`Generated zkJWT public inputs: ${JSON.stringify(publicInputs, null, 2)}`);
 
         // @dev - Extract domain from email (instead of trying to decode from public inputs)
-        const domainFromZkJwtCircuit = decoded.email.split('@')[1];
+        const domainFromZkJwtCircuit = extractDomain(decoded.email);
         console.log(`domain (from email): ${domainFromZkJwtCircuit}`); // @dev - i.e. "example-company.com"
 
         // @dev - Smart contract interactions via ethers.js
@@ -213,12 +221,11 @@ export function SignInPanel() { // @dev - For Wagmi
       } else {
         //return;
       }
-
-      // // We'll discard the email/token for privacy and just sign in anonymously
-      // signIn();
     } catch (err) {
       console.error('Error decoding token:', err);
       setError('Failed to authenticate with Google');
+    } finally {
+      setLoading(false); // @dev - Once a zkJWT proof is generated and a on-chain transaction is successful, a loading spinner is going to be hidden.
     }
   };
 
@@ -269,7 +276,14 @@ export function SignInPanel() { // @dev - For Wagmi
           </div>
 
           <div className="flex justify-center relative">
-            {hasValidGoogleClientId ? (
+            {loading ? (
+              <div className="flex items-center space-x-2">
+                <Spinner size={24} color="#2563eb" />
+                <span>Signing in...</span>
+                {/* <span className="animate-spin">🔄</span> */}
+                {/* <p className="text-sm text-gray-600">Your proof is being generated. This takes 10-20 seconds.</p> */}
+              </div>
+            ) : hasValidGoogleClientId ? (
               <>
                 {!isWalletConnected && (
                   // Overlay to intercept clicks when wallet is not connected
