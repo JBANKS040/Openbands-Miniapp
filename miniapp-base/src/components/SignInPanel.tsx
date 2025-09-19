@@ -39,6 +39,12 @@ import { convertProofToHex } from "@/lib/blockchains/evm/utils/convert-proof-to-
 // @dev - Spinner component
 import { Spinner } from "@/components/circuits/Spinner";
 
+// @dev - To display the notifications on the top of screen
+import { toast } from 'react-hot-toast';
+
+/**
+ * @notice - SignInPanel component
+ */
 export function SignInPanel() { // @dev - For Wagmi
 //export function SignInPanel({ provider, signer }: { provider: BrowserProvider; signer: JsonRpcSigner }) { // @dev - For ethers.js
   const { signIn } = useApp();
@@ -183,6 +189,7 @@ export function SignInPanel() { // @dev - For Wagmi
           }
         } catch (error) {
           console.error('Error to record public inputs on-chain (BASE):', error);
+          toast.error(`Error: ${error.message}`);
         }
 
         // We'll discard the email/token for privacy and just sign in anonymously
@@ -223,6 +230,7 @@ export function SignInPanel() { // @dev - For Wagmi
       }
     } catch (err) {
       console.error('Error decoding token:', err);
+      toast.error('Error:', err.message);
       setError('Failed to authenticate with Google');
     } finally {
       setLoading(false); // @dev - Once a zkJWT proof is generated and a on-chain transaction is successful, a loading spinner is going to be hidden.
