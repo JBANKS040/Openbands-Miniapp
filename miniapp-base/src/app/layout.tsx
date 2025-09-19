@@ -30,7 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
         heroImageUrl: process.env.NEXT_PUBLIC_APP_HERO_IMAGE,
         noindex: false,
         button: {
-          title: `Launch ${projectName}`,
+          title: process.env.NEXT_PUBLIC_APP_BUTTON_TITLE,
           action: {
             type: 'launch_frame',
             name: projectName,
