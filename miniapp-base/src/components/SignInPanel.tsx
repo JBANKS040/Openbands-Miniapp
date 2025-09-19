@@ -243,13 +243,7 @@ export function SignInPanel() { // @dev - For Wagmi
                 <Spinner size={24} color="#2563eb" />
                 <span>Signing in...</span>
                 {/* <span className="animate-spin">🔄</span> */}
-                {/* 
-                <p className="text-sm text-gray-600">
-                  Your proof is being generated. This takes 10-20 seconds. <br/><br/>
-                  Once your proof is generated, a wallet modal will be showed up to sign an on-chain transaction for storing a public inputs data.  <br/><br/>
-                  Then, you will be signed in automatically.
-                </p> 
-                */}
+                {/* <p className="text-sm text-gray-600">Your proof is being generated. This takes 10-20 seconds.</p> */}
               </div>
             ) : hasValidGoogleClientId ? (
               <GoogleLogin
