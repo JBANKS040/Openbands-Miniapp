@@ -76,11 +76,10 @@ export function SignInPanel() { // @dev - For Wagmi
     setLoading(true);    
     
     // @dev - Variables to manage multiple toasts
-    let toastToNotifyZkJwtProofGeneration;
     let toastToNotifyZkJwtPublicInputsRecordingOnChain;
 
     // @dev - Notify the beginning of zkJWT proof generation as a notification on the top of screen.
-    toastToNotifyZkJwtProofGeneration = toast.loading("Your zkJWT proof generation get started! Wait for 10-20 seconds.");
+    const toastToNotifyZkJwtProofGeneration = toast.loading("Your zkJWT proof generation get started! Wait for 10-20 seconds.");
 
     // Require wallet connection before continuing Google auth flow
     if (!isWalletConnected) {
