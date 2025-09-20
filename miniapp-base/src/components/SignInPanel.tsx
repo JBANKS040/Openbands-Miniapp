@@ -135,6 +135,7 @@ export function SignInPanel() { // @dev - For Wagmi
         const { proof, publicInputs } = await generateZkJwtProof(decoded.email, resp.credential);
         if (proof && publicInputs) {
           toast.success('Your zkJWT proof has been successfully generated!');
+          toast.loading("Then, the public inputs of your zkJWT proof will be recorded on-chain (on BASE Mainnet). Once a Web3 wallet modal would be displayed, please confirm/sign the transaction on BASE Mainnet.");
         }
 
         // @dev - Log (NOTE: The data type of a given proof and publicInputs are "object". Hence, the ${} method can not be used in the console.log())
