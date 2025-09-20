@@ -188,10 +188,12 @@ export function SignInPanel() { // @dev - For Wagmi
             signIn(domainFromZkJwtCircuit);
           }
         } catch (error) {
-          console.error('Error to record public inputs on-chain (BASE):', error);
+          console.error('Error when a given public inputs is recorded on-chain (BASE):', error);
           if (error.message.includes("A given nullifierHash is already used, which means a given proof is already used")) {
             toast.error("A given nullifierHash is already used, which means a given proof is already used.");
             //toast.error(`Error: ${error.message}`);
+          } else {
+            toast.error(`when a given public inputs is recorded on-chain (BASE): ${error.message}`);
           }
         }
 
