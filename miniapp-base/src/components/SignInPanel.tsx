@@ -75,6 +75,9 @@ export function SignInPanel() { // @dev - For Wagmi
     // @dev - Display a loading spinner
     setLoading(true);    
     
+    // @dev - Notify the beginning of zkJWT proof generation as a notification on the top of screen.
+    toast.loading("Your zkJWT proof generation get started! Wait for 10-20 seconds.");
+
     // Require wallet connection before continuing Google auth flow
     if (!isWalletConnected) {
       setShowWalletPrompt(true);
