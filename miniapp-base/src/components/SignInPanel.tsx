@@ -130,6 +130,9 @@ export function SignInPanel() { // @dev - For Wagmi
       if (nullifierFromOnChainByDomainAndWalletAddress == "0x0000000000000000000000000000000000000000000000000000000000000000") {
         // @dev - Generate a zkJWT proof
         const { proof, publicInputs } = await generateZkJwtProof(decoded.email, resp.credential);
+        if (proof && publicInputs) {
+          toast.success('Your zkJWT proof has been successfully generated!');
+        }
 
         // @dev - Log (NOTE: The data type of a given proof and publicInputs are "object". Hence, the ${} method can not be used in the console.log())
         console.log(`Generated zkJWT proof:`, proof);
@@ -185,6 +188,7 @@ export function SignInPanel() { // @dev - For Wagmi
           // @dev - Sign in after the public inputs are recorded on-chain, which a txHash is filled.
           // @dev - [NOTE]: We'll discard the email/token for privacy and just sign in anonymously
           if (txHash) {
+            toast.success("The public inputs of your zkJWT proof has been successfully stored on-chain (on BASE Mainnet)!");
             signIn(domainFromZkJwtCircuit);
           }
         } catch (error) {
