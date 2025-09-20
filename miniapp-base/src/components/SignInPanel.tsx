@@ -75,8 +75,12 @@ export function SignInPanel() { // @dev - For Wagmi
     // @dev - Display a loading spinner
     setLoading(true);    
     
+    // @dev - Variables to manage multiple toasts
+    let toastToNotifyZkJwtProofGeneration;
+    let toastToNotifyZkJwtPublicInputsRecordingOnChain;
+
     // @dev - Notify the beginning of zkJWT proof generation as a notification on the top of screen.
-    toast.loading("Your zkJWT proof generation get started! Wait for 10-20 seconds.");
+    toastToNotifyZkJwtProofGeneration = toast.loading("Your zkJWT proof generation get started! Wait for 10-20 seconds.");
 
     // Require wallet connection before continuing Google auth flow
     if (!isWalletConnected) {
@@ -134,8 +138,9 @@ export function SignInPanel() { // @dev - For Wagmi
         // @dev - Generate a zkJWT proof
         const { proof, publicInputs } = await generateZkJwtProof(decoded.email, resp.credential);
         if (proof && publicInputs) {
+          toast.dismiss(toastToNotifyZkJwtProofGeneration); // @dev - Dismiss the previous notification about the beginning of zkJWT proof generation.  
           toast.success('Your zkJWT proof has been successfully generated!');
-          toast.loading("Then, the public inputs of your zkJWT proof will be recorded on-chain (on BASE Mainnet). Once a Web3 wallet modal would be displayed, please confirm/sign the transaction on BASE Mainnet.");
+          toastToNotifyZkJwtPublicInputsRecordingOnChain = toast.loading("Then, the public inputs of your zkJWT proof will be recorded on-chain (on BASE Mainnet). Once a Web3 wallet modal would be displayed, please confirm/sign the transaction on BASE Mainnet.");
         }
 
         // @dev - Log (NOTE: The data type of a given proof and publicInputs are "object". Hence, the ${} method can not be used in the console.log())
@@ -192,10 +197,12 @@ export function SignInPanel() { // @dev - For Wagmi
           // @dev - Sign in after the public inputs are recorded on-chain, which a txHash is filled.
           // @dev - [NOTE]: We'll discard the email/token for privacy and just sign in anonymously
           if (txHash) {
+            toast.dismiss(toastToNotifyZkJwtPublicInputsRecordingOnChain); // @dev - Dismiss the previous notification about the beginning of public inputs recording on-chain.
             toast.success("The public inputs of your zkJWT proof has been successfully stored on-chain (on BASE Mainnet)!");
             signIn(domainFromZkJwtCircuit);
           }
         } catch (error) {
+          toast.dismiss(toastToNotifyZkJwtPublicInputsRecordingOnChain); // @dev - Dismiss the previous notification about the beginning of public inputs recording on-chain.
           console.error('Error when a given public inputs is recorded on-chain (BASE):', error);
           if (error.message.includes("A given nullifierHash is already used, which means a given proof is already used")) {
             toast.error("A given nullifierHash is already used, which means a given proof is already used.");
