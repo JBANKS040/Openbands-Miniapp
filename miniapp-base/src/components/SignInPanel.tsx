@@ -203,11 +203,10 @@ export function SignInPanel() { // @dev - For Wagmi
         } catch (error: unknown) {
           toast.dismiss(toastToNotifyZkJwtPublicInputsRecordingOnChain); // @dev - Dismiss the previous notification about the beginning of public inputs recording on-chain.
           console.error('Error when a given public inputs is recorded on-chain (BASE):', error);
-          if (error.message.includes("A given nullifierHash is already used, which means a given proof is already used")) {
+          if ((error as any).message.includes("A given nullifierHash is already used, which means a given proof is already used")) {
             toast.error("A given nullifierHash is already used, which means a given proof is already used.");
-            //toast.error(`Error: ${error.message}`);
           } else {
-            toast.error(`when a given public inputs is recorded on-chain (BASE): ${error.message}`);
+            toast.error(`when a given public inputs is recorded on-chain (BASE): ${(error as any).message}`);
           }
         }
 
@@ -249,7 +248,16 @@ export function SignInPanel() { // @dev - For Wagmi
       }
     } catch (err: unknown) {
       console.error('Error decoding token:', err);
-      toast.error('Error:', err.message);
+      if (
+        typeof err === "object" &&
+        err !== null &&
+        "message" in err &&
+        typeof (err as any).message === "string"
+      ) {
+        toast.error(`Error: ${(err as any).message}`);
+      } else {
+        toast.error("Failed to authenticate with Google");
+      }
       setError('Failed to authenticate with Google');
     } finally {
       setLoading(false); // @dev - Once a zkJWT proof is generated and a on-chain transaction is successful, a loading spinner is going to be hidden.
