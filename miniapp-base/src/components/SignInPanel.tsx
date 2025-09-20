@@ -39,6 +39,21 @@ import { convertProofToHex } from "@/lib/blockchains/evm/utils/convert-proof-to-
 // @dev - Spinner component
 import { Spinner } from "@/components/circuits/Spinner";
 
+// @dev - To display the notifications on the top of screen
+import { toast } from 'react-hot-toast';
+
+function isErrorWithMessage(error: unknown): error is { message: string } {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof (error as { message?: unknown }).message === "string"
+  );
+}
+
+/**
+ * @notice - SignInPanel component
+ */
 export function SignInPanel() { // @dev - For Wagmi
 //export function SignInPanel({ provider, signer }: { provider: BrowserProvider; signer: JsonRpcSigner }) { // @dev - For ethers.js
   const { signIn } = useApp();
@@ -69,6 +84,12 @@ export function SignInPanel() { // @dev - For Wagmi
     // @dev - Display a loading spinner
     setLoading(true);    
     
+    // @dev - Variables to manage multiple toasts
+    let toastToNotifyZkJwtPublicInputsRecordingOnChain;
+
+    // @dev - Notify the beginning of zkJWT proof generation as a notification on the top of screen.
+    const toastToNotifyZkJwtProofGeneration = toast.loading("Your zkJWT proof generation get started! Wait for 10-20 seconds.");
+
     // Require wallet connection before continuing Google auth flow
     if (!isWalletConnected) {
       setShowWalletPrompt(true);
@@ -124,6 +145,11 @@ export function SignInPanel() { // @dev - For Wagmi
       if (nullifierFromOnChainByDomainAndWalletAddress == "0x0000000000000000000000000000000000000000000000000000000000000000") {
         // @dev - Generate a zkJWT proof
         const { proof, publicInputs } = await generateZkJwtProof(decoded.email, resp.credential);
+        if (proof && publicInputs) {
+          toast.dismiss(toastToNotifyZkJwtProofGeneration); // @dev - Dismiss the previous notification about the beginning of zkJWT proof generation.  
+          toast.success('Your zkJWT proof has been successfully generated!');
+          toastToNotifyZkJwtPublicInputsRecordingOnChain = toast.loading("Then, the public inputs of your zkJWT proof will be recorded on-chain (on BASE Mainnet). Once a Web3 wallet modal would be displayed, please confirm/sign the transaction on BASE Mainnet.");
+        }
 
         // @dev - Log (NOTE: The data type of a given proof and publicInputs are "object". Hence, the ${} method can not be used in the console.log())
         console.log(`Generated zkJWT proof:`, proof);
@@ -179,10 +205,19 @@ export function SignInPanel() { // @dev - For Wagmi
           // @dev - Sign in after the public inputs are recorded on-chain, which a txHash is filled.
           // @dev - [NOTE]: We'll discard the email/token for privacy and just sign in anonymously
           if (txHash) {
+            toast.dismiss(toastToNotifyZkJwtPublicInputsRecordingOnChain); // @dev - Dismiss the previous notification about the beginning of public inputs recording on-chain.
+            toast.success("The public inputs of your zkJWT proof has been successfully stored on-chain (on BASE Mainnet)!");
             signIn(domainFromZkJwtCircuit);
           }
-        } catch (error) {
-          console.error('Error to record public inputs on-chain (BASE):', error);
+        } catch (error: unknown) {
+          toast.dismiss(toastToNotifyZkJwtPublicInputsRecordingOnChain); // @dev - Dismiss the previous notification about the beginning of public inputs recording on-chain.
+          console.error('Error when a given public inputs is recorded on-chain (BASE):', error);
+          if (isErrorWithMessage(error) && error.message.includes("A given nullifierHash is already used, which means a given proof is already used")) {
+            toast.error("A given nullifierHash is already used, which means a given proof is already used.");
+          } else {
+            toast.error(`when a given public inputs is recorded on-chain (BASE): ${isErrorWithMessage(error)}`);
+            //toast.error(`when a given public inputs is recorded on-chain (BASE): ${(error as any).message}`);
+          }
         }
 
         // We'll discard the email/token for privacy and just sign in anonymously
@@ -221,8 +256,13 @@ export function SignInPanel() { // @dev - For Wagmi
       } else {
         //return;
       }
-    } catch (err) {
-      console.error('Error decoding token:', err);
+    } catch (err: unknown) {
+      console.error('Error in the SignInPanel:', err);
+      if (isErrorWithMessage(err)) {
+        toast.error(`Error: ${isErrorWithMessage(err)}`);
+      } else {
+        toast.error("Failed to authenticate with Google");
+      }
       setError('Failed to authenticate with Google');
     } finally {
       setLoading(false); // @dev - Once a zkJWT proof is generated and a on-chain transaction is successful, a loading spinner is going to be hidden.
