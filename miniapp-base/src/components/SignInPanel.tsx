@@ -42,6 +42,15 @@ import { Spinner } from "@/components/circuits/Spinner";
 // @dev - To display the notifications on the top of screen
 import { toast } from 'react-hot-toast';
 
+function isErrorWithMessage(error: unknown): error is { message: string } {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof (error as { message?: unknown }).message === "string"
+  );
+}
+
 /**
  * @notice - SignInPanel component
  */
@@ -203,10 +212,11 @@ export function SignInPanel() { // @dev - For Wagmi
         } catch (error: unknown) {
           toast.dismiss(toastToNotifyZkJwtPublicInputsRecordingOnChain); // @dev - Dismiss the previous notification about the beginning of public inputs recording on-chain.
           console.error('Error when a given public inputs is recorded on-chain (BASE):', error);
-          if ((error as any).message.includes("A given nullifierHash is already used, which means a given proof is already used")) {
+          if (isErrorWithMessage(error) && error.message.includes("A given nullifierHash is already used, which means a given proof is already used")) {
             toast.error("A given nullifierHash is already used, which means a given proof is already used.");
           } else {
-            toast.error(`when a given public inputs is recorded on-chain (BASE): ${(error as any).message}`);
+            toast.error(`when a given public inputs is recorded on-chain (BASE): ${isErrorWithMessage(error)}`);
+            //toast.error(`when a given public inputs is recorded on-chain (BASE): ${(error as any).message}`);
           }
         }
 
@@ -248,12 +258,9 @@ export function SignInPanel() { // @dev - For Wagmi
       }
     } catch (err: unknown) {
       console.error('Error decoding token:', err);
-      if (
-        typeof err === "object" &&
-        err !== null &&
-        "message" in err &&
-        typeof (err as any).message === "string"
-      ) {
+
+      isErrorWithMessage(err);
+      if (isErrorWithMessage(err) === "string") {
         toast.error(`Error: ${(err as any).message}`);
       } else {
         toast.error("Failed to authenticate with Google");
