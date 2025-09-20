@@ -257,11 +257,9 @@ export function SignInPanel() { // @dev - For Wagmi
         //return;
       }
     } catch (err: unknown) {
-      console.error('Error decoding token:', err);
-
-      isErrorWithMessage(err);
-      if (isErrorWithMessage(err) === "string") {
-        toast.error(`Error: ${(err as any).message}`);
+      console.error('Error in the SignInPanel:', err);
+      if (isErrorWithMessage(err)) {
+        toast.error(`Error: ${isErrorWithMessage(err)}`);
       } else {
         toast.error("Failed to authenticate with Google");
       }
