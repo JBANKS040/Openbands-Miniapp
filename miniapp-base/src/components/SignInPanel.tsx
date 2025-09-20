@@ -200,7 +200,7 @@ export function SignInPanel() { // @dev - For Wagmi
             toast.success("The public inputs of your zkJWT proof has been successfully stored on-chain (on BASE Mainnet)!");
             signIn(domainFromZkJwtCircuit);
           }
-        } catch (error: any) {
+        } catch (error: unknown) {
           toast.dismiss(toastToNotifyZkJwtPublicInputsRecordingOnChain); // @dev - Dismiss the previous notification about the beginning of public inputs recording on-chain.
           console.error('Error when a given public inputs is recorded on-chain (BASE):', error);
           if (error.message.includes("A given nullifierHash is already used, which means a given proof is already used")) {
@@ -247,7 +247,7 @@ export function SignInPanel() { // @dev - For Wagmi
       } else {
         //return;
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error decoding token:', err);
       toast.error('Error:', err.message);
       setError('Failed to authenticate with Google');
