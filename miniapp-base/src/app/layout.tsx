@@ -24,13 +24,12 @@ export async function generateMetadata(): Promise<Metadata> {
     title: projectName,
     description: process.env.NEXT_PUBLIC_APP_DESCRIPTION,
     other: {
-      'fc:frame': JSON.stringify({
-        version: 'next',
+      // Per Mini Apps docs, expose fc:miniapp (not fc:frame) and use version "1"
+      // https://miniapps.farcaster.xyz/docs/guides/agents-checklist
+      // https://miniapps.farcaster.xyz/docs/guides/discovery
+      'fc:miniapp': JSON.stringify({
+        version: '1',
         imageUrl: process.env.NEXT_PUBLIC_APP_HERO_IMAGE,
-        ogImageUrl: process.env.NEXT_PUBLIC_APP_OG_IMAGE,
-        buttonTitle: process.env.NEXT_PUBLIC_APP_BUTTON_TITLE,
-        heroImageUrl: process.env.NEXT_PUBLIC_APP_HERO_IMAGE,
-        noindex: false,
         button: {
           title: process.env.NEXT_PUBLIC_APP_BUTTON_TITLE,
           action: {
@@ -38,7 +37,23 @@ export async function generateMetadata(): Promise<Metadata> {
             name: projectName,
             url: BASE,
             splashImageUrl: process.env.NEXT_PUBLIC_APP_SPLASH_IMAGE,
-            splashBackgroundColor: process.env.NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR
+            splashBackgroundColor: process.env.NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR,
+          },
+        },
+      }),
+      // Per Base Cookbook (MiniKit), also include fc:frame with version "next"
+      // https://docs.base.org/cookbook/minikit/add-frame-metadata#add-frame-metadata
+      'fc:frame': JSON.stringify({
+        version: 'next',
+        imageUrl: process.env.NEXT_PUBLIC_APP_HERO_IMAGE,
+        button: {
+          title: process.env.NEXT_PUBLIC_APP_BUTTON_TITLE,
+          action: {
+            type: 'launch_frame',
+            name: projectName,
+            url: BASE,
+            splashImageUrl: process.env.NEXT_PUBLIC_APP_SPLASH_IMAGE,
+            splashBackgroundColor: process.env.NEXT_PUBLIC_SPLASH_BACKGROUND_COLOR,
           },
         },
       }),
