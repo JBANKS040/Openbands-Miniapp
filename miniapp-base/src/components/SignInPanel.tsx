@@ -41,15 +41,7 @@ import { Spinner } from "@/components/circuits/Spinner";
 
 // @dev - To display the notifications on the top of screen
 import { toast } from 'react-hot-toast';
-
-function isErrorWithMessage(error: unknown): error is { message: string } {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    "message" in error &&
-    typeof (error as { message?: unknown }).message === "string"
-  );
-}
+import { extractErrorMessageInString } from "@/lib/utils/try-catch-error-handling";
 
 /**
  * @notice - SignInPanel component
@@ -212,10 +204,10 @@ export function SignInPanel() { // @dev - For Wagmi
         } catch (error: unknown) {
           toast.dismiss(toastToNotifyZkJwtPublicInputsRecordingOnChain); // @dev - Dismiss the previous notification about the beginning of public inputs recording on-chain.
           console.error('Error when a given public inputs is recorded on-chain (BASE):', error);
-          if (isErrorWithMessage(error) && error.message.includes("A given nullifierHash is already used, which means a given proof is already used")) {
+          if (extractErrorMessageInString(error) && error.message.includes("A given nullifierHash is already used, which means a given proof is already used")) {
             toast.error("A given nullifierHash is already used, which means a given proof is already used.");
           } else {
-            toast.error(`when a given public inputs is recorded on-chain (BASE): ${isErrorWithMessage(error)}`);
+            toast.error(`when a given public inputs is recorded on-chain (BASE): ${extractErrorMessageInString(error)}`);
             //toast.error(`when a given public inputs is recorded on-chain (BASE): ${(error as any).message}`);
           }
         }
@@ -258,8 +250,8 @@ export function SignInPanel() { // @dev - For Wagmi
       }
     } catch (err: unknown) {
       console.error('Error in the SignInPanel:', err);
-      if (isErrorWithMessage(err)) {
-        toast.error(`Error: ${isErrorWithMessage(err)}`);
+      if (extractErrorMessageInString(err)) {
+        toast.error(`Error: ${extractErrorMessageInString(err)}`);
       } else {
         toast.error("Failed to authenticate with Google");
       }
