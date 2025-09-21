@@ -58,3 +58,14 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+<br>
+
+## Deployed-Smart Contract addresses on Base Mainnet
+
+| Contract Name | Descripttion | Deployed-contract addresses on `Base` (Mainnet) | Contract Source Code Verified |
+| ------------- |:------------:|:--------------------------------------------------:|:-----------------------------:|
+| HonkVerifier | | [0x8Cda51EBA880183C5F4174b553b1C7ea175c7a90](https://basescan.org/address/0x8Cda51EBA880183C5F4174b553b1C7ea175c7a90) | [Contract Source Code Verified](https://basescan.org/address/0x8Cda51EBA880183C5F4174b553b1C7ea175c7a90#code) |
+| ZkJwtProofVerifier | | [0x0bC7F66F9b76eA37Ae37e3965E866bDeD8b2824C](https://basescan.org/address/0x0bC7F66F9b76eA37Ae37e3965E866bDeD8b2824C) | [Contract Source Code Verified](https://basescan.org/address/0x0bC7F66F9b76eA37Ae37e3965E866bDeD8b2824C#code) |
+| ZkJwtProofManager | | [0x9218D30c18e2342BA5A1661E95a8B2BFeD6911e2](https://basescan.org/address/0x9218D30c18e2342BA5A1661E95a8B2BFeD6911e2) | [Contract Source Code Verified](https://basescan.org/address/0x9218D30c18e2342BA5A1661E95a8B2BFeD6911e2#code) |
+
