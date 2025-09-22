@@ -3,6 +3,7 @@ import { base } from '@wagmi/core/chains'
 
 export const wagmiConfig = createConfig({
   chains: [base],
+  //autoConnect: true, // @dev - Restores sessions (But, this ways is the Wagmi v1's way, not v2's way)
   transports: {
     [base.id]: fallback([
       // Primary RPC - Alchemy (if available)
