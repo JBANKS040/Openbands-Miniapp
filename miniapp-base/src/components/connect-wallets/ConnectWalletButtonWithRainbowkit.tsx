@@ -111,6 +111,7 @@ export default function ConnectWalletButtonWithRainbowkit() {
       <ConnectButton />
       
       {/* @dev - Connection status and manual reconnect option */}
+      {/* 
       {!isConnected && reconnectAttempted && (
         <div className="text-center">
           <button
@@ -122,14 +123,17 @@ export default function ConnectWalletButtonWithRainbowkit() {
           </button>
         </div>
       )}
+      */}
       
       {/* @dev - Debug info (remove in production) */}
+      {/*
       {process.env.NODE_ENV === 'development' && address && (
         <div className="text-xs text-gray-500 mt-2">
           <div>Connected: {isConnected ? 'Yes' : 'No'}</div>
           <div>Address: {address?.slice(0, 6)}...{address?.slice(-4)}</div>
         </div>
       )}
+      */}
     </div>
   );
 }
