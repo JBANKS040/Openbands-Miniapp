@@ -8,37 +8,135 @@ import {
   getDefaultConfig,
   RainbowKitProvider,
 } from '@rainbow-me/rainbowkit';
-import { WagmiProvider, Config } from 'wagmi';
+import { WagmiProvider, Config, useAccount, useDisconnect } from 'wagmi';
 import { base } from 'wagmi/chains';
 import {
   QueryClientProvider,
   QueryClient,
 } from "@tanstack/react-query";
 
+import { reconnect, getConnections } from '@wagmi/core';
+import { wagmiConfig } from '@/lib/blockchains/evm/smart-contracts/wagmi/config';
+
 // @dev - Blockchain related imports
 //import { connectToEvmWallet } from '../../lib/blockchains/evm/connect-wallets/connect-to-evm-wallet';
 
+/** 
+ * @dev - Utility function to check if there are stored connections
+ */
+function hasStoredConnections(): boolean {
+  try {
+    // Check if there are any stored wallet connections
+    const connections = getConnections(wagmiConfig);
+    return connections.length > 0;
+  } catch (error) {
+    console.warn('Error checking stored connections:', error);
+    return false;
+  }
+}
+
 /**
  * @notice - A button component to connect to an EVM wallet (e.g., MetaMask) by using the RainbowKit
+ * @dev - Includes automatic reconnection to previously connected wallets
  */
 export default function ConnectWalletButtonWithRainbowkit() {
-  //const [account, setAccount] = useState<string | null>(null);
+  const [isReconnecting, setIsReconnecting] = useState(true);
+  const [reconnectAttempted, setReconnectAttempted] = useState(false);
+  
+  // @dev - Wagmi hooks for connection status
+  const { address, isConnected, isConnecting } = useAccount();
+  const { disconnect } = useDisconnect();
 
   useEffect(() => {
-    async function init() {
-      // const { provider, signer } = await connectToEvmWallet(); // @dev - Connect to EVM wallet (i.e. MetaMask) on page load
-      // const accounts = await provider.send("eth_requestAccounts", []);
-      // setAccount(accounts[0]); // @dev - To always link an connected-wallet address and display it - even if a web browser is refreshed.
+    async function handleReconnect() {
+      if (reconnectAttempted) return; // Prevent multiple reconnect attempts
+      
+      // @dev - Check if there are stored connections first
+      const hasStored = hasStoredConnections();
+      if (!hasStored) {
+        console.log('No stored wallet connections found');
+        setIsReconnecting(false);
+        setReconnectAttempted(true);
+        return;
+      }
+      
+      try {
+        setIsReconnecting(true);
+        setReconnectAttempted(true);
+        
+        console.log('Attempting to reconnect to previously connected wallets...');
+        
+        // @dev - Attempt to reconnect to previously connected wallets
+        const result = await reconnect(wagmiConfig, {
+          // Optional parameters you can use:
+          // connectors: [specificConnectors], // Limit to specific connectors
+        });
+        
+        console.log('Reconnection attempt completed:', result);
+      } catch (error) {
+        console.warn('Reconnection failed:', error);
+      } finally {
+        setIsReconnecting(false);
+      }
     }
-    init();
-  }, []);
+    
+    handleReconnect();
+  }, [reconnectAttempted]);
+
+  // @dev - Manual reconnect function for user-triggered reconnection
+  const handleManualReconnect = async () => {
+    setIsReconnecting(true);
+    try {
+      await reconnect(wagmiConfig);
+      console.log('Manual reconnection successful');
+    } catch (error) {
+      console.error('Manual reconnection failed:', error);
+    } finally {
+      setIsReconnecting(false);
+    }
+  };
+
+  // @dev - Show loading state while reconnecting or connecting
+  if (isReconnecting || isConnecting) {
+    return (
+      <div className="flex items-center space-x-2 text-sm text-gray-600 p-2">
+        <span className="animate-spin">🔄</span>
+        <span>{isReconnecting ? 'Restoring wallet connection...' : 'Connecting...'}</span>
+      </div>
+    );
+  }
 
   return (
-    <ConnectButton />
+    <div className="space-y-2">
+      <ConnectButton />
+      
+      {/* @dev - Connection status and manual reconnect option */}
+      {!isConnected && reconnectAttempted && (
+        <div className="text-center">
+          <button
+            onClick={handleManualReconnect}
+            className="text-xs text-blue-600 hover:text-blue-800 underline"
+            disabled={isReconnecting}
+          >
+            Try reconnecting to previous wallet
+          </button>
+        </div>
+      )}
+      
+      {/* @dev - Debug info (remove in production) */}
+      {process.env.NODE_ENV === 'development' && address && (
+        <div className="text-xs text-gray-500 mt-2">
+          <div>Connected: {isConnected ? 'Yes' : 'No'}</div>
+          <div>Address: {address?.slice(0, 6)}...{address?.slice(-4)}</div>
+        </div>
+      )}
+    </div>
   );
 }
 
-
+/**
+ * @notice - Set up and return the RainbowKit config and React Query client
+ */
 export function setConfigAndQueryClient(): { config: Config, queryClient: QueryClient } {
   // Set up config for RainbowKit
   const config = getDefaultConfig({

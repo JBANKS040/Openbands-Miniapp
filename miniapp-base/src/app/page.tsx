@@ -10,8 +10,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 // @dev - Connecting a Browser Wallet button
-import ConnectWalletButton from '../components/connect-wallets/ConnectWalletButton';
-import ConnectWalletButtonWithOnchainkit from '../components/connect-wallets/ConnectWalletButtonWithOnchainkit';
+//import ConnectWalletButton from '../components/connect-wallets/ConnectWalletButton';
+//import ConnectWalletButtonWithOnchainkit from '../components/connect-wallets/ConnectWalletButtonWithOnchainkit';
 import ConnectWalletButtonWithRainbowkit from '@/components/connect-wallets/ConnectWalletButtonWithRainbowkit';
 
 // @dev - Blockchain related imports
