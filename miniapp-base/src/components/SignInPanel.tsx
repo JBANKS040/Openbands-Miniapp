@@ -76,12 +76,6 @@ export function SignInPanel() { // @dev - For Wagmi
   const onSuccess = async (resp: CredentialResponse) => {
     // @dev - Display a loading spinner
     setLoading(true);    
-    
-    // @dev - Variables to manage multiple toasts
-    let toastToNotifyZkJwtPublicInputsRecordingOnChain;
-
-    // @dev - Notify the beginning of zkJWT proof generation as a notification on the top of screen.
-    const toastToNotifyZkJwtProofGeneration = toast.loading("Your proof is being generated. This takes 10-20 seconds");
 
     // Require wallet connection before continuing Google auth flow
     if (!isWalletConnected) {
@@ -136,6 +130,12 @@ export function SignInPanel() { // @dev - For Wagmi
 
       // @dev - If there is no nullifierFromOnChain, which is stored on-chain and is associated with a given wallet address, it will be recorded on-chain (BASE).
       if (nullifierFromOnChainByDomainAndWalletAddress == "0x0000000000000000000000000000000000000000000000000000000000000000") {
+        // @dev - Variables to manage multiple toasts
+        let toastToNotifyZkJwtPublicInputsRecordingOnChain;
+
+        // @dev - Notify the beginning of zkJWT proof generation as a notification on the top of screen.
+        const toastToNotifyZkJwtProofGeneration = toast.loading("Your proof is being generated. This takes 10-20 seconds");
+
         // @dev - Generate a zkJWT proof
         const { proof, publicInputs } = await generateZkJwtProof(decoded.email, resp.credential);
         if (proof && publicInputs) {
