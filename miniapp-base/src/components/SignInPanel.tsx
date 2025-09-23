@@ -80,7 +80,7 @@ export function SignInPanel() { // @dev - For Wagmi
     let toastToNotifyZkJwtPublicInputsRecordingOnChain;
 
     // @dev - Notify the beginning of zkJWT proof generation as a notification on the top of screen.
-    const toastToNotifyZkJwtProofGeneration = toast.loading("Your zkJWT proof generation get started! Wait for 10-20 seconds.");
+    const toastToNotifyZkJwtProofGeneration = toast.loading("Your proof is being generated. This takes 10-20 seconds");
 
     // Require wallet connection before continuing Google auth flow
     if (!isWalletConnected) {
@@ -140,7 +140,7 @@ export function SignInPanel() { // @dev - For Wagmi
         if (proof && publicInputs) {
           toast.dismiss(toastToNotifyZkJwtProofGeneration); // @dev - Dismiss the previous notification about the beginning of zkJWT proof generation.  
           toast.success('Your zkJWT proof has been successfully generated!');
-          toastToNotifyZkJwtPublicInputsRecordingOnChain = toast.loading("Then, the public inputs of your zkJWT proof will be recorded on-chain (on BASE Mainnet). Once a Web3 wallet modal would be displayed, please confirm/sign the transaction on BASE Mainnet.");
+          toastToNotifyZkJwtPublicInputsRecordingOnChain = toast.loading("Proof generated successfully! Please confirm the transaction.");
         }
 
         // @dev - Log (NOTE: The data type of a given proof and publicInputs are "object". Hence, the ${} method can not be used in the console.log())
@@ -205,7 +205,7 @@ export function SignInPanel() { // @dev - For Wagmi
           toast.dismiss(toastToNotifyZkJwtPublicInputsRecordingOnChain); // @dev - Dismiss the previous notification about the beginning of public inputs recording on-chain.
           console.error('Error when a given public inputs is recorded on-chain (BASE):', error);
           if (extractErrorMessageInString(error) && error.message.includes("A given nullifierHash is already used, which means a given proof is already used")) {
-            toast.error("A given nullifierHash is already used, which means a given proof is already used.");
+            toast.error("Email already associated with address 0xe4...3G3c. Please connect with the same address to log in");
           } else {
             toast.error(`when a given public inputs is recorded on-chain (BASE): ${extractErrorMessageInString(error)}`);
             //toast.error(`when a given public inputs is recorded on-chain (BASE): ${(error as any).message}`);
