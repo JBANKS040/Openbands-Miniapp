@@ -24,4 +24,12 @@ Live app: https://app.openbands.xyz
 
 - Next.js, TypeScript, Tailwind CSS
 - Wagmi + RainbowKit (wallets)
-- ZK tooling: Noir-lang/noir_js, (Noir/bb.js, [noir-jwt](https://github.com/zkemail/noir-jwt))
+- ZK tooling: [Noir-lang](https://noir-lang.org/), [noir-jwt](https://github.com/zkemail/noir-jwt))
+
+## Trust Assumption
+
+Google may be able to probabilistically de-anonymize users:
+
+- If someone sends a message right after registering, Google could attempt a timing attack by matching the OAuth completion time with the message activity.
+
+- If only a small number of users from a given domain are using the app, Google     could narrow down the sender by linking activity back to those few accounts.
