@@ -35,6 +35,7 @@ import { useConnectModal } from '@rainbow-me/rainbowkit';
 
 // @dev - Utility function to convert a ZK Proof to Hex
 import { convertProofToHex } from "@/lib/blockchains/evm/utils/convert-proof-to-hex";
+import { truncateAddress } from "@/lib/blockchains/evm/utils/truncate-address";
 
 // @dev - Spinner component
 import { Spinner } from "@/components/circuits/Spinner";
@@ -205,7 +206,7 @@ export function SignInPanel() { // @dev - For Wagmi
           toast.dismiss(toastToNotifyZkJwtPublicInputsRecordingOnChain); // @dev - Dismiss the previous notification about the beginning of public inputs recording on-chain.
           console.error('Error when a given public inputs is recorded on-chain (BASE):', error);
           if (extractErrorMessageInString(error) && error.message.includes("A given nullifierHash is already used, which means a given proof is already used")) {
-            toast.error("Email already associated with address 0xe4...3G3c. Please connect with the same address to log in");
+            toast.error(`Email already associated with address ${ truncateAddress(walletAddressFromConnectedWallet) }. Please connect with the same address to log in`);
           } else {
             toast.error(`when a given public inputs is recorded on-chain (BASE): ${extractErrorMessageInString(error)}`);
             //toast.error(`when a given public inputs is recorded on-chain (BASE): ${(error as any).message}`);
