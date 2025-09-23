@@ -208,9 +208,9 @@ export function SignInPanel() { // @dev - For Wagmi
           if (extractErrorMessageInString(error) && error.message.includes("A given nullifierHash is already used, which means a given proof is already used")) {
             toast.error(`Email already associated with address ${ truncateAddress(walletAddressFromConnectedWallet) }. Please connect with the same address to log in`);
           } else if (extractErrorMessageInString(error) && error.message.includes("User rejected the request")) {
-            toast.error(`Cancelled the transaction: ${extractErrorMessageInString(error)}`);
+            toast.error(`Cancelled the transaction`);
           } else if (extractErrorMessageInString(error) && error.message.includes("insufficient funds for gas")) {
-            toast.error(`Insufficient funds for gas: ${extractErrorMessageInString(error)}`);
+            toast.error(`Insufficient funds for gas`);
           } else {
             toast.error(`when a given public inputs is recorded on-chain (BASE): ${extractErrorMessageInString(error)}`);
             //toast.error(`when a given public inputs is recorded on-chain (BASE): ${(error as any).message}`);
