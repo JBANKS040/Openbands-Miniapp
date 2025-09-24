@@ -19,6 +19,7 @@ export interface Comment {
   authorId: string;
   authorEmail: string; // Keep for compatibility but will be empty
   authorAnonymousId: string; // Anonymous display name
+  companyDomain: CompanyDomain; // domain of the commenter
   content: string;
   likeCount: number;
   createdAt: number; // epoch ms

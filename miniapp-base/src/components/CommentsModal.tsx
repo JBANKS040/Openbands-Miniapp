@@ -131,7 +131,7 @@ export function CommentsModal({ post, isOpen, onClose }: CommentsModalProps) {
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
                       <div className="text-sm font-medium text-gray-900">
-                        Someone from {post.companyDomain || 'their company'}
+                        Someone from {comment.companyDomain || 'their company'}
                       </div>
                       <div className="text-xs text-gray-500">
                         {timeAgo(comment.createdAt)}
