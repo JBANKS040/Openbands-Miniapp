@@ -221,7 +221,8 @@ export function SignInPanel() { // @dev - For Wagmi
           } else if (extractErrorMessageInString(error) && error.message.includes("insufficient funds for gas")) {
             toast.error(`Insufficient funds for gas`);
           } else {
-            toast.error(`when a given public inputs is recorded on-chain (BASE): ${extractErrorMessageInString(error)}`);
+            toast.error(`Failed to send a transaction to blockchain`);
+            console.error(`when a given public inputs is recorded on-chain (BASE): ${extractErrorMessageInString(error)}`);
             //toast.error(`when a given public inputs is recorded on-chain (BASE): ${(error as any).message}`);
           }
         }
@@ -265,9 +266,8 @@ export function SignInPanel() { // @dev - For Wagmi
     } catch (err: unknown) {
       console.error('Error in the SignInPanel:', err);
       if (extractErrorMessageInString(err)) {
-        toast.error(`Error: ${extractErrorMessageInString(err)}`);
-      } else {
         toast.error("Failed to authenticate with Google");
+        console.error(`Error: ${extractErrorMessageInString(err)}`);
       }
       setError('Failed to authenticate with Google');
     } finally {
