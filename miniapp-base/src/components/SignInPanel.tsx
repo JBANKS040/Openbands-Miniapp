@@ -204,7 +204,7 @@ export function SignInPanel() { // @dev - For Wagmi
           }
         } catch (error: unknown) {
           toast.dismiss(toastToNotifyZkJwtPublicInputsRecordingOnChain); // @dev - Dismiss the previous notification about the beginning of public inputs recording on-chain.
-          console.error('Error when a given public inputs is recorded on-chain (BASE):', error);
+          //console.error('Error when a given public inputs is recorded on-chain (BASE):', error);
           if (extractErrorMessageInString(error) && error.message.includes("A given nullifierHash is already used, which means a given proof is already used")) {
             // @dev - Get public inputs from on-chain
             const publicInputsFromOnChain: PublicInputs = await readContract(wagmiConfig, {
