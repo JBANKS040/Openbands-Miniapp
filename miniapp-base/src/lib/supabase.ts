@@ -75,6 +75,7 @@ function dbCommentToComment(dbComment: DbComment): import('@/lib/types').Comment
     authorId: dbComment.anonymous_id,
     authorEmail: '', // Not stored for privacy
     authorAnonymousId: dbComment.anonymous_id,
+    companyDomain: dbComment.company_domain || 'unknown.com',
     content: dbComment.content,
     likeCount: dbComment.like_count,
     createdAt: new Date(dbComment.created_at).getTime(),
