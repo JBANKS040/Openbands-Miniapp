@@ -368,7 +368,7 @@ export function SignInPanel() { // @dev - For Wagmi
               <div>
                 <p className="text-xs font-medium text-blue-900">How it works</p>
                 <p className="text-xs text-blue-700 mt-1">
-                1) Log in and generate a ZK proof using your company email. <br/><br/>2) Confrim the transaction to verify and store your proof onchain.<br/><br/> 3) Start posting as company.xyz.<br/><br/> Personal information like your full name or full email never leaves your device and remains private. <br/><br/>Only your company domain is revealed. (e.g. &quot;openbands.xyz&quot;)
+                1) Log in to generate a ZK proof using your company email. <br/><br/>2) Confirm the transaction to verify and store your proof onchain.<br/><br/> 3) Start posting as company.xyz.<br/><br/> Personal information like your full name or full email never leaves your device and remains private. <br/><br/>Only your company domain is revealed. (e.g. &quot;openbands.xyz&quot;)
                 </p>
               </div>
             </div>
