@@ -306,9 +306,9 @@ export function SignInPanel() { // @dev - For Wagmi
           <div className="w-12 h-12 mx-auto mb-4">
             <img src="/Openbands.png" alt="Openbands" className="w-12 h-12 rounded-lg object-cover" />
           </div>
-          <h1 className="text-xl font-bold text-gray-900 mb-2">Welcome to OpenBands</h1>
+          <h1 className="text-xl font-bold text-gray-900 mb-2">Welcome to Openbands</h1>
           <p className="text-gray-600 text-sm">
-            The anonymous social network for verified employees
+            The anonymous forum for verified employees
           </p>
         </div>
 
@@ -368,7 +368,7 @@ export function SignInPanel() { // @dev - For Wagmi
               <div>
                 <p className="text-xs font-medium text-blue-900">How it works</p>
                 <p className="text-xs text-blue-700 mt-1">
-                You generate a cryptographic proof using your company email. <br/><br/>Personal information remains private and never leaves your device.<br/><br/> Only your company domain is revealed. (e.g. &quot;openbands.xyz&quot;)
+                1) Log in and generate a ZK proof using your company email. <br/><br/>2) Confrim the transaction to verify and store your proof onchain.<br/><br/> 3) Start posting as company.xyz.<br/><br/> Personal information like your full name or full email never leaves your device and remains private. <br/><br/>Only your company domain is revealed. (e.g. &quot;openbands.xyz&quot;)
                 </p>
               </div>
             </div>
