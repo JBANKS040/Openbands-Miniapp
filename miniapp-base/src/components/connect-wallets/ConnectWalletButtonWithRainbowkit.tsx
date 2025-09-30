@@ -21,6 +21,27 @@ import { wagmiConfig } from '@/lib/blockchains/evm/smart-contracts/wagmi/config'
 // @dev - Blockchain related imports
 //import { connectToEvmWallet } from '../../lib/blockchains/evm/connect-wallets/connect-to-evm-wallet';
 
+/**
+ * @notice - Set up and return the RainbowKit config and React Query client
+ */
+export function setConfigAndQueryClient(): { config: Config, queryClient: QueryClient } {
+  const PROJECT_ID = process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || 'YOUR_PROJECT_ID';
+
+  // Set up config for RainbowKit
+  const config = getDefaultConfig({
+    appName: 'OpenBands MiniApp',
+    projectId: PROJECT_ID,
+    chains: [base],
+    //chains: [mainnet, polygon, optimism, arbitrum, base],
+    ssr: true, // If your dApp uses server side rendering (SSR)
+  });
+
+  // @dev - React Query Client for RainbowKit
+  const queryClient = new QueryClient();
+
+  return { config, queryClient };
+}
+
 /** 
  * @dev - Utility function to check if there are stored connections
  */
@@ -136,23 +157,4 @@ export default function ConnectWalletButtonWithRainbowkit() {
       */}
     </div>
   );
-}
-
-/**
- * @notice - Set up and return the RainbowKit config and React Query client
- */
-export function setConfigAndQueryClient(): { config: Config, queryClient: QueryClient } {
-  // Set up config for RainbowKit
-  const config = getDefaultConfig({
-    appName: 'My RainbowKit App',
-    projectId: 'YOUR_PROJECT_ID',
-    chains: [base],
-    //chains: [mainnet, polygon, optimism, arbitrum, base],
-    ssr: true, // If your dApp uses server side rendering (SSR)
-  });
-
-  // @dev - React Query Client for RainbowKit
-  const queryClient = new QueryClient();
-
-  return { config, queryClient };
 }
