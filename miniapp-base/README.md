@@ -69,3 +69,8 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 | ZkJwtProofVerifier | | [0x0bC7F66F9b76eA37Ae37e3965E866bDeD8b2824C](https://basescan.org/address/0x0bC7F66F9b76eA37Ae37e3965E866bDeD8b2824C) | [Contract Source Code Verified](https://basescan.org/address/0x0bC7F66F9b76eA37Ae37e3965E866bDeD8b2824C#code) |
 | ZkJwtProofManager | | [0x9218D30c18e2342BA5A1661E95a8B2BFeD6911e2](https://basescan.org/address/0x9218D30c18e2342BA5A1661E95a8B2BFeD6911e2) | [Contract Source Code Verified](https://basescan.org/address/0x9218D30c18e2342BA5A1661E95a8B2BFeD6911e2#code) |
 
+<br>
+
+## ZK circuit and Smart Contract repository
+
+The ZK circuit and Smart Contract repository of this project has been implemented in the different repository. You can see it from [here](https://github.com/masaun/Openbands-Miniapp_ZK-circuit_and_contracts).
