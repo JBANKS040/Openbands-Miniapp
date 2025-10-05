@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { createBaseAccountSDK, pay, getPaymentStatus } from '@base-org/account';
 import { SignInWithBaseButton, BasePayButton } from '@base-org/account-ui/react';
 
+import { createWalletClient, custom } from 'viem';
+import { base } from 'viem/chains';
+
 /**
  * @notice - A button component to connect to a Base Account using the Base Account SDK.
  * @dev - ref (Base Account SDK - Web / Next.js): https://docs.base.org/base-account/quickstart/web-react
@@ -17,6 +20,11 @@ export default function ConnectWalletButtonWithBaseAccountSDK() {
   const [sdkError, setSdkError] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
   
+  // @dev - For authentication
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
   // Ensure we're on client side
   React.useEffect(() => {
     setIsClient(true);
@@ -32,6 +40,7 @@ export default function ConnectWalletButtonWithBaseAccountSDK() {
           const baseSDK = createBaseAccountSDK({
             appName: 'Base Account Quick-start',
             appLogoUrl: 'https://base.org/logo.png',
+            appChainIds: [base.id], // @dev - chain ID for Base Mainnet
           });
           setSdk(baseSDK);
           setSdkError(null);
@@ -51,16 +60,54 @@ export default function ConnectWalletButtonWithBaseAccountSDK() {
 
   // Optional sign-in step – not required for `pay()`, but useful to get the user address
   const handleSignIn = async () => {
+    setLoading(true);
+    setError(null);
+
     if (!sdk) {
       console.error('SDK not initialized');
       return;
     }
     try {
-      await sdk.getProvider().request({ method: 'wallet_connect' });
+      // Get the provider and create wallet client
+      const provider = await sdk.getProvider().request({ method: 'wallet_connect' });
+      const client = createWalletClient({
+        chain: base,
+        transport: custom(provider)
+      });
+
+      // Get account address
+      const [account] = await client.getAddresses();
+      console.log('Connected account:', account);
+
+      // Sign authentication message
+      const message = `Sign in to MyApp at ${Date.now()}`;
+      const signature = await client.signMessage({ 
+        account,
+        message,
+      });
+
+      // // @dev - Verify signature on backend (optional)
+      // const authResult = await verifySignature(account, message, signature);
+
+      // if (authResult.success) {
+      //   setUser({
+      //     address: account,
+      //     signature: signature,
+      //     timestamp: Date.now()
+      //   });
+      //   console.log('User authenticated successfully');
+      // } else {
+      //   throw new Error('Authentication verification failed');
+      // }
+
       setIsSignedIn(true);
     } catch (error) {
-      console.error('Sign in failed:', error);
+      console.error('Authentication failed:', error);
+      setError(error.message || 'Authentication failed');
+    } finally {
+      setLoading(false);
     }
+
   };
 
   // One-tap USDC payment using the pay() function
