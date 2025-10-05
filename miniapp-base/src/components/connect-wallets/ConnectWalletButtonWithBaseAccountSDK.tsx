@@ -10,18 +10,51 @@ export default function ConnectWalletButtonWithBaseAccountSDK() {
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState('');
   const [paymentId, setPaymentId] = useState('');
-  const [theme, setTheme] = useState('light');
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
-  // Initialize SDK
-  const sdk = createBaseAccountSDK(
-    {
-      appName: 'Base Account Quick-start',
-      appLogoUrl: 'https://base.org/logo.png',
+  // Initialize SDK with error handling
+  const [sdk, setSdk] = useState<any>(null);
+  const [sdkError, setSdkError] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
+  
+  // Ensure we're on client side
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
+  
+  React.useEffect(() => {
+    if (!isClient) return;
+    
+    try {
+      // Add a delay to ensure all dependencies are loaded
+      const initializeSDK = async () => {
+        try {
+          const baseSDK = createBaseAccountSDK({
+            appName: 'Base Account Quick-start',
+            appLogoUrl: 'https://base.org/logo.png',
+          });
+          setSdk(baseSDK);
+          setSdkError(null);
+        } catch (error) {
+          console.error('Failed to initialize Base Account SDK:', error);
+          setSdkError(error instanceof Error ? error.message : 'Unknown error');
+        }
+      };
+      
+      // Small delay to ensure proper client-side initialization
+      setTimeout(initializeSDK, 100);
+    } catch (error) {
+      console.error('Failed to initialize Base Account SDK:', error);
+      setSdkError(error instanceof Error ? error.message : 'Unknown error');
     }
-  );
+  }, [isClient]);
 
   // Optional sign-in step – not required for `pay()`, but useful to get the user address
   const handleSignIn = async () => {
+    if (!sdk) {
+      console.error('SDK not initialized');
+      return;
+    }
     try {
       await sdk.getProvider().request({ method: 'wallet_connect' });
       setIsSignedIn(true);
@@ -69,15 +102,27 @@ export default function ConnectWalletButtonWithBaseAccountSDK() {
 
   const dark = theme === 'dark';
   const styles = {
-    container: { minHeight: '100vh', backgroundColor: dark ? '#111' : '#fff', color: dark ? '#fff' : '#000', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px' },
-    card: { backgroundColor: dark ? '#222' : '#f9f9f9', borderRadius: '12px', padding: '30px', maxWidth: '400px', textAlign: 'center' },
+    container: { minHeight: '100vh', backgroundColor: dark ? '#111' : '#fff', color: dark ? '#fff' : '#000', display: 'flex', flexDirection: 'column' as const, alignItems: 'center', justifyContent: 'center', padding: '20px' },
+    card: { backgroundColor: dark ? '#222' : '#f9f9f9', borderRadius: '12px', padding: '30px', maxWidth: '400px', textAlign: 'center' as const },
     title: { fontSize: '24px', fontWeight: 'bold', marginBottom: '10px', color: dark ? '#fff' : '#00f' },
     subtitle: { fontSize: '16px', color: dark ? '#aaa' : '#666', marginBottom: '30px' },
-    themeToggle: { position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px' },
-    buttonGroup: { display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'center' },
+    themeToggle: { position: 'absolute' as const, top: '20px', right: '20px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px' },
+    buttonGroup: { display: 'flex', flexDirection: 'column' as const, gap: '16px', alignItems: 'center' },
     status: { marginTop: '20px', padding: '12px', backgroundColor: dark ? '#333' : '#f0f0f0', borderRadius: '8px', fontSize: '14px' },
     signInStatus: { marginTop: '8px', fontSize: '14px', color: dark ? '#0f0' : '#060' }
   };
+
+  // Don't render on server side to avoid hydration issues
+  if (!isClient) {
+    return (
+      <div style={styles.container}>
+        <div style={styles.card}>
+          <h1 style={styles.title}>Base Account</h1>
+          <p style={styles.subtitle}>Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={styles.container}>
@@ -89,41 +134,59 @@ export default function ConnectWalletButtonWithBaseAccountSDK() {
         <h1 style={styles.title}>Base Account</h1>
         <p style={styles.subtitle}>Experience seamless crypto payments</p>
         
-        <div style={styles.buttonGroup}>
-          <SignInWithBaseButton 
-            align="center"
-            variant="solid"
-            colorScheme={theme}
-            size="medium"
-            onClick={handleSignIn}
-          />
-          
-          {isSignedIn && (
-            <div style={styles.signInStatus}>
-              ✅ Connected to Base Account
+        {sdkError && (
+          <div style={{ ...styles.status, backgroundColor: dark ? '#441' : '#fee', color: dark ? '#f88' : '#c00' }}>
+            <div>SDK Error: {sdkError}</div>
+            <div style={{ fontSize: '12px', marginTop: '8px' }}>
+              Please check your internet connection and try refreshing the page.
             </div>
-          )}
-          
-          <BasePayButton 
-            colorScheme={theme}
-            onClick={handlePayment}
-          />
-          
-          {paymentId && (
-            <button 
-              onClick={handleCheckStatus}
-              style={{
-                padding: '12px 24px',
-                backgroundColor: theme === 'dark' ? '#374151' : '#f3f4f6',
-                color: theme === 'dark' ? '#ffffff' : '#1f2937',
-                border: `1px solid ${theme === 'dark' ? '#6b7280' : '#d1d5db'}`,
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontSize: '14px'
-              }}
-            >
-              Check Payment Status
-            </button>
+          </div>
+        )}
+        
+        {!sdk && !sdkError && (
+          <div style={styles.status}>
+            Initializing Base Account SDK...
+          </div>
+        )}
+        
+        <div style={styles.buttonGroup}>
+          {sdk && (
+            <>
+              <SignInWithBaseButton 
+                align="center"
+                variant="solid"
+                colorScheme={theme}
+                onClick={handleSignIn}
+              />
+              
+              {isSignedIn && (
+                <div style={styles.signInStatus}>
+                  ✅ Connected to Base Account
+                </div>
+              )}
+              
+              <BasePayButton 
+                colorScheme={theme}
+                onClick={handlePayment}
+              />
+              
+              {paymentId && (
+                <button 
+                  onClick={handleCheckStatus}
+                  style={{
+                    padding: '12px 24px',
+                    backgroundColor: theme === 'dark' ? '#374151' : '#f3f4f6',
+                    color: theme === 'dark' ? '#ffffff' : '#1f2937',
+                    border: `1px solid ${theme === 'dark' ? '#6b7280' : '#d1d5db'}`,
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '14px'
+                  }}
+                >
+                  Check Payment Status
+                </button>
+              )}
+            </>
           )}
         </div>
 
