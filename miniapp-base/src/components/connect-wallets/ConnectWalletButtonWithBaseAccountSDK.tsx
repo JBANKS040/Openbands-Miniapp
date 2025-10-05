@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { createBaseAccountSDK, pay, getPaymentStatus } from '@base-org/account';
 import { SignInWithBaseButton, BasePayButton } from '@base-org/account-ui/react';
 
-import { createWalletClient, custom } from 'viem';
+//import { createWalletClient, custom } from 'viem';
 import { base } from 'viem/chains';
 
 /**
@@ -16,14 +16,14 @@ export default function ConnectWalletButtonWithBaseAccountSDK() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   // Initialize SDK with error handling
-  const [sdk, setSdk] = useState<any>(null);
+  const [sdk, setSdk] = useState<ReturnType<typeof createBaseAccountSDK> | null>(null);
   const [sdkError, setSdkError] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
   
   // @dev - For authentication
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<{ address: string; signature: string; timestamp: number } | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Ensure we're on client side
   React.useEffect(() => {
@@ -60,54 +60,30 @@ export default function ConnectWalletButtonWithBaseAccountSDK() {
 
   // Optional sign-in step – not required for `pay()`, but useful to get the user address
   const handleSignIn = async () => {
-    setLoading(true);
-    setError(null);
-
     if (!sdk) {
       console.error('SDK not initialized');
       return;
     }
     try {
-      // Get the provider and create wallet client
+      // @dev - Get a provider and request wallet connection
       const provider = await sdk.getProvider().request({ method: 'wallet_connect' });
-      const client = createWalletClient({
-        chain: base,
-        transport: custom(provider)
-      });
+      console.log('provider:', provider);
 
-      // Get account address
-      const [account] = await client.getAddresses();
-      console.log('Connected account:', account);
-
-      // Sign authentication message
-      const message = `Sign in to MyApp at ${Date.now()}`;
-      const signature = await client.signMessage({ 
-        account,
-        message,
-      });
-
-      // // @dev - Verify signature on backend (optional)
-      // const authResult = await verifySignature(account, message, signature);
-
-      // if (authResult.success) {
-      //   setUser({
-      //     address: account,
-      //     signature: signature,
-      //     timestamp: Date.now()
-      //   });
-      //   console.log('User authenticated successfully');
-      // } else {
-      //   throw new Error('Authentication verification failed');
-      // }
+      // @dev - Create a wallet client (if needed for further interactions)
+      // const client = createWalletClient({
+      //   chain: base,
+      //   transport: custom(provider)
+      // });
 
       setIsSignedIn(true);
+      console.log('Sign in successful');
     } catch (error) {
       console.error('Authentication failed:', error);
-      setError(error.message || 'Authentication failed');
+      const errorMessage = error instanceof Error ? error.message : 'Authentication failed';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
-
   };
 
   // One-tap USDC payment using the pay() function
@@ -206,9 +182,26 @@ export default function ConnectWalletButtonWithBaseAccountSDK() {
                 onClick={handleSignIn}
               />
               
-              {isSignedIn && (
+              {loading && (
+                <div style={styles.status}>
+                  Signing in...
+                </div>
+              )}
+              
+              {error && (
+                <div style={{ ...styles.status, backgroundColor: dark ? '#441' : '#fee', color: dark ? '#f88' : '#c00' }}>
+                  {error}
+                </div>
+              )}
+              
+              {isSignedIn && !loading && !error && (
                 <div style={styles.signInStatus}>
                   ✅ Connected to Base Account
+                  {user && (
+                    <div style={{ fontSize: '12px', marginTop: '4px' }}>
+                      Signed in at: {new Date(user.timestamp).toLocaleTimeString()}
+                    </div>
+                  )}
                 </div>
               )}
               
