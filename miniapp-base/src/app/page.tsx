@@ -10,9 +10,10 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 // @dev - Connecting a Browser Wallet button
+import ConnectWalletButtonWithBaseAccountSDK from '@/components/connect-wallets/ConnectWalletButtonWithBaseAccountSDK';
+//import ConnectWalletButtonWithRainbowkit from '@/components/connect-wallets/ConnectWalletButtonWithRainbowkit';
 //import ConnectWalletButton from '../components/connect-wallets/ConnectWalletButton';
 //import ConnectWalletButtonWithOnchainkit from '../components/connect-wallets/ConnectWalletButtonWithOnchainkit';
-import ConnectWalletButtonWithRainbowkit from '@/components/connect-wallets/ConnectWalletButtonWithRainbowkit';
 
 // @dev - Blockchain related imports
 import { connectToEvmWallet } from '../lib/blockchains/evm/connect-wallets/connect-to-evm-wallet';
@@ -185,7 +186,8 @@ export default function Home() {
               ) : (
                 // <ConnectWalletButton />
                 // <ConnectWalletButtonWithOnchainkit />
-                <ConnectWalletButtonWithRainbowkit />
+                //<ConnectWalletButtonWithRainbowkit />
+                <ConnectWalletButtonWithBaseAccountSDK />
               )}
             </div>
           </div>
