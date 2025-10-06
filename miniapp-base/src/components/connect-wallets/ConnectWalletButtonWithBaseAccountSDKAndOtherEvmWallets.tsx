@@ -2,6 +2,25 @@ import React, { useState, useEffect } from 'react';
 import { createBaseAccountSDK } from '@base-org/account';
 import { base } from 'viem/chains';
 
+import { reconnect, getConnections } from '@wagmi/core';
+import { wagmiConfig } from '@/lib/blockchains/evm/smart-contracts/wagmi/config-with-onchainkit';
+
+/**
+ * @notice - Set up and return the RainbowKit config and React Query client
+ */
+export function setConfigAndQueryClient(): { config: Config, queryClient: QueryClient } {
+  // Set up config
+  const config = wagmiConfig;
+
+  // @dev - React Query Client for RainbowKit
+  const queryClient = new QueryClient();
+
+  return { config, queryClient };
+}
+
+/**
+ * @notice - A button component to connect to a Base Account using the Base Account SDK and other EVM wallets.
+ */
 export default function ConnectWalletButtonWithBaseAccountSDKAndOtherEvmWallets() {
   const [sdk, setSdk] = useState(null);
   const [provider, setProvider] = useState(null);
