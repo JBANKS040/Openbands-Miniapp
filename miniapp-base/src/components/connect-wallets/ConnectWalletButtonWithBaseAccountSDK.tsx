@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createBaseAccountSDK, pay, getPaymentStatus } from '@base-org/account';
 import { SignInWithBaseButton, BasePayButton } from '@base-org/account-ui/react';
 
@@ -26,11 +26,11 @@ export default function ConnectWalletButtonWithBaseAccountSDK() {
   const [error, setError] = useState<string | null>(null);
 
   // Ensure we're on client side
-  React.useEffect(() => {
+  useEffect(() => {
     setIsClient(true);
   }, []);
   
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isClient) return;
     
     try {
