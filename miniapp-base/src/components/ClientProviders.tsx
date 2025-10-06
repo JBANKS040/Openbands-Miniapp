@@ -27,24 +27,24 @@ export default function ClientProviders({ children }: PropsWithChildren) {
       <MiniKitProvider 
         apiKey={apiKey} 
         chain={base}
-        // config={{
-        //   appearance: {
-        //     name: 'OpenBands MiniApp',
-        //     logo: 'https://your-logo.com',
-        //     mode: 'dark',
-        //     theme: 'default',
-        //   },
-        //   wallet: {
-        //     display: 'modal',
-        //     termsUrl: 'https://...',
-        //     privacyUrl: 'https://...',
-        //     supportedWallets: { 
-        //       rabby: true, 
-        //       trust: true, 
-        //       frame: true, 
-        //     }, 
-        //   },
-        // }}
+        config={{
+          appearance: {
+            name: 'OpenBands MiniApp',
+            logo: 'https://your-logo.com',
+            mode: 'dark',
+            theme: 'default',
+          },
+          wallet: {
+            display: 'modal',
+            termsUrl: 'https://...',
+            privacyUrl: 'https://...',
+            supportedWallets: { 
+              rabby: true, 
+              trust: true, 
+              frame: true, 
+            }, 
+          },
+        }}
       >
         <WagmiProvider config={config}>
           <QueryClientProvider client={queryClient}>
