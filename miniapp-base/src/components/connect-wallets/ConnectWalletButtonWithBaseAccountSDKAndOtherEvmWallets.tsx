@@ -5,6 +5,10 @@ import { base } from 'viem/chains';
 import { reconnect, getConnections } from '@wagmi/core';
 import { wagmiConfig } from '@/lib/blockchains/evm/smart-contracts/wagmi/config-with-onchainkit';
 
+import { useConnect, useAccount } from 'wagmi';
+import { baseAccount } from 'wagmi/connectors';
+
+
 /**
  * @notice - Set up and return the RainbowKit config and React Query client
  */
@@ -39,25 +43,38 @@ export default function ConnectWalletButtonWithBaseAccountSDKAndOtherEvmWallets(
     setProvider(sdkInstance.getProvider());
   }, []);
 
-  const connectWallet = async () => {
-    if (!provider) return;
+  const { connect, connectors, isPending } = useConnect();
+  const { isConnected, address } = useAccount();
 
-    setIsConnecting(true);
-    try {
-      // This displays the wallet connection UI
-      const accounts = await provider.request({
-        method: 'eth_requestAccounts',
-        params: []
-      });
+  const handleConnect = () => {
+    const baseAccountConnector = connectors.find(
+      connector => connector.id === 'baseAccount'
+    );
 
-      setAccount(accounts[0]);
-      console.log('Connected account:', accounts[0]);
-    } catch (error) {
-      console.error('Connection failed:', error);
-    } finally {
-      setIsConnecting(false);
+    if (baseAccountConnector) {
+      connect({ connector: baseAccountConnector });
     }
   };
+
+  // const connectWallet = async () => {
+  //   if (!provider) return;
+
+  //   setIsConnecting(true);
+  //   try {
+  //     // This displays the wallet connection UI
+  //     const accounts = await provider.request({
+  //       method: 'eth_requestAccounts',
+  //       params: []
+  //     });
+
+  //     setAccount(accounts[0]);
+  //     console.log('Connected account:', accounts[0]);
+  //   } catch (error) {
+  //     console.error('Connection failed:', error);
+  //   } finally {
+  //     setIsConnecting(false);
+  //   }
+  // };
 
   const signMessage = async () => {
     if (!provider || !account) return;
@@ -77,19 +94,31 @@ export default function ConnectWalletButtonWithBaseAccountSDKAndOtherEvmWallets(
 
   return (
     <div>
-      {!account ? (
-        <button 
-          onClick={connectWallet} 
-          disabled={isConnecting || !provider}
-        >
-          {isConnecting ? 'Connecting...' : 'Connect Wallet'}
+      {!isConnected ? (
+        <button onClick={handleConnect} disabled={isPending}>
+          {isPending ? 'Connecting...' : 'Connect Base Account'}
         </button>
       ) : (
-        <div>
-          <p>Connected: {account}</p>
-          <button onClick={signMessage}>Sign Message</button>
-        </div>
+        <p>Connected: {address}</p>
       )}
     </div>
   );
+
+  // return (
+  //   <div>
+  //     {!account ? (
+  //       <button 
+  //         onClick={connectWallet} 
+  //         disabled={isConnecting || !provider}
+  //       >
+  //         {isConnecting ? 'Connecting...' : 'Connect Wallet'}
+  //       </button>
+  //     ) : (
+  //       <div>
+  //         <p>Connected: {account}</p>
+  //         <button onClick={signMessage}>Sign Message</button>
+  //       </div>
+  //     )}
+  //   </div>
+  // );
 }
