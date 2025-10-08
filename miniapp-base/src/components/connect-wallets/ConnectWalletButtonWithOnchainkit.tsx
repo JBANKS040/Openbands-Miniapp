@@ -1,3 +1,8 @@
+// @dev - CSS for OnchainKit components
+import '@coinbase/onchainkit/styles.css';
+import { color } from '@coinbase/onchainkit/theme';
+
+// @dev - OnchainKit <Wallet> components
 import {
   ConnectWallet,
   Wallet,
@@ -8,9 +13,13 @@ import {
   WalletAdvancedWalletActions,
   WalletDropdownDisconnect
 } from '@coinbase/onchainkit/wallet';
-import { Identity, Avatar, Name, Badge, Address, EthBalance } from '@coinbase/onchainkit/identity';
-import { color } from '@coinbase/onchainkit/theme';
 
+// @dev - OnchainKit <Identity> components
+import { Identity, Avatar, Name, Badge, Address, EthBalance } from '@coinbase/onchainkit/identity';
+
+/**
+ * @notice - A "Connect wallet" button component to connect an EVM wallet using OnchainKit's <Wallet /> component.
+ */
 export default function ConnectWalletButtonWithOnchainkit() {
   return (
     <div className="flex justify-end">

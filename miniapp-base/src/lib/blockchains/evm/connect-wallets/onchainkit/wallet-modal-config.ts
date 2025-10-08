@@ -1,3 +1,5 @@
+// import "@/app/globals.css";
+
 /**
  * Configuration for a wallet modal using the Wallet component of OnchainKit.
  */
