@@ -9,3 +9,105 @@
 .animate-spin {
   animation: spin 1s linear infinite;
 }
+
+
+/* OnchainKit Wallet Modal Custom Colors */
+:root {
+  /* Light theme colors */
+  --ck-connectkit-background: #ffffff;
+  --ck-connectkit-body-background: #ffffff;
+  --ck-connectkit-body-background-secondary: #f6f7f9;
+  --ck-connectkit-body-background-tertiary: #eff1f3;
+  --ck-connectkit-body-background-transparent: rgba(255, 255, 255, 0.9);
+  
+  /* Primary colors */
+  --ck-primary-button-background: #0052ff;
+  --ck-primary-button-hover-background: #0041cc;
+  --ck-primary-button-color: #ffffff;
+  --ck-primary-button-border-radius: 12px;
+  
+  /* Secondary colors */
+  --ck-secondary-button-background: #f6f7f9;
+  --ck-secondary-button-hover-background: #e1e4e8;
+  --ck-secondary-button-color: #373737;
+  --ck-secondary-button-border-radius: 12px;
+  
+  /* Text colors */
+  --ck-body-color: #373737;
+  --ck-body-color-muted: #999999;
+  --ck-body-color-muted-hover: #111111;
+  
+  /* Border and focus */
+  --ck-focus-color: #0052ff;
+  --ck-modal-box-shadow: 0 10px 38px rgba(0, 0, 0, 0.12);
+  --ck-border-radius: 16px;
+  --ck-connectkit-border-radius: 16px;
+  
+  /* Overlay */
+  --ck-overlay-background: rgba(0, 0, 0, 0.4);
+  --ck-overlay-backdrop-filter: blur(4px);
+}
+
+/* Dark theme overrides */
+[data-theme='dark'] {
+  --ck-connectkit-background: #1a1b1f;
+  --ck-connectkit-body-background: #1a1b1f;
+  --ck-connectkit-body-background-secondary: #313235;
+  --ck-connectkit-body-background-tertiary: #3d3e42;
+  --ck-connectkit-body-background-transparent: rgba(26, 27, 31, 0.9);
+  
+  --ck-primary-button-background: #0052ff;
+  --ck-primary-button-hover-background: #0041cc;
+  
+  --ck-secondary-button-background: #313235;
+  --ck-secondary-button-hover-background: #3d3e42;
+  --ck-secondary-button-color: #ffffff;
+  
+  --ck-body-color: #ffffff;
+  --ck-body-color-muted: #8b949e;
+  --ck-body-color-muted-hover: #ffffff;
+  
+  --ck-modal-box-shadow: 0 10px 38px rgba(0, 0, 0, 0.35);
+  --ck-overlay-background: rgba(0, 0, 0, 0.6);
+}
+
+/* Additional OnchainKit specific styles to fix transparency issues */
+.ock-wallet-provider,
+.ock-wallet-modal,
+.ock-wallet-modal-content {
+  background: var(--ck-connectkit-background) !important;
+}
+
+.ock-wallet-modal-overlay {
+  background: var(--ck-overlay-background) !important;
+  backdrop-filter: var(--ck-overlay-backdrop-filter, blur(4px)) !important;
+}
+
+.ock-wallet-button {
+  background: var(--ck-primary-button-background) !important;
+  color: var(--ck-primary-button-color) !important;
+  border-radius: var(--ck-primary-button-border-radius) !important;
+}
+
+.ock-wallet-button:hover {
+  background: var(--ck-primary-button-hover-background) !important;
+}
+
+/* Wallet option buttons */
+.ock-wallet-option {
+  background: var(--ck-connectkit-body-background-secondary) !important;
+  border-radius: var(--ck-border-radius) !important;
+}
+
+.ock-wallet-option:hover {
+  background: var(--ck-connectkit-body-background-tertiary) !important;
+}
+
+/* Text colors */
+.ock-wallet-text {
+  color: var(--ck-body-color) !important;
+}
+
+.ock-wallet-text-muted {
+  color: var(--ck-body-color-muted) !important;
+}
