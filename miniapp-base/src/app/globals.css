@@ -9,22 +9,3 @@
 .animate-spin {
   animation: spin 1s linear infinite;
 }
-
-
-/* OnchainKit Wallet Modal Custom Colors */
-@layer base {
-  [data-ock-theme='custom-light'] {
-    --ock-font-family: 'Inter', sans-serif;
-    --ock-radius-default: 0.75rem;
-    --ock-foreground: #1a1a1a;
-    --ock-background: #ffffff;
-    --ock-primary: #3b82f6;
-    /* ... other variables */
-  }
-
-  [data-ock-theme='custom-dark'] {
-    --ock-foreground: #ffffff;
-    --ock-background: #1a1a1a;
-    /* ... other dark mode variables */
-  }
-}
