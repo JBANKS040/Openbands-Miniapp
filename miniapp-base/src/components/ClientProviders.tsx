@@ -12,6 +12,9 @@ import { WagmiProvider } from 'wagmi';
 import { QueryClientProvider } from "@tanstack/react-query";
 const { config, queryClient } = setConfigAndQueryClient();
 
+// @dev - OnchainKit related imports
+import { walletModalConfig } from '@/lib/blockchains/evm/connect-wallets/onchainkit/wallet-modal-config';
+
 
 export default function ClientProviders({ children }: PropsWithChildren) {
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";                // @dev - Production
@@ -27,24 +30,7 @@ export default function ClientProviders({ children }: PropsWithChildren) {
       <MiniKitProvider 
         apiKey={apiKey} 
         chain={base}
-        config={{
-          appearance: {
-            name: 'OpenBands MiniApp',     // Displayed in modal header
-            logo: 'https://your-logo.com', // Displayed in modal header
-            mode: 'dark',                  // 'light' | 'dark' | '400'
-            theme: 'default',              // 'default' or custom theme
-          },
-          wallet: {
-            display: 'modal',
-            termsUrl: 'https://...',
-            privacyUrl: 'https://...',
-            supportedWallets: { 
-              rabby: true, 
-              trust: true, 
-              frame: true, 
-            }, 
-          },
-        }}
+        config={walletModalConfig}
       >
         <WagmiProvider config={config}>
           <QueryClientProvider client={queryClient}>
