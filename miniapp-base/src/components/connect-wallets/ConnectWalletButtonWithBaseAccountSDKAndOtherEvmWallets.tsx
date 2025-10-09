@@ -5,8 +5,10 @@ import { base } from 'viem/chains';
 import { reconnect, getConnections } from '@wagmi/core';
 import { wagmiConfig } from '@/lib/blockchains/evm/smart-contracts/wagmi/config-with-onchainkit';
 
-import { useConnect, useAccount } from 'wagmi';
+import { useConnect, useAccount, type Config } from 'wagmi';
 import { baseAccount } from 'wagmi/connectors';
+
+import { QueryClient } from '@tanstack/react-query';
 
 /**
  * @notice - Set up and return the RainbowKit config and React Query client
