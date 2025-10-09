@@ -15,7 +15,6 @@ const { config, queryClient } = setConfigAndQueryClient();
 // @dev - OnchainKit related imports
 import { walletModalConfig } from '@/lib/blockchains/evm/connect-wallets/onchainkit/wallet-modal-config';
 
-
 export default function ClientProviders({ children }: PropsWithChildren) {
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";                // @dev - Production
   //const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID_STAGING || "";      // @dev - Staging

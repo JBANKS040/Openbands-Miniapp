@@ -7,7 +7,7 @@ export const walletModalConfig = {
   appearance: {
     name: 'OpenBands MiniApp',     // Displayed in modal header
     logo: 'https://your-logo.com', // Displayed in modal header
-    mode: 'dark',                  // 'light' | 'dark' | '400'
+    mode: 'dark' as const,         // 'light' | 'dark' | '400' 
     theme: 'custom',               // 'default' or custom theme
   },
   wallet: {
@@ -20,7 +20,7 @@ export const walletModalConfig = {
       frame: true, 
     }, 
   },
-}
+} as const;
 
 // /**
 //  * Custom theme configuration for OnchainKit wallet modal colors
