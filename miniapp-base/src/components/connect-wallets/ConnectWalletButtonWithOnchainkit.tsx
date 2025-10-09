@@ -7,6 +7,7 @@ import {
   ConnectWallet,
   Wallet,
   WalletDropdown,
+  WalletDropdownBasename, // @dev - For displaying a "Basename"
   WalletAdvancedAddressDetails,
   WalletAdvancedTokenHoldings,
   WalletAdvancedTransactionActions,
@@ -36,6 +37,7 @@ export default function ConnectWalletButtonWithOnchainkit() {
             <Address className={color.foregroundMuted} />
             <EthBalance />
           </Identity>
+          <WalletDropdownBasename />
           <WalletDropdownDisconnect />
           <WalletAdvancedWalletActions />
           <WalletAdvancedAddressDetails />
