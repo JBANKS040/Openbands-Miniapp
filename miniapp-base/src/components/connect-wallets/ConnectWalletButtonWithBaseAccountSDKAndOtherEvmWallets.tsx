@@ -8,7 +8,6 @@ import { wagmiConfig } from '@/lib/blockchains/evm/smart-contracts/wagmi/config-
 import { useConnect, useAccount } from 'wagmi';
 import { baseAccount } from 'wagmi/connectors';
 
-
 /**
  * @notice - Set up and return the RainbowKit config and React Query client
  */

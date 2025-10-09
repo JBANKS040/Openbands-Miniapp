@@ -25,6 +25,6 @@ export const wagmiConfig = createConfig({
 
 declare module 'wagmi' {
   interface Register {
-    config: ReturnType<typeof getConfig>;
+    config: ReturnType<typeof createConfig>;
   }
 }
